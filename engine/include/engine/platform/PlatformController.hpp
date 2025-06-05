@@ -104,7 +104,7 @@ namespace engine::platform {
         */
         [[nodiscard]] bool is_cursor_enabled() const;
 
-        [[nodiscard]] static double getTime() const;
+        [[nodiscard]] static double getTime();
 
         /**
         * @brief Swaps the current draw buffer for the main window. Should be called at the end of the frame.
