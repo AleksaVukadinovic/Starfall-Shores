@@ -44,7 +44,7 @@ namespace app {
             case 2: skybox_name = "skybox_default"; break;
             default: skybox_name = "skybox_day"; break;
             }
-            std::cout << skybox_name << std::endl;
+            spdlog::info("{}", skybox_name);
             main_controller->set_skybox(skybox_name, true);
         }
 
@@ -57,7 +57,7 @@ namespace app {
             case 1: skybox_name = "skybox_night_stars"; break;
             default: skybox_name = "skybox_night"; break;
             }
-            std::cout << skybox_name << std::endl;
+            spdlog::info("{}", skybox_name);
             main_controller->set_skybox(skybox_name, false);
         }
         ImGui::End();
