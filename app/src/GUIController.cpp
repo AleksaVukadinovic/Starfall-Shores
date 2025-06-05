@@ -16,9 +16,7 @@ namespace app {
     void GUIController::poll_events() {
         if (const auto platform = get<engine::platform::PlatformController>(); platform->key(engine::platform::KeyId::KEY_G).state() == engine::platform::Key::State::JustPressed) {
             set_enable(!is_enabled());
-            const auto main_controller = get<MainController>();
-            main_controller->enable_cursor(!main_controller->is_cursor_enabled());
-            platform->set_enable_cursor(main_controller->is_cursor_enabled());
+            platform->set_enable_cursor(!platform->is_cursor_enabled());
         }
     }
 
