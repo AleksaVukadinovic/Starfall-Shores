@@ -15,6 +15,7 @@ namespace app {
         main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         bloom_controller->after(main_controller);
         gui_controller->after(main_controller);
+        bloom_controller->after(gui_controller);
     }
 
 }
