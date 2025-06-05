@@ -18,14 +18,6 @@ namespace app {
             }
         }
 
-        [[nodiscard]] bool is_cursor_enabled() const {
-            return m_mouse_enabled;
-        }
-
-        void enable_cursor(const bool enable) {
-            m_mouse_enabled = enable;
-        }
-
         void set_daytime_skybox(const std::string &new_skybox) {
             active_daytime_skybox = new_skybox;
         }
@@ -84,7 +76,6 @@ namespace app {
         void update_camera();
 
         bool m_is_day = true;
-        bool m_mouse_enabled = false;
         std::string active_daytime_skybox = "skybox_day";
         std::string active_nighttime_skybox = "skybox_night";
 

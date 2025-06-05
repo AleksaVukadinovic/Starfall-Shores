@@ -41,8 +41,7 @@ namespace app {
         gui                 = GUIController();
         const auto platform = get<engine::platform::PlatformController>();
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
-        m_mouse_enabled = false;
-        platform->set_enable_cursor(m_mouse_enabled);
+        platform->set_enable_cursor(false);
         m_is_day         = true;
         camera->Front    = glm::vec3(0.77, -0.08, -0.6);
         camera->Position = glm::vec3(5, 27, 17);
@@ -623,8 +622,7 @@ namespace app {
                 camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_P).state() == engine::platform::Key::State::JustPressed) {
-            m_mouse_enabled = !m_mouse_enabled;
-            platform->set_enable_cursor(m_mouse_enabled);
+            platform->set_enable_cursor(platform->is_cursor_enabled() ? false : true);
         }
         if (platform->key(engine::platform::KeyId::KEY_N).state() == engine::platform::Key::State::JustPressed) {
             m_is_day = !m_is_day;

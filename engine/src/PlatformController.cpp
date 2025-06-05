@@ -242,6 +242,7 @@ namespace engine::platform {
     }
 
     void PlatformController::set_enable_cursor(bool enabled) {
+        m_cursor_enabled = enabled;
         if (enabled) {
             glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         } else {

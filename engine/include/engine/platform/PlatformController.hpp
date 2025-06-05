@@ -99,6 +99,14 @@ namespace engine::platform {
         void set_enable_cursor(bool enabled);
 
         /**
+        * @brief Check if the cursor is currently enabled/visible.
+        * @returns true if cursor is enabled, false otherwise
+        */
+        bool is_cursor_enabled() const {
+            return m_cursor_enabled;
+        }
+
+        /**
         * @brief Swaps the current draw buffer for the main window. Should be called at the end of the frame.
         */
         void swap_buffers();
@@ -155,6 +163,11 @@ namespace engine::platform {
         Window m_window;
         std::vector<Key> m_keys;
         std::vector<std::unique_ptr<PlatformEventObserver> > m_platform_event_observers;
+
+        /**
+        * @brief Tracks whether the cursor is currently enabled/visible
+        */
+        bool m_cursor_enabled = true;
     };
 } // namespace engine
 
