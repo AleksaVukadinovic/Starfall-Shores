@@ -37,8 +37,6 @@ namespace app {
 
         void draw() override;
 
-        void test() const;
-
         void draw_skybox() const;
 
         void draw_terrain() const;
