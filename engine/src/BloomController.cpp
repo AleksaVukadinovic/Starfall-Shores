@@ -1,18 +1,13 @@
 #include <glad/glad.h>
-
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/resources/ResourcesController.hpp>
-#include <spdlog/spdlog.h>
 #include <engine/graphics/BloomController.hpp>
-
-#include <iostream>
 
 namespace engine::graphics {
 
     void BloomController::render_quad() {
         {
-
             if (m_quadVAO == 0) {
                 float quadVertices[] = {
                         -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
