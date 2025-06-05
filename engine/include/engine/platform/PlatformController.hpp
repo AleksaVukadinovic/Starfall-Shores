@@ -102,9 +102,9 @@ namespace engine::platform {
         * @brief Check if the cursor is currently enabled/visible.
         * @returns true if cursor is enabled, false otherwise
         */
-        bool is_cursor_enabled() const {
-            return m_cursor_enabled;
-        }
+        [[nodiscard]] bool is_cursor_enabled() const;
+
+        [[nodiscard]] static double getTime() const;
 
         /**
         * @brief Swaps the current draw buffer for the main window. Should be called at the end of the frame.

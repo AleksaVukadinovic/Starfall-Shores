@@ -5,11 +5,8 @@
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
-
 #include <MainController.hpp>
 #include <GUIController.hpp>
-
-#include "../../engine/libs/glfw/include/GLFW/glfw3.h"
 
 namespace app {
     engine::resources::ResourcesController *resources;
@@ -520,7 +517,7 @@ namespace app {
         const auto lightPos = m_is_day ? glm::vec3(0.0f, 60.0f, 0.0f) : glm::vec3(12.0f, 25.0f, 6.0f);
         water_shader->use();
 
-        const auto currentTime = static_cast<float>(glfwGetTime());
+        const auto currentTime = static_cast<float>(engine::platform::PlatformController::getTime());
         water_shader->set_float("time", currentTime);
 
         const glm::vec3 waterColor = m_is_day
@@ -580,10 +577,10 @@ namespace app {
         model      = scale(model, glm::vec3(3.1));
         fire_shader->set_mat4("model", model);
 
-        static double startTime  = glfwGetTime();
-        const double currentTime = glfwGetTime() - startTime;
+        static double start_time  = engine::platform::PlatformController::getTime();
+        const double current_time = engine::platform::PlatformController::getTime() - start_time;
 
-        fire_shader->set_float("time", static_cast<float>(currentTime));
+        fire_shader->set_float("time", static_cast<float>(current_time));
         fire_shader->set_vec3("fireColor", glm::vec3(1.0f, 0.6f, 0.2f));
         fire_shader->set_vec3("glowColor", glm::vec3(1.0f, 0.3f, 0.0f));
         fire_shader->set_float("intensity", 50.0f);

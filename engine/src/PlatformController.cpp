@@ -1,4 +1,3 @@
-
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -92,7 +91,7 @@ namespace engine::platform {
     }
 
     void PlatformController::poll_events() {
-        g_mouse_position.dx = g_mouse_position.dy = 0.0f;
+        g_mouse_position.dx     = g_mouse_position.dy = 0.0f;
         g_mouse_position.scroll = 0.0f;
         glfwPollEvents();
         for (int i = 0; i < KEY_COUNT; ++i) {
@@ -250,10 +249,18 @@ namespace engine::platform {
         }
     }
 
+    bool PlatformController::is_cursor_enabled() const {
+        return m_cursor_enabled;
+    }
+
+    double PlatformController::getTime() const {
+        return glfwGetTime();
+    }
+
     void initialize_key_maps() {
         // formatter: off
-        #include "glfw_key_mapping.include"
-        #include "engine_key_to_string.include"
+#include "glfw_key_mapping.include"
+#include "engine_key_to_string.include"
         // formatter: on
     }
 
