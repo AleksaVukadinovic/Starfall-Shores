@@ -18,14 +18,6 @@ namespace app {
             }
         }
 
-        void set_daytime_skybox(const std::string &new_skybox) {
-            active_daytime_skybox = new_skybox;
-        }
-
-        void set_nighttime_skybox(const std::string &new_skybox) {
-            active_nighttime_skybox = new_skybox;
-        }
-
     private:
         void initialize() override;
 
