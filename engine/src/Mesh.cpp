@@ -79,7 +79,7 @@ namespace engine::resources {
             uniform_name.clear();
         }
         CHECKED_GL_CALL(glBindVertexArray, m_vao);
-        glDrawElementsInstanced(GL_TRIANGLES, m_num_indices, GL_UNSIGNED_INT, 0, number_of_instances);
+        CHECKED_GL_CALL(glDrawElementsInstanced, GL_TRIANGLES, m_num_indices, GL_UNSIGNED_INT, nullptr, number_of_instances);
         CHECKED_GL_CALL(glBindVertexArray, 0);
     }
 
