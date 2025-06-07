@@ -550,7 +550,7 @@ namespace app {
                 camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_P).state() == engine::platform::Key::State::JustPressed) {
-            platform->set_enable_cursor(platform->is_cursor_enabled() ? false : true);
+            platform->set_enable_cursor(!platform->is_cursor_enabled());
         }
         if (platform->key(engine::platform::KeyId::KEY_N).state() == engine::platform::Key::State::JustPressed) {
             m_is_day = !m_is_day;
