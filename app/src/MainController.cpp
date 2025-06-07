@@ -328,7 +328,7 @@ namespace app {
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        white_flowers->draw_instanced(flower_shader, amount, model_matrices.data());
+        white_flowers->draw_instanced(flower_shader, model_matrices);
     }
 
     void MainController::draw_flowers() const {
@@ -406,7 +406,7 @@ namespace app {
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        roses->draw_instanced(flower_shader, model_matrices.size(), model_matrices.data());
+        roses->draw_instanced(flower_shader, model_matrices);
     }
 
     void MainController::draw_terrain() const {
