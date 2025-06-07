@@ -240,7 +240,6 @@ namespace app {
         model      = scale(model, glm::vec3(0.04));
 
         old_tree_shader->set_mat4("model", model);
-
         old_tree->draw(old_tree_shader);
     }
 
@@ -306,7 +305,7 @@ namespace app {
         model_matrices.reserve(amount);
 
         for (unsigned int row = 0; row < row_count; row++) {
-            const float x = (row == 0) ? 40.0f : 44.0f;
+            const float x = row == 0 ? 40.0f : 44.0f;
 
             for (unsigned int col = 0; col < col_count; col++) {
                 auto model = glm::mat4(1.0f);
@@ -342,10 +341,10 @@ namespace app {
 
         set_common_shader_variables(stone_shader, camera, graphics);
 
-        auto draw_path_segment = [&](const glm::vec3 &translation, const float yRotation, const float scale) {
+        auto draw_path_segment = [&](const glm::vec3 &translation, const float y_rotation, const float scale) {
             auto model = glm::mat4(1.0f);
             model      = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-            model      = rotate(model, glm::radians(yRotation), glm::vec3(0, 1, 0));
+            model      = rotate(model, glm::radians(y_rotation), glm::vec3(0, 1, 0));
             model      = rotate(model, glm::radians(15.0f), glm::vec3(0, 0, 1));
             model      = translate(model, translation);
             model      = glm::scale(model, glm::vec3(scale));
@@ -365,10 +364,10 @@ namespace app {
 
         set_common_shader_variables(shroom_shader, camera, graphics);
 
-        auto draw_mushroom = [&](const glm::vec3 &translation, const float scale, const float yRotation = 0.0f) {
+        auto draw_mushroom = [&](const glm::vec3 &translation, const float scale, const float y_rotation = 0.0f) {
             auto model = glm::mat4(1.0f);
             model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-            model      = rotate(model, glm::radians(yRotation), glm::vec3(0, 1, 0));
+            model      = rotate(model, glm::radians(y_rotation), glm::vec3(0, 1, 0));
             model      = translate(model, translation);
             model      = glm::scale(model, glm::vec3(scale));
             shroom_shader->set_mat4("model", model);
@@ -423,17 +422,17 @@ namespace app {
         engine::resources::Model *water_model         = resources->model("water");
         const engine::resources::Shader *water_shader = resources->shader("water_shader");
 
-        const auto lightPos = m_is_day ? glm::vec3(0.0f, 60.0f, 0.0f) : glm::vec3(12.0f, 25.0f, 6.0f);
+        const auto light_pos = m_is_day ? glm::vec3(0.0f, 60.0f, 0.0f) : glm::vec3(12.0f, 25.0f, 6.0f);
         water_shader->use();
 
         const auto current_time = static_cast<float>(engine::platform::PlatformController::get_time());
         water_shader->set_float("time", current_time);
 
-        const glm::vec3 waterColor = m_is_day
+        const glm::vec3 water_color = m_is_day
                                          ? glm::vec3(0.0f, 0.4f, 0.6f)
                                          : glm::vec3(0.0f, 0.1f, 0.3f);
-        water_shader->set_vec3("waterColor", waterColor);
-        water_shader->set_vec3("lightPos", lightPos);
+        water_shader->set_vec3("waterColor", water_color);
+        water_shader->set_vec3("lightPos", light_pos);
         water_shader->set_vec3("viewPos", camera->Position);
         water_shader->set_mat4("projection", graphics->projection_matrix());
         water_shader->set_mat4("view", camera->view_matrix());
@@ -477,7 +476,6 @@ namespace app {
         const engine::resources::Shader *fire_shader = resources->shader("fire_shader");
         fire_shader->use();
         fire_shader->set_vec3("viewPos", camera->Position);
-
         fire_shader->set_mat4("projection", graphics->projection_matrix());
         fire_shader->set_mat4("view", camera->view_matrix());
 
