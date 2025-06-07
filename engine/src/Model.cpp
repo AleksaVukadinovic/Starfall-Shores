@@ -11,14 +11,14 @@ namespace engine::resources {
         }
     }
 
-    void Model::drawBlended(const Shader *shader) {
+    void Model::draw_blended(const Shader *shader) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         draw(shader);
         glDisable(GL_BLEND);
     }
 
-    void Model::drawInstanced(const Shader *shader, const unsigned int number_of_instances, glm::mat4* model_matrices) {
+    void Model::draw_instanced(const Shader *shader, const unsigned int number_of_instances, glm::mat4* model_matrices) {
         unsigned int buffer;
         glGenBuffers(1, &buffer);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);

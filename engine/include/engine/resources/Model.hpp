@@ -24,14 +24,19 @@ namespace engine::resources {
         */  
         void draw(const Shader *shader);
 
-        void drawBlended(const Shader *shader);
+        /**
+         * @brief Enables blending
+         * @param shader The shader to use for drawing
+         */
+        void draw_blended(const Shader *shader);
 
         /**
         * @brief Draws the model using a given shader by drawing all the meshes in the model.
         * @param shader The shader to use for drawing.
         * @param number_of_instances Number of model instances to be drawn
+        * @param model_matrices Model matrix for each transition
         */
-        void drawInstanced(const Shader *shader, unsigned int number_of_instances, glm::mat4* model_matrices);
+        void draw_instanced(const Shader *shader, unsigned int number_of_instances, glm::mat4* model_matrices);
 
         /**
         * @brief Destroys the model in the OpenGL context.

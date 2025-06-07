@@ -254,7 +254,7 @@ namespace app {
 
         auto draw_model = [bush_shader](engine::resources::Model *model, const glm::mat4 &transform) {
             bush_shader->set_mat4("model", transform);
-            model->drawBlended(bush_shader);
+            model->draw_blended(bush_shader);
         };
 
         auto draw_bush1 = [&](const glm::vec3 &translation, const float scale) {
@@ -328,7 +328,7 @@ namespace app {
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        white_flowers->drawInstanced(flower_shader, amount, model_matrices.data());
+        white_flowers->draw_instanced(flower_shader, amount, model_matrices.data());
     }
 
     void MainController::draw_flowers() const {
@@ -406,7 +406,7 @@ namespace app {
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        roses->drawInstanced(flower_shader, model_matrices.size(), model_matrices.data());
+        roses->draw_instanced(flower_shader, model_matrices.size(), model_matrices.data());
     }
 
     void MainController::draw_terrain() const {
@@ -444,7 +444,7 @@ namespace app {
         model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
         water_shader->set_mat4("model", model);
 
-        water_model->drawBlended(water_shader);
+        water_model->draw_blended(water_shader);
     }
 
     void MainController::draw_skybox() const {
@@ -496,7 +496,7 @@ namespace app {
         fire_shader->set_float("flickerSpeed", 5.0f);
         fire_shader->set_float("distortionAmount", 0.1f);
 
-        fire->drawBlended(fire_shader);
+        fire->draw_blended(fire_shader);
     }
 
     void MainController::update() {
