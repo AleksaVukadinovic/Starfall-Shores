@@ -295,54 +295,9 @@ namespace app {
         const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
 
         const std::vector translations = {
-                glm::vec3(-3, -21, -17.2),
-                glm::vec3(-7, -17, -17.2),
-                glm::vec3(-14, -11, -17.2),
-                glm::vec3(-22, -4, -17.2),
-                glm::vec3(-27, 5, -15),
-                glm::vec3(-15, 28, -17.2),
-                glm::vec3(-1, 34, -17.2),
-                glm::vec3(9, 36, -17.2),
-                glm::vec3(18, 36, -17.2),
-                glm::vec3(28, 36, -17.2),
-                glm::vec3(38, 29, -17.2),
-                glm::vec3(51, 9, -17.2),
-                glm::vec3(5, -16, -17.2),
-                glm::vec3(-62.0f, 7.0f, -20.0f),
-                glm::vec3(-66.0f, 7.0f, -20.0f),
-                glm::vec3(-70.0f, 7.0f, -20.0f),
-                glm::vec3(-74.0f, 7.0f, -20.0f),
-                glm::vec3(-77.0f, 9.0f, -20.0f),
-                glm::vec3(-82.0f, 13.0f, -20.0f),
-                glm::vec3(-83.0f, 18.0f, -20.0f),
-                glm::vec3(-79.0f, 27.0f, -20.0f),
-                glm::vec3(-74.0f, 27.0f, -20.0f),
-                glm::vec3(-67.0f, 14.0f, -20.0f),
-                glm::vec3(-73.0f, 16.0f, -20.0f),
-                glm::vec3(-73.0f, 19.0f, -20.0f),
-                glm::vec3(-69.0f, 23.0f, -20.0f),
-                glm::vec3(-65.0f, 28.0f, -20.0f),
-                glm::vec3(-59.0f, 29.0f, -20.0f),
-                glm::vec3(-66.0f, 36.0f, -20.0f),
-                glm::vec3(-72.0f, 33.0f, -20.0f),
-                glm::vec3(-76.0f, 33.0f, -20.0f),
-                glm::vec3(-72.0f, 40.0f, -20.0f),
-                glm::vec3(37, 5, -17),
-                glm::vec3(37, 13, -17),
-                glm::vec3(35, 16, -17),
-                glm::vec3(-7, 30, -17),
-                glm::vec3(59, -14, -12.2),
-                glm::vec3(63, -16, -12.2),
-                glm::vec3(63, -21, -12.2),
-                glm::vec3(57, -21, -12.2),
-                glm::vec3(55, -21, -12.2),
-                glm::vec3(53, -25, -12.2),
-                glm::vec3(53, -30, -12.2),
-                glm::vec3(61, -30, -12.2),
-                glm::vec3(61, -35, -12.2),
-                glm::vec3(55, -35, -12.2),
-                glm::vec3(50, -35, -12.2),
-                glm::vec3(45, -35, -12.2),
+            // formatter: off
+            #include <white_flowers.include>
+            // formatter: off
         };
 
         constexpr unsigned int rowCount = 2;
@@ -434,37 +389,9 @@ namespace app {
         const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
 
         const std::vector translations = {
-                glm::vec3(-10, 0, 17),
-                glm::vec3(-4, 9, 17),
-                glm::vec3(-4, 19, 17),
-                glm::vec3(-12, 13, 17),
-                glm::vec3(-15, 6, 17),
-                glm::vec3(-17, 3, 17),
-                glm::vec3(34, 2, 17),
-                glm::vec3(43, 2, 17),
-                glm::vec3(43, 10, 17),
-                glm::vec3(31, 10, 17),
-                glm::vec3(31, 15, 17),
-                glm::vec3(49, -3, 17),
-                glm::vec3(50, -14, 17),
-                glm::vec3(43, -26, 17),
-                glm::vec3(26, -29, 17),
-                glm::vec3(17, -29, 17),
-                glm::vec3(17, -40, 17),
-                glm::vec3(10, -37, 17),
-                glm::vec3(4, -38, 17),
-                glm::vec3(4, -23, 17),
-                glm::vec3(7, -23, 17),
-                glm::vec3(-65.0f, -18.0f, 20.0f),
-                glm::vec3(-57.0f, -11.0f, 20.0f),
-                glm::vec3(-69.0f, -3.0f, 20.0f),
-                glm::vec3(-74.0f, -11.0f, 20.0f),
-                glm::vec3(-83.0f, -15.0f, 20.0f),
-                glm::vec3(-80.0f, -26.0f, 20.0f),
-                glm::vec3(-70.0f, -34.0f, 20.0f),
-                glm::vec3(-65.0f, -38.0f, 20.0f),
-                glm::vec3(-62.0f, -31.0f, 20.0f),
-                glm::vec3(-54.0f, -26.0f, 20.0f)
+            // formatter: off
+            #include <red_flowers.include>
+            // formatter: on
         };
 
         const unsigned int amount = translations.size();
