@@ -253,7 +253,7 @@ namespace engine::platform {
         return m_cursor_enabled;
     }
 
-    double PlatformController::getTime() {
+    double PlatformController::get_time() {
         return glfwGetTime();
     }
 
