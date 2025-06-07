@@ -299,7 +299,7 @@ namespace app {
 
         constexpr unsigned int row_count = 2;
         constexpr unsigned int col_count = 10;
-        constexpr unsigned int amount   = row_count * col_count + translations.size();
+        constexpr unsigned int amount    = row_count * col_count + translations.size();
 
         std::vector<glm::mat4> model_matrices;
         model_matrices.reserve(amount);
@@ -309,18 +309,18 @@ namespace app {
 
             for (unsigned int col = 0; col < col_count; col++) {
                 auto model = glm::mat4(1.0f);
-                model = translate(model, glm::vec3(x, 17.4f, 4.0f * static_cast<float>(col) - 16));
-                model = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-                model = scale(model, glm::vec3(0.12f));
+                model      = translate(model, glm::vec3(x, 17.4f, 4.0f * static_cast<float>(col) - 16));
+                model      = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+                model      = scale(model, glm::vec3(0.12f));
                 model_matrices.push_back(model);
             }
         }
 
-        for (const auto& translation : translations) {
+        for (const auto &translation: translations) {
             auto model = glm::mat4(1.0f);
-            model = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-            model = translate(model, translation);
-            model = scale(model, glm::vec3(0.12f));
+            model      = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            model      = translate(model, translation);
+            model      = scale(model, glm::vec3(0.12f));
             model_matrices.push_back(model);
         }
 
@@ -394,11 +394,11 @@ namespace app {
         std::vector<glm::mat4> model_matrices;
         model_matrices.reserve(translations.size());
 
-        for (const auto& translation : translations) {
+        for (const auto &translation: translations) {
             auto model = glm::mat4(1.0f);
-            model = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-            model = translate(model, translation);
-            model = scale(model, glm::vec3(0.04f));
+            model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+            model      = translate(model, translation);
+            model      = scale(model, glm::vec3(0.04f));
             model_matrices.push_back(model);
         }
 
@@ -429,8 +429,8 @@ namespace app {
         water_shader->set_float("time", current_time);
 
         const glm::vec3 water_color = m_is_day
-                                         ? glm::vec3(0.0f, 0.4f, 0.6f)
-                                         : glm::vec3(0.0f, 0.1f, 0.3f);
+                                          ? glm::vec3(0.0f, 0.4f, 0.6f)
+                                          : glm::vec3(0.0f, 0.1f, 0.3f);
         water_shader->set_vec3("waterColor", water_color);
         water_shader->set_vec3("lightPos", light_pos);
         water_shader->set_vec3("viewPos", camera->Position);
