@@ -127,40 +127,25 @@ namespace app {
             tree_model->draw(tree_shader);
         };
 
-        struct TreePlacement {
+        // formatter: off
+        struct tree_placement {
             float x, y, z, scale;
         };
-
-        const std::vector<TreePlacement> yellow_trees = {
-                {49, 17, 9, 0.04f}, {0, 17, -22, 0.04f}, {-25, 15, 5, 0.04f}, {4, 17, 25, 0.04f},
-                {39, 17, -5, 0.06f}, {45, 17, 12, 0.06f}, {37, 17, 32, 0.06f}, {11, 17, 32, 0.06f},
-                {-69.0f, 16.0f, 19.0f, 0.06f}, {-59.0f, 20.0f, 26.0f, 0.06f}, {-65.0f, 20.0f, 34.0f, 0.06f},
-                {-76.0f, 20.0f, 31.0f, 0.06f}, {-86.0f, 20.0f, 26.0f, 0.06f}, {-86.0f, 20.0f, 13.0f, 0.06f},
-                {-77.0f, 20.0f, 6.0f, 0.06f}, {60.0f, 13.0f, -20.0f, 0.05f}, {54.0f, 13.0f, -31.0f, 0.05f},
-                {59.0f, 13.0f, -39.0f, 0.05f}
+        const std::vector<tree_placement> yellow_trees = {
+            #include <yellow_trees.include>
+        };
+        const std::vector<tree_placement> green_trees = {
+            #include <green_trees.include>
         };
 
-        const std::vector<TreePlacement> green_trees = {
-                {-10, 1, 17, 0.22f}, {-2, 6, 16, 0.29f}, {45, 1, 16, 0.29f}, {-1, -39, 16, 0.29f},
-                {8, 11, 17, 0.22f}, {33, 10, 17, 0.22f}, {17, -24, 17, 0.22f}, {39, -24, 17, 0.22f},
-                {-59.0f, -16.0f, 20.0f, 0.29f}, {-74.0f, -24.0f, 20.0f, 0.29f}, {-68.0f, -41.0f, 20.0f, 0.29f},
-                {-67.0f, -9.0f, 20.0f, 0.29f}, {-87.0f, -19.0f, 20.0f, 0.29f}, {45.0f, 39.0f, 12.0f, 0.24f},
-                {65.0f, 10.0f, 12.0f, 0.24f}
-        };
-
-        const std::vector<TreePlacement> tall_trees = {
-                {-6, 14, -15, 0.1f}, {-19, 14, -8, 0.1f}, {21, 14, 38, 0.1f}
+        const std::vector<tree_placement> tall_trees = {
+            #include <tall_trees.include>
         };
 
         const std::vector<glm::vec3> pine_trees = {
-                {32, 0, 17}, {36, 22, 17}, {12, 20, 17}, {49, -9, 17}, {23, -30, 17},
-                {-5, -26, 17}, {-11, 1, 17}, {-26, 0, 13}, {-12, 10, 17}, {26, 29, 17},
-                {-11, 10, 17}, {-11, -30, 17}, {3, 28, 17}, {-63.0f, -10.0f, 20.0f},
-                {-63.0f, -5.0f, 20.0f}, {-72.0f, -4.0f, 20.0f}, {-72.0f, -13.0f, 20.0f},
-                {-78.0f, -11.0f, 20.0f}, {-78.0f, -21.0f, 20.0f}, {-77.0f, -24.0f, 20.0f},
-                {-82.0f, -31.0f, 20.0f}, {-69.0f, -30.0f, 20.0f}, {-72.0f, -37.0f, 20.0f},
-                {55.0f, 12.0f, 12.0f}, {53.0f, 19.0f, 12.0f}, {36.0f, 38.0f, 12.0f}
+            #include <pine_trees.include>
         };
+        // formatter: on
 
         for (const auto &[x, y, z, scale]: yellow_trees) {
             draw_tree(yellow_tree, x, y, z, scale);

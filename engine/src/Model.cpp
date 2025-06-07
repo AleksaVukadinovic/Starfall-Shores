@@ -1,4 +1,3 @@
-
 #include <glad/glad.h>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/Shader.hpp>
