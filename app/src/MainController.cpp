@@ -48,9 +48,8 @@ namespace app {
 
     bool MainController::loop() {
         if (const auto platform = get<engine::platform::PlatformController>(); platform->key(
-                engine::platform::KeyId::KEY_ESCAPE).is_down()) {
+                engine::platform::KeyId::KEY_ESCAPE).is_down())
             return false;
-        }
         return true;
     }
 
@@ -117,9 +116,8 @@ namespace app {
                              const float rotation_angle = 0.0f, const glm::vec3 &rotation_axis = glm::vec3(0, 0, 0)) {
             auto model = glm::mat4(1.0f);
 
-            if (rotation_angle != 0.0f) {
+            if (rotation_angle != 0.0f)
                 model = rotate(model, glm::radians(rotation_angle), rotation_axis);
-            }
 
             model = translate(model, glm::vec3(x, y, z));
             model = glm::scale(model, glm::vec3(scale));
@@ -131,20 +129,20 @@ namespace app {
         struct tree_placement {
             float x, y, z, scale;
         };
-        const std::vector<tree_placement> yellow_trees = {
+        constexpr std::array<tree_placement, 18> yellow_trees = {{
             #include <yellow_trees.include>
-        };
-        const std::vector<tree_placement> green_trees = {
+        }};
+        constexpr std::array<tree_placement, 15> green_trees = {{
             #include <green_trees.include>
-        };
+        }};
 
-        const std::vector<tree_placement> tall_trees = {
+        constexpr std::array<tree_placement, 3> tall_trees = {{
             #include <tall_trees.include>
-        };
+        }};
 
-        const std::vector<glm::vec3> pine_trees = {
+        constexpr std::array<glm::vec3, 26> pine_trees = {{
             #include <pine_trees.include>
-        };
+        }};
         // formatter: on
 
         for (const auto &[x, y, z, scale]: yellow_trees) {
@@ -173,7 +171,7 @@ namespace app {
         set_common_shader_variables(campfire_shader, camera, graphics);
         campfire_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(5.0f));
 
-        const glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(12.0f, 17.3f, 6.0f));
+        constexpr glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(12.0f, 17.3f, 6.0f));
         campfire_shader->set_mat4("model", model);
         campfire->draw(campfire_shader);
     }
@@ -185,12 +183,12 @@ namespace app {
         set_common_shader_variables(log_seat_shader, camera, graphics);
         log_seat_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(4.0f));
 
-        struct LogPlacement {
+        struct log_placement {
             float rotation_angle;
             glm::vec3 position;
         };
 
-        const std::vector<LogPlacement> logs = {
+        const std::vector<log_placement> logs = {
                 {42.0f, glm::vec3(6, 17.5, 2)},
                 {155.0f, glm::vec3(-16, 17.5, -9)},
                 {-100.0f, glm::vec3(1, 17.5, -26)}
@@ -254,83 +252,83 @@ namespace app {
 
         set_common_shader_variables(bush_shader, camera, graphics);
 
-        auto drawModel = [bush_shader](engine::resources::Model *model, const glm::mat4 &transform) {
+        auto draw_model = [bush_shader](engine::resources::Model *model, const glm::mat4 &transform) {
             bush_shader->set_mat4("model", transform);
             model->drawBlended(bush_shader);
         };
 
-        auto drawBush1 = [&](const glm::vec3 &translation, const float scale) {
+        auto draw_bush1 = [&](const glm::vec3 &translation, const float scale) {
             auto model = glm::mat4(1.0f);
             model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
             model      = translate(model, translation);
             model      = glm::scale(model, glm::vec3(scale));
-            drawModel(bush1, model);
+            draw_model(bush1, model);
         };
 
-        auto drawSimple = [&](engine::resources::Model *model, const glm::vec3 &translation, const float scale) {
+        auto draw_simple = [&](engine::resources::Model *model, const glm::vec3 &translation, const float scale) {
             auto m = glm::mat4(1.0f);
             m      = translate(m, translation);
             m      = glm::scale(m, glm::vec3(scale));
-            drawModel(model, m);
+            draw_model(model, m);
         };
 
-        drawBush1(glm::vec3(-19, -3, 16), 5.0f);
-        drawBush1(glm::vec3(15, 25, 16), 5.0f);
-        drawBush1(glm::vec3(52, -19, 17), 5.0f);
-        drawBush1(glm::vec3(31, -32, 17), 5.0f);
-        drawBush1(glm::vec3(12, -24, 17), 5.0f);
-        drawSimple(bush2, glm::vec3(4, 20, -13), 0.3f);
-        drawSimple(bush2, glm::vec3(32, 20, 4), 0.3f);
-        drawSimple(bush2, glm::vec3(30, 20, 12), 0.3f);
-        drawSimple(laurel_bush, glm::vec3(-25, 16, 0), 0.680f);
-        drawSimple(laurel_bush, glm::vec3(-25, 16, 12), 0.680f);
-        drawSimple(laurel_bush, glm::vec3(-20, 16, 23), 0.680f);
-        drawSimple(laurel_bush, glm::vec3(-5, 16, 23), 0.680f);
-        drawSimple(laurel_bush, glm::vec3(6, 17, 20), 0.680f);
-        drawSimple(laurel_bush, glm::vec3(33, 17, -6), 0.680f);
+        draw_bush1(glm::vec3(-19, -3, 16), 5.0f);
+        draw_bush1(glm::vec3(15, 25, 16), 5.0f);
+        draw_bush1(glm::vec3(52, -19, 17), 5.0f);
+        draw_bush1(glm::vec3(31, -32, 17), 5.0f);
+        draw_bush1(glm::vec3(12, -24, 17), 5.0f);
+        draw_simple(bush2, glm::vec3(4, 20, -13), 0.3f);
+        draw_simple(bush2, glm::vec3(32, 20, 4), 0.3f);
+        draw_simple(bush2, glm::vec3(30, 20, 12), 0.3f);
+        draw_simple(laurel_bush, glm::vec3(-25, 16, 0), 0.680f);
+        draw_simple(laurel_bush, glm::vec3(-25, 16, 12), 0.680f);
+        draw_simple(laurel_bush, glm::vec3(-20, 16, 23), 0.680f);
+        draw_simple(laurel_bush, glm::vec3(-5, 16, 23), 0.680f);
+        draw_simple(laurel_bush, glm::vec3(6, 17, 20), 0.680f);
+        draw_simple(laurel_bush, glm::vec3(33, 17, -6), 0.680f);
     }
 
     void MainController::draw_white_flowers() const {
         engine::resources::Model *white_flowers        = resources->model("flowers2");
         const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
 
-        const std::vector translations = {
+        constexpr std::array translations = {
             // formatter: off
             #include <white_flowers.include>
             // formatter: off
         };
 
-        constexpr unsigned int rowCount = 2;
-        constexpr unsigned int colCount = 10;
-        const unsigned int amount       = rowCount * colCount + translations.size();
-        auto *modelMatrices             = new glm::mat4[amount];
+        constexpr unsigned int row_count = 2;
+        constexpr unsigned int col_count = 10;
+        constexpr unsigned int amount   = row_count * col_count + translations.size();
+        auto *model_matrices             = new glm::mat4[amount];
 
-        for (unsigned int row = 0; row < rowCount; row++) {
+        for (unsigned int row = 0; row < row_count; row++) {
             const float x = (row == 0) ? 40.0f : 44.0f;
 
-            for (unsigned int col = 0; col < colCount; col++) {
-                const unsigned int index = row * colCount + col;
+            for (unsigned int col = 0; col < col_count; col++) {
+                const unsigned int index = row * col_count + col;
                 auto model               = glm::mat4(1.0f);
                 model                    = translate(model, glm::vec3(x, 17.4f, 4.0f * static_cast<float>(col) - 16));
                 model                    = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
                 model                    = scale(model, glm::vec3(0.12f));
-                modelMatrices[index]     = model;
+                model_matrices[index]     = model;
             }
         }
 
-        for (unsigned int i = rowCount * colCount; i < amount; i++) {
+        for (unsigned int i = row_count * col_count; i < amount; i++) {
             auto model       = glm::mat4(1.0f);
             model            = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-            model            = translate(model, translations[i - rowCount * colCount]);
+            model            = translate(model, translations[i - row_count * col_count]);
             model            = scale(model, glm::vec3(0.12f));
-            modelMatrices[i] = model;
+            model_matrices[i] = model;
         }
 
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        white_flowers->drawInstanced(flower_shader, amount, modelMatrices);
-        delete[] modelMatrices;
+        white_flowers->drawInstanced(flower_shader, amount, model_matrices);
+        delete[] model_matrices;
     }
 
     void MainController::draw_flowers() const {
@@ -367,7 +365,7 @@ namespace app {
 
         set_common_shader_variables(shroom_shader, camera, graphics);
 
-        auto drawMushroom = [&](const glm::vec3 &translation, const float scale, const float yRotation = 0.0f) {
+        auto draw_mushroom = [&](const glm::vec3 &translation, const float scale, const float yRotation = 0.0f) {
             auto model = glm::mat4(1.0f);
             model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
             model      = rotate(model, glm::radians(yRotation), glm::vec3(0, 1, 0));
@@ -377,39 +375,39 @@ namespace app {
             mushroom->draw(shroom_shader);
         };
 
-        drawMushroom(glm::vec3(6, 0, 16), 0.19f, -19.0f);
-        drawMushroom(glm::vec3(3, 8, 17), 0.19f);
-        drawMushroom(glm::vec3(12, 19, 17), 0.19f);
-        drawMushroom(glm::vec3(30, 1, 17), 0.19f);
-        drawMushroom(glm::vec3(30, -10, 17), 0.19f);
+        draw_mushroom(glm::vec3(6, 0, 16), 0.19f, -19.0f);
+        draw_mushroom(glm::vec3(3, 8, 17), 0.19f);
+        draw_mushroom(glm::vec3(12, 19, 17), 0.19f);
+        draw_mushroom(glm::vec3(30, 1, 17), 0.19f);
+        draw_mushroom(glm::vec3(30, -10, 17), 0.19f);
     }
 
     void MainController::draw_red_flowers() const {
         engine::resources::Model *roses                = resources->model("roses");
         const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
 
-        const std::vector translations = {
+        constexpr std::array translations = {
             // formatter: off
             #include <red_flowers.include>
             // formatter: on
         };
 
-        const unsigned int amount = translations.size();
-        auto *modelMatrices       = new glm::mat4[amount];
+        constexpr unsigned int amount = translations.size();
+        auto *model_matrices           = new glm::mat4[amount];
 
         for (int i = 0; i < amount; i++) {
             auto model       = glm::mat4(1.0f);
             model            = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
             model            = translate(model, translations[i]);
             model            = scale(model, glm::vec3(0.04f));
-            modelMatrices[i] = model;
+            model_matrices[i] = model;
         }
 
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        roses->drawInstanced(flower_shader, amount, modelMatrices);
-        delete[] modelMatrices;
+        roses->drawInstanced(flower_shader, amount, model_matrices);
+        delete[] model_matrices;
     }
 
     void MainController::draw_terrain() const {
@@ -429,8 +427,8 @@ namespace app {
         const auto lightPos = m_is_day ? glm::vec3(0.0f, 60.0f, 0.0f) : glm::vec3(12.0f, 25.0f, 6.0f);
         water_shader->use();
 
-        const auto currentTime = static_cast<float>(engine::platform::PlatformController::getTime());
-        water_shader->set_float("time", currentTime);
+        const auto current_time = static_cast<float>(engine::platform::PlatformController::getTime());
+        water_shader->set_float("time", current_time);
 
         const glm::vec3 waterColor = m_is_day
                                          ? glm::vec3(0.0f, 0.4f, 0.6f)
