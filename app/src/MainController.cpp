@@ -306,7 +306,7 @@ namespace app {
         model_matrices.reserve(amount);
 
         for (unsigned int row = 0; row < row_count; row++) {
-            const float x = row == 0 ? 40.0f : 44.0f;
+            const float x = (row == 0) ? 40.0f : 44.0f;
 
             for (unsigned int col = 0; col < col_count; col++) {
                 auto model = glm::mat4(1.0f);
@@ -392,22 +392,21 @@ namespace app {
             // formatter: on
         };
 
-        constexpr unsigned int amount = translations.size();
-        auto *model_matrices           = new glm::mat4[amount];
+        std::vector<glm::mat4> model_matrices;
+        model_matrices.reserve(translations.size());
 
-        for (int i = 0; i < amount; i++) {
-            auto model       = glm::mat4(1.0f);
-            model            = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-            model            = translate(model, translations[i]);
-            model            = scale(model, glm::vec3(0.04f));
-            model_matrices[i] = model;
+        for (const auto& translation : translations) {
+            auto model = glm::mat4(1.0f);
+            model = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+            model = translate(model, translation);
+            model = scale(model, glm::vec3(0.04f));
+            model_matrices.push_back(model);
         }
 
         set_common_shader_variables(flower_shader, camera, graphics);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
-        roses->drawInstanced(flower_shader, amount, model_matrices);
-        delete[] model_matrices;
+        roses->drawInstanced(flower_shader, model_matrices.size(), model_matrices.data());
     }
 
     void MainController::draw_terrain() const {
