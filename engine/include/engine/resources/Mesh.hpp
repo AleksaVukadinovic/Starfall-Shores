@@ -43,7 +43,7 @@ namespace engine::resources {
         * @param shader The shader to use for drawing.
         * @param number_of_instances Number of instances that will be drawn
         */
-        void drawInstanced(const Shader *shader, unsigned int number_of_instances);
+        void draw_instanced(const Shader *shader, unsigned int number_of_instances);
 
         /**
         * @brief Destroys the mesh in the OpenGL context.

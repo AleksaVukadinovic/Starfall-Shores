@@ -49,7 +49,7 @@ namespace engine::resources {
 
         shader->use();
         for (auto &mesh: m_meshes) {
-            mesh.drawInstanced(shader, number_of_instances);
+            mesh.draw_instanced(shader, number_of_instances);
         }
     }
 

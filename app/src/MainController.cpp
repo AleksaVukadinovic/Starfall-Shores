@@ -183,12 +183,12 @@ namespace app {
         set_common_shader_variables(log_seat_shader, camera, graphics);
         log_seat_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(4.0f));
 
-        struct log_placement {
+        struct LogPlacement {
             float rotation_angle;
             glm::vec3 position;
         };
 
-        const std::vector<log_placement> logs = {
+        const std::vector<LogPlacement> logs = {
                 {42.0f, glm::vec3(6, 17.5, 2)},
                 {155.0f, glm::vec3(-16, 17.5, -9)},
                 {-100.0f, glm::vec3(1, 17.5, -26)}

@@ -64,7 +64,7 @@ namespace engine::resources {
         glBindVertexArray(0);
     }
 
-    void Mesh::drawInstanced(const Shader *shader, const unsigned int number_of_instances) {
+    void Mesh::draw_instanced(const Shader *shader, const unsigned int number_of_instances) {
         std::unordered_map<std::string_view, uint32_t> counts;
         std::string uniform_name;
         uniform_name.reserve(32);
