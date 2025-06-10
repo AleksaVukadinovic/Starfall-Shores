@@ -15,13 +15,13 @@ namespace engine::graphics {
         const int opengl_initialized = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
         RG_GUARANTEE(opengl_initialized, "OpenGL failed to init!");
 
-        auto platform               = engine::core::Controller::get<platform::PlatformController>();
+        auto platform               = get<platform::PlatformController>();
         auto handle                 = platform->window()->handle_();
         m_perspective_params.FOV    = glm::radians(m_camera.Zoom);
         m_perspective_params.Width  = static_cast<float>(platform->window()->width());
         m_perspective_params.Height = static_cast<float>(platform->window()->height());
         m_perspective_params.Near   = 0.1f;
-        m_perspective_params.Far    = 200.f;
+        m_perspective_params.Far    = 250.f;
 
         m_ortho_params.Bottom = 0.0f;
         m_ortho_params.Top    = static_cast<float>(platform->window()->height());
