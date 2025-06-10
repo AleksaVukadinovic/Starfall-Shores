@@ -19,10 +19,11 @@ namespace engine::resources {
     }
 
     void Model::draw_instanced(const Shader *shader, const std::vector<glm::mat4> &model_matrices) {
+        const unsigned int number_of_instances = model_matrices.size();
         unsigned int buffer;
         glGenBuffers(1, &buffer);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferData(GL_ARRAY_BUFFER, model_matrices.size() * sizeof(glm::mat4), model_matrices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, number_of_instances * sizeof(glm::mat4), model_matrices.data(), GL_STATIC_DRAW);
 
         for (const auto &mesh: this->m_meshes) {
             const unsigned int VAO = mesh.m_vao;
@@ -48,7 +49,7 @@ namespace engine::resources {
 
         shader->use();
         for (auto &mesh: m_meshes) {
-            mesh.draw_instanced(shader, model_matrices.size());
+            mesh.draw_instanced(shader, number_of_instances);
         }
     }
 
