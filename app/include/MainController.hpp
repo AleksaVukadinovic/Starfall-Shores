@@ -61,7 +61,9 @@ namespace app {
 
         void update() override;
 
-        void update_camera();
+        void update_day_night_transition();
+
+        static void update_camera();
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;
