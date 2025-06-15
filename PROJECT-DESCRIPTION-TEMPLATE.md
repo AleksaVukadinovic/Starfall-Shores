@@ -18,7 +18,7 @@ Mouse movement -> Look around
 LShift -> hold to speed up other actions (movement, turning around etc.)
 
 ### Scene controls
-N -> Toggle day/night (campfire lights automatically)
+N -> Starts day/night transition, campfire lights automatically upon transition end
 P -> Turn mouse on/off
 G -> Turn GUI on/off (includes bloom effect settings)
 ESC -> Exit the program
