@@ -64,6 +64,9 @@ namespace app {
         void update_camera();
 
         bool m_is_day                       = true;
+        bool m_day_change_requested = false;
+        double m_day_change_timer = 0.0;
+        static constexpr double DAY_CHANGE_DELAY = 3.0;
         std::string active_daytime_skybox   = "skybox_day";
         std::string active_nighttime_skybox = "skybox_night";
 

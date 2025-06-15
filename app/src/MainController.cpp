@@ -536,7 +536,16 @@ namespace app {
             platform->set_enable_cursor(!platform->is_cursor_enabled());
         }
         if (platform->key(engine::platform::KeyId::KEY_N).state() == engine::platform::Key::State::JustPressed) {
-            m_is_day = !m_is_day;
+            if (!m_day_change_requested) {
+                m_day_change_requested = true;
+                m_day_change_timer = engine::platform::PlatformController::get_time();
+            }
+        }
+        if (m_day_change_requested) {
+            if (const double current_time = engine::platform::PlatformController::get_time(); current_time - m_day_change_timer >= DAY_CHANGE_DELAY) {
+                m_is_day = !m_is_day;
+                m_day_change_requested = false;
+            }
         }
         if (platform->key(engine::platform::KeyId::KEY_Q).is_down()) {
             camera->rotate_camera(-10, 0);
