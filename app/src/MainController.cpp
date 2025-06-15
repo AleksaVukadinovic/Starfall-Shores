@@ -542,10 +542,19 @@ namespace app {
             }
         }
         if (m_day_change_requested) {
-            if (const double current_time = engine::platform::PlatformController::get_time(); current_time - m_day_change_timer >= DAY_CHANGE_DELAY) {
+            const double current_time = engine::platform::PlatformController::get_time();
+            const double elapsed_time = current_time - m_day_change_timer;
+
+            if (const float transition_progress = static_cast<float>(elapsed_time / DAY_CHANGE_DELAY); transition_progress >= 1.0f) {
                 m_is_day = !m_is_day;
+                m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 m_day_change_requested = false;
+            } else {
+                const float start_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
+                const float target_exposure = m_is_day ? NIGHT_EXPOSURE : DAY_EXPOSURE;
+                m_current_exposure = start_exposure + (target_exposure - start_exposure) * transition_progress;
             }
+            bloom_controller->exposure = m_current_exposure;
         }
         if (platform->key(engine::platform::KeyId::KEY_Q).is_down()) {
             camera->rotate_camera(-10, 0);

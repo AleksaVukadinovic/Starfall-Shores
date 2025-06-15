@@ -66,7 +66,10 @@ namespace app {
         bool m_is_day                       = true;
         bool m_day_change_requested = false;
         double m_day_change_timer = 0.0;
+        float m_current_exposure = DAY_EXPOSURE;
         static constexpr double DAY_CHANGE_DELAY = 3.0;
+        static constexpr float DAY_EXPOSURE = 1.2f;
+        static constexpr float NIGHT_EXPOSURE = 0.6f;
         std::string active_daytime_skybox   = "skybox_day";
         std::string active_nighttime_skybox = "skybox_night";
 
