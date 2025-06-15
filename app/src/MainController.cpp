@@ -89,7 +89,6 @@ namespace app {
         draw_campfire();
         draw_logs();
         draw_tents();
-        draw_old_tree();
         draw_forest();
         draw_bushes();
         draw_flowers();
@@ -108,6 +107,7 @@ namespace app {
         auto *tall_tree         = resources->model("beech_tree");
         auto *oak_tree          = resources->model("oak_tree");
         auto *pine_tree         = resources->model("pine_tree");
+        auto *old_tree          = resources->model("old_tree");
         const auto *tree_shader = resources->shader("basic");
 
         set_common_shader_variables(tree_shader, camera, graphics);
@@ -162,8 +162,9 @@ namespace app {
         for (const auto &pos: pine_trees) {
             draw_tree(pine_tree, pos.x, pos.y, pos.z, 11.0f, -90.0f, glm::vec3(1, 0, 0));
         }
-    }
 
+        draw_tree(old_tree, 65, 40, -39, 0.04f, 3.0f, glm::vec3(0, 0, 1));
+    }
     void MainController::draw_campfire() const {
         engine::resources::Model *campfire               = resources->model("campfire");
         const engine::resources::Shader *campfire_shader = resources->shader("basic");
@@ -226,21 +227,6 @@ namespace app {
         model = scale(model, glm::vec3(0.06));
         tent_shader->set_mat4("model", model);
         stylized_tent->draw(tent_shader);
-    }
-
-    void MainController::draw_old_tree() const {
-        engine::resources::Model *old_tree               = resources->model("old_tree");
-        const engine::resources::Shader *old_tree_shader = resources->shader("basic");
-
-        set_common_shader_variables(old_tree_shader, camera, graphics);
-
-        auto model = glm::mat4(1.0f);
-        model      = rotate(model, glm::radians(3.0f), glm::vec3(0, 0, 1));
-        model      = translate(model, glm::vec3(65, 40, -39));
-        model      = scale(model, glm::vec3(0.04));
-
-        old_tree_shader->set_mat4("model", model);
-        old_tree->draw(old_tree_shader);
     }
 
     void MainController::draw_bushes() const {

@@ -43,8 +43,6 @@ namespace app {
 
         void draw_tents() const;
 
-        void draw_old_tree() const;
-
         void draw_bushes() const;
 
         void draw_white_flowers() const;
