@@ -30,6 +30,7 @@ namespace app {
     void MainController::initialize() {
         engine::graphics::OpenGL::enable_depth_testing();
         graphics         = get<engine::graphics::GraphicsController>();
+        graphics->perspective_params().Far = 250.0f;
         bloom_controller = get<engine::graphics::BloomController>();
         bloom_controller->bloom_setup();
         resources           = get<engine::resources::ResourcesController>();
