@@ -1,0 +1,11 @@
+Model Information:
+* title:	Water
+* source:	https://sketchfab.com/3d-models/water-23a7e330abda46cb8a78e6963997ea5e
+* author:	Gustavo_Gontijo (https://sketchfab.com/Baiano22)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Water" (https://sketchfab.com/3d-models/water-23a7e330abda46cb8a78e6963997ea5e) by Gustavo_Gontijo (https://sketchfab.com/Baiano22) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

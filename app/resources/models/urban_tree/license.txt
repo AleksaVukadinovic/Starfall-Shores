@@ -1,0 +1,11 @@
+Model Information:
+* title:	Urban Tree
+* source:	https://sketchfab.com/3d-models/urban-tree-3c51f2f4c9d14eeb99fe4336e4c1457f
+* author:	gelmi.com.br (https://sketchfab.com/rodrigogelmi)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Urban Tree" (https://sketchfab.com/3d-models/urban-tree-3c51f2f4c9d14eeb99fe4336e4c1457f) by gelmi.com.br (https://sketchfab.com/rodrigogelmi) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

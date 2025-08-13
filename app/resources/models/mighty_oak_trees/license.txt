@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mighty Oak Trees
+* source:	https://sketchfab.com/3d-models/mighty-oak-trees-4f6ab5594a8a415aba3f958682b9ced5
+* author:	Jagobo (https://sketchfab.com/Jagobo)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mighty Oak Trees" (https://sketchfab.com/3d-models/mighty-oak-trees-4f6ab5594a8a415aba3f958682b9ced5) by Jagobo (https://sketchfab.com/Jagobo) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

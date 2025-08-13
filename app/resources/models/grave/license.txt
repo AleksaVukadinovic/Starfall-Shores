@@ -1,0 +1,11 @@
+Model Information:
+* title:	Grave
+* source:	https://sketchfab.com/3d-models/grave-b3de8d38f8444ec6b6170cb235e4594f
+* author:	MarkusProud (https://sketchfab.com/MarkusProud)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Grave" (https://sketchfab.com/3d-models/grave-b3de8d38f8444ec6b6170cb235e4594f) by MarkusProud (https://sketchfab.com/MarkusProud) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)

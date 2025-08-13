@@ -1,96 +1,185 @@
+/**
+ * @file GraphicsController.hpp
+ * @brief Defines the GraphicsController class that initializes OpenGL and ImGUI, and provides basic drawing functions.
+*/
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <engine/graphics/GraphicsController.hpp>
-#include <engine/graphics/OpenGL.hpp>
-#include <engine/platform/PlatformController.hpp>
-#include <engine/resources/Skybox.hpp>
+#ifndef GRAPHICSCONTROLLER_HPP
+#define GRAPHICSCONTROLLER_HPP
+#include <engine/graphics/Camera.hpp>
+#include <engine/core/Controller.hpp>
+#include <engine/platform/PlatformEventObserver.hpp>
+
+struct ImGuiContext;
+
+namespace engine::resources {
+    class Skybox;
+    class Shader;
+}
 
 namespace engine::graphics {
+    /**
+    * @brief Parameters used to define a perspective projection matrix.
+    */
+    struct PerspectiveMatrixParams {
+        float FOV;
+        float Width;
+        float Height;
+        float Near;
+        float Far;
+    };
 
-void GraphicsController::initialize() {
-    const int opengl_initialized = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
-    RG_GUARANTEE(opengl_initialized, "OpenGL failed to init!");
+    /**
+    * @brief Parameters used to define an orthographic projection matrix.
+    */
+    struct OrthographicMatrixParams {
+        float Left;
+        float Right;
+        float Bottom;
+        float Top;
+        float Near;
+        float Far;
+    };
 
-    auto platform = engine::core::Controller::get<platform::PlatformController>();
-    auto handle = platform->window()
-                          ->handle_();
-    m_perspective_params.FOV = glm::radians(m_camera.Zoom);
-    m_perspective_params.Width = static_cast<float>(platform->window()
-                                                            ->width());
-    m_perspective_params.Height = static_cast<float>(platform->window()
-                                                             ->height());
-    m_perspective_params.Near = 0.1f;
-    m_perspective_params.Far = 100.f;
+    enum ProjectionType {
+        Perspective,
+        Orthographic
+    };
 
-    m_ortho_params.Bottom = 0.0f;
-    m_ortho_params.Top = static_cast<float>(platform->window()
-                                                    ->height());
-    m_ortho_params.Left = 0.0f;
-    m_ortho_params.Right = static_cast<float>(platform->window()
-                                                      ->width());
-    m_ortho_params.Near = 0.1f;
-    m_ortho_params.Far = 100.0f;
-    platform->register_platform_event_observer(
-            std::make_unique<GraphicsPlatformEventObserver>(this));
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void) io;
-    RG_GUARANTEE(ImGui_ImplGlfw_InitForOpenGL(handle, true), "ImGUI failed to initialize for OpenGL");
-    RG_GUARANTEE(ImGui_ImplOpenGL3_Init("#version 330 core"), "ImGUI failed to initialize for OpenGL");
+    /**
+    * @class GraphicsController
+    * @brief Implements basic drawing methods that the @ref core::App implementation uses.
+    *
+    * This class should implement all the complex functions needed for drawing an entity in the scene.
+    * For example @ref GraphicsController::draw_skybox.
+    */
+    class GraphicsController final : public core::Controller {
+    public:
+        std::string_view name() const override;
+
+        /**
+        * @brief Calls internal methods for the beginning of gui drawing. Should be called in pair with @ref GraphicsController::end_gui.
+        *
+        * Example:
+        * @code
+        * auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        * graphics->begin_gui();
+        * ImGui::Begin("Camera info");
+        * const auto &c = ...;
+        * ImGui::Text("Camera position: (%f, %f, %f)", c.Position.x, c.Position.y, c.Position.z);
+        * ImGui::Text("(Yaw, Pitch): (%f, %f)", c.Yaw, c.Pitch);
+        * ImGui::Text("Camera front: (%f, %f, %f)", c.Front.x, c.Front.y, c.Front.z);
+        * ImGui::End();
+        * graphics->end_gui();
+        * @endcode
+        */
+        void begin_gui();
+
+        /**
+        * @brief Calls internal method for the ending of gui drawing. Should be called in pair with @ref GraphicsController::begin_gui.
+        */
+        void end_gui();
+
+        /**
+        * @brief Draws a @ref resources::Skybox with the @ref resources::Shader.
+        */
+        void draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox);
+
+        Camera *camera() {
+            return &m_camera;
+        }
+
+        /**
+        * @brief Compute the projection matrix.
+        * @returns Return perspective projection by default.
+        */
+        template<ProjectionType type = Perspective>
+        glm::mat4 projection_matrix() const {
+            if constexpr (type == Perspective) {
+                return glm::perspective(m_perspective_params.FOV,
+                                        m_perspective_params.Width / m_perspective_params.Height,
+                                        m_perspective_params.Near, m_perspective_params.Far);
+            } else {
+                return glm::ortho(m_ortho_params.Left, m_ortho_params.Right, m_ortho_params.Bottom, m_ortho_params.Top,
+                                  m_ortho_params.Near, m_ortho_params.Far);
+            }
+        }
+
+        /**
+        * @brief Compute the projection matrix.
+        * @returns Return perspective projection by default.
+        */
+        glm::mat4 projection_matrix(ProjectionType type = Perspective) const {
+            switch (type) {
+            case Perspective: return projection_matrix<Perspective>();
+            case Orthographic: return projection_matrix<Orthographic>();
+            default: RG_SHOULD_NOT_REACH_HERE("Unsupported type");
+            }
+        }
+
+        /**
+        * @brief Use this function to change the perspective projection matrix parameters.
+        * Projection matrix is always computed when the @ref GraphicsController::projection_matrix is called.
+        * @returns @ref PerspectiveMatrixParams
+        */
+        PerspectiveMatrixParams &perspective_params() {
+            return m_perspective_params;
+        }
+
+        /**
+        * @brief Get the current @ref PerspectiveMatrixParams values.
+        * @returns @ref PerspectiveMatrixParams
+        */
+        const PerspectiveMatrixParams &perspective_params() const {
+            return m_perspective_params;
+        }
+
+        /**
+        * @brief Use this function to change the orthographic projection matrix parameters.
+        * Projection matrix is always computed
+        * when @ref GraphicsController::projection_matrix is called.
+        * @returns @ref PerspectiveMatrixParams
+        */
+        OrthographicMatrixParams &orthographic_params() {
+            return m_ortho_params;
+        }
+
+        /**
+        * @brief Get the current @ref OrthographicMatrixParams values.
+        * @returns @ref PerspectiveMatrixParams
+        */
+        const OrthographicMatrixParams &orthographic_params() const {
+            return m_ortho_params;
+        }
+
+    private:
+        /**
+        * @brief Initializes OpenGL, ImGUI, and projection matrix params;
+        */
+        void initialize() override;
+
+        void terminate();
+
+        PerspectiveMatrixParams m_perspective_params{};
+        OrthographicMatrixParams m_ortho_params{};
+
+        glm::mat4 m_projection_matrix{};
+        Camera m_camera{};
+        ImGuiContext *m_imgui_context{};
+    };
+
+    /**
+    * @class GraphicsPlatformEventObserver
+    * @brief Observers change in window size in order to update the projection matrix.
+    */
+    class GraphicsPlatformEventObserver final : public platform::PlatformEventObserver {
+    public:
+        explicit GraphicsPlatformEventObserver(GraphicsController *graphics) : m_graphics(graphics) {
+        }
+
+        void on_window_resize(int width, int height) override;
+
+    private:
+        GraphicsController *m_graphics;
+    };
 }
-
-void GraphicsController::terminate() {
-    if (ImGui::GetCurrentContext()) {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-    }
-}
-
-void GraphicsPlatformEventObserver::on_window_resize(int width, int height) {
-    m_graphics->perspective_params()
-              .Width = static_cast<float>(width);
-    m_graphics->perspective_params()
-              .Height = static_cast<float>(height);
-
-    m_graphics->orthographic_params()
-              .Right = static_cast<float>(width);
-    m_graphics->orthographic_params()
-              .Top = static_cast<float>(height);
-}
-
-std::string_view GraphicsController::name() const {
-    return "GraphicsController";
-}
-
-void GraphicsController::begin_gui() {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-}
-
-void GraphicsController::end_gui() {
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void GraphicsController::draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) {
-    glm::mat4 view = glm::mat4(glm::mat3(m_camera.view_matrix()));
-    shader->use();
-    shader->set_mat4("view", view);
-    shader->set_mat4("projection", projection_matrix<>());
-    CHECKED_GL_CALL(glDepthFunc, GL_LEQUAL);
-    CHECKED_GL_CALL(glBindVertexArray, skybox->vao());
-    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
-    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_CUBE_MAP, skybox->texture());
-    CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 36);
-    CHECKED_GL_CALL(glBindVertexArray, 0);
-    CHECKED_GL_CALL(glDepthFunc, GL_LESS); // set depth function back to default
-    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_CUBE_MAP, 0);
-}
-}
+#endif //GRAPHICSCONTROLLER_HPP

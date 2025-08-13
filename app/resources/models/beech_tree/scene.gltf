@@ -1,0 +1,407 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 5366,
+      "max": [
+        135.99327087402344,
+        353.9539794921875,
+        118.27699279785156
+      ],
+      "min": [
+        -111.71092987060547,
+        0.0,
+        -109.12217712402344
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 64392,
+      "componentType": 5126,
+      "count": 5366,
+      "max": [
+        0.9996704459190369,
+        0.9810563921928406,
+        0.9999120831489563
+      ],
+      "min": [
+        -0.9998843669891357,
+        -0.9852272272109985,
+        -0.9999725222587585
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 5366,
+      "max": [
+        0.9999439120292664,
+        0.9736568331718445,
+        0.9996787905693054,
+        1.0
+      ],
+      "min": [
+        -0.9999997019767761,
+        -0.9994658827781677,
+        -0.9999606013298035,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 5366,
+      "max": [
+        0.9985399842262268,
+        13.313090324401855
+      ],
+      "min": [
+        0.0004900000058114529,
+        1.0
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 13011,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 128784,
+      "componentType": 5126,
+      "count": 3360,
+      "max": [
+        158.6839599609375,
+        380.4515075683594,
+        140.07339477539063
+      ],
+      "min": [
+        -130.81459045410156,
+        86.37248229980469,
+        -127.9384765625
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 169104,
+      "componentType": 5126,
+      "count": 3360,
+      "max": [
+        0.9987444281578064,
+        0.9992726445198059,
+        0.9979743957519531
+      ],
+      "min": [
+        -0.9999186992645264,
+        -0.9499391317367554,
+        -0.9999625086784363
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "byteOffset": 85856,
+      "componentType": 5126,
+      "count": 3360,
+      "max": [
+        0.9994512796401978,
+        0.9960542917251587,
+        0.9992891550064087,
+        1.0
+      ],
+      "min": [
+        -0.9994105100631714,
+        -0.999422550201416,
+        -0.9982112050056458,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 42928,
+      "componentType": 5126,
+      "count": 3360,
+      "max": [
+        0.9986100196838379,
+        0.9985100030899048
+      ],
+      "min": [
+        0.0015899999998509884,
+        0.0014900000533089042
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 52044,
+      "componentType": 5125,
+      "count": 5040,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "evolveduk (https://sketchfab.com/evolveduk)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/beech-tree-0983d8933531491f9be71c669e8a907b",
+      "title": "Beech tree"
+    },
+    "generator": "Sketchfab-13.39.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 72204,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 69808,
+      "byteOffset": 72204,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 209424,
+      "byteOffset": 142012,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 139616,
+      "byteOffset": 351436,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 491052,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/Tree_0Mat_baseColor.png"
+    },
+    {
+      "uri": "textures/Tree_0Mat_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/Tree_0Mat_normal.png"
+    },
+    {
+      "uri": "textures/Tree_1Mat_baseColor.png"
+    },
+    {
+      "uri": "textures/Tree_1Mat_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/Tree_1Mat_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "Tree_0Mat",
+      "normalTexture": {
+        "index": 2
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    },
+    {
+      "alphaCutoff": 0.2274076786,
+      "alphaMode": "MASK",
+      "doubleSided": true,
+      "name": "Tree_1Mat",
+      "normalTexture": {
+        "index": 5
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 3
+        },
+        "metallicFactor": 0.0,
+        "metallicRoughnessTexture": {
+          "index": 4
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Tree_0_Tree_0Mat_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Tree_1_Tree_1Mat_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 6,
+            "POSITION": 5,
+            "TANGENT": 7,
+            "TEXCOORD_0": 8
+          },
+          "indices": 9,
+          "material": 1,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "beech.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4,
+        5
+      ],
+      "name": "Tree_0"
+    },
+    {
+      "mesh": 0,
+      "name": "Tree_0_Tree_0Mat_0"
+    },
+    {
+      "children": [
+        6
+      ],
+      "name": "Tree_1"
+    },
+    {
+      "mesh": 1,
+      "name": "Tree_1_Tree_1Mat_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    },
+    {
+      "sampler": 0,
+      "source": 4
+    },
+    {
+      "sampler": 0,
+      "source": 5
+    }
+  ]
+}
