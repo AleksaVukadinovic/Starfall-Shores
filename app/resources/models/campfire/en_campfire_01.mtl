@@ -1,0 +1,52 @@
+newmtl mat0
+Ns 0
+Ka 1.0 1.0 1.0
+Kd 0.21404 0.21404 0.21404
+Ks 0 0 0
+Ke 0 0 0
+Ni 1.0
+d 1
+illum 1
+map_Kd TX_Campfire_Basecolour_01.png
+map_bump TX_Campfire_Normal_01.png
+map_Ks TX_Campfire_OcclusionRoughnessMetallic_01.png
+
+newmtl mat1
+Ns 0
+Ka 1.0 1.0 1.0
+Kd 0.21404 0.21404 0.21404
+Ks 0 0 0
+Ke 0 0 0
+Ni 1.0
+d 1
+illum 1
+map_Kd TX_Campfire_Basecolour_02.png
+map_bump TX_Campfire_Normal_02.png
+map_Ks TX_Campfire_OcclusionRoughnessMetallic_02.png
+
+newmtl mat2
+Ns 0
+Ka 1.0 1.0 1.0
+Kd 0.21404 0.21404 0.21404
+Ks 0 0 0
+Ke 0 0 0
+Ni 1.0
+d 1
+illum 1
+map_Kd TX_Campfire_Basecolour_03.png
+map_bump TX_Campfire_normal_03.png
+map_Ks TX_Campfire_OcclusionRoughnessMetallic_03.png
+
+newmtl mat3
+Ns 500
+Ka 1.0 1.0 1.0
+Kd 0.85 0.85 0.85
+Ks 0.05 0.05 0.05
+Ke 1.0 1.0 1.0
+Ni 1.0
+d 1
+illum 2
+map_Kd TX_Campfire_Basecolour_01.png
+map_bump TX_Campfire_Normal_01.png
+map_Ks TX_Campfire_OcclusionRoughnessMetallic_01.png
+map_Ke TX_Campfire_Emissive_01.png

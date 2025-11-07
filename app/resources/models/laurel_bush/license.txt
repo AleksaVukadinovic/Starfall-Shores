@@ -1,0 +1,11 @@
+Model Information:
+* title:	Laurel Bush
+* source:	https://sketchfab.com/3d-models/laurel-bush-2616665bf38b4ff7b62c5452629bd5b1
+* author:	SCADL & Co (https://sketchfab.com/scadl)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Laurel Bush" (https://sketchfab.com/3d-models/laurel-bush-2616665bf38b4ff7b62c5452629bd5b1) by SCADL & Co (https://sketchfab.com/scadl) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

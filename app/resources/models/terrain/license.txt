@@ -1,0 +1,11 @@
+Model Information:
+* title:	Floating island
+* source:	https://sketchfab.com/3d-models/floating-island-192393b07d5d4e06a27e9ffc68ac5d89
+* author:	Una.K.C (https://sketchfab.com/Una.K.C)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Floating island" (https://sketchfab.com/3d-models/floating-island-192393b07d5d4e06a27e9ffc68ac5d89) by Una.K.C (https://sketchfab.com/Una.K.C) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

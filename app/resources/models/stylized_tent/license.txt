@@ -1,0 +1,11 @@
+Model Information:
+* title:	Stylized Tent
+* source:	https://sketchfab.com/3d-models/stylized-tent-e5a32b9c07a941f78411bd1145f85fdf
+* author:	csabat3D (https://sketchfab.com/taczi.csaba)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Stylized Tent" (https://sketchfab.com/3d-models/stylized-tent-e5a32b9c07a941f78411bd1145f85fdf) by csabat3D (https://sketchfab.com/taczi.csaba) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

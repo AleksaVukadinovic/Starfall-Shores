@@ -1,11 +1,77 @@
 {
   "resources": {
     "models": {
+      "log_seat" : {
+        "path" : "log_seat/scene.gltf"
+      },
+      "campfire" : {
+        "path" : "campfire/en_campfire_01.obj"
+      },
+      "stylized_tent" : {
+        "path" : "stylized_tent/scene.gltf"
+      },
+      "terrain" : {
+        "path" : "terrain/scene.gltf"
+      },
+      "viking_tent" : {
+        "path" : "viking_tent/scene.gltf"
+      },
+      "old_tree" : {
+        "path" : "old_tree/scene.gltf"
+      },
+      "yellow_tree" : {
+        "path" : "platano_tree/scene.gltf"
+      },
+      "urban_tree" : {
+        "path" : "urban_tree/scene.gltf"
+      },
+      "green_tree" : {
+        "path" : "bodhi_tree/scene.gltf"
+      },
+      "bush1" : {
+        "path" : "stylized_bush/scene.gltf"
+      },
+      "bush2" : {
+        "path" : "photorealistic_bush/scene.gltf"
+      },
+      "beech_tree" : {
+        "path" : "beech_tree/scene.gltf"
+      },
+      "oak_tree" : {
+        "path" : "mighty_oak_trees/scene.gltf"
+      },
+      "flowers2" : {
+        "path" : "flowers/scene.gltf"
+      },
+      "roses" : {
+        "path" : "roses/scene.gltf"
+      },
+      "pine_tree" : {
+        "path" : "pine_tree/scene.gltf"
+      },
+      "path" : {
+        "path" : "way_path_blocks/scene.gltf"
+      },
+      "shrooms" : {
+        "path" : "mushrooms/scene.gltf"
+      },
+      "laurel_bush" : {
+        "path" : "laurel_bush/scene.gltf"
+      },
+      "grave" : {
+        "path" : "grave/scene.gltf"
+      },
+      "fire" : {
+        "path" : "fire/scene.gltf"
+      },
+      "water" : {
+        "path" : "water/scene.gltf"
+      }
     }
   },
   "window": {
-    "height": 600,
-    "title": "Hello, window!",
-    "width": 800
+    "height": 1000,
+    "title": "Starfall Shores",
+    "width": 1400
   }
 }
