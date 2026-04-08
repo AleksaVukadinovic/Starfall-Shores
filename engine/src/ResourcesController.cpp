@@ -21,7 +21,7 @@ void ResourcesController::initialize() {
 
 void ResourcesController::load_shaders() {
     if (!exists(m_shaders_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the shaders from", m_shaders_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the shaders from", m_shaders_path.string());
         return;
     }
     for (const auto &shader_path: std::filesystem::directory_iterator(m_shaders_path)) {
@@ -34,7 +34,7 @@ void ResourcesController::load_shaders() {
 
 void ResourcesController::load_models() {
     if (!exists(m_models_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the models from", m_models_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the models from", m_models_path.string());
         return;
     }
     const auto &config = util::Configuration::config();
@@ -49,7 +49,7 @@ void ResourcesController::load_models() {
 
 void ResourcesController::load_textures() {
     if (!exists(m_textures_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
         return;
     }
     for (const auto &texture_entry: std::filesystem::directory_iterator(m_textures_path)) {
@@ -61,7 +61,7 @@ void ResourcesController::load_textures() {
 
 void ResourcesController::load_skyboxes() {
     if (!exists(m_skyboxes_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string());
         return;
     }
     for (const auto &sky_boxes_entry: std::filesystem::directory_iterator(m_skyboxes_path)) {
