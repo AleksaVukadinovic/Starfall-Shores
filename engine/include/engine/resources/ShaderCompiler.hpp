@@ -24,7 +24,7 @@ struct ShaderParsingResult {
 /**
 * @class ShaderCompiler
 * @brief Compiles GLSL shaders from a single source file.
-* Vertex, Fragment and Geometry shaders are separated by the `// #shader vertex|fragment|geometry` directive.
+* Vertex, Fragment, and Geometry shaders are separated by the `// #shader vertex|fragment|geometry` directive.
 * All the code following the directive belongs to the source of the shader specified in the `#shader` directive.
 * Here is an example:
 * @code
@@ -56,7 +56,7 @@ public:
     static Shader compile_from_source(std::string shader_name, std::string shader_source);
 
     /**
-    * @brief Compiles a shader from file.
+    * @brief Compiles a shader from a file.
     * @param shader_name
     * @param shader_path containing the source for the vertex, fragment, [geometry] shader
     * @returns Compiled @ref Shader object that can be used for drawing.
@@ -71,7 +71,7 @@ public:
 
 private:
     /**
-    * @brief Compile shader sources into a OpenGL shader program.
+    * @brief Compile shader sources into an OpenGL shader program.
     * @returns A @ref graphics::OpenGL::ShaderProgramId referencing OpenGL shader program.
     */
     graphics::OpenGL::ShaderProgramId compile(const ShaderParsingResult &shader_sources);

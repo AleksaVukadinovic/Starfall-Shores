@@ -13,11 +13,11 @@ std::string_view texture_type_to_string(TextureType type) {
     }
 }
 
-void Texture::destroy() {
+void Texture::destroy() const {
     glDeleteTextures(1, &m_id);
 }
 
-void Texture::bind(int32_t sampler) {
+void Texture::bind(const int32_t sampler) const {
     RG_GUARANTEE(sampler >= GL_TEXTURE0 && sampler <= GL_TEXTURE31, "sampler out of range");
     glActiveTexture(sampler);
     glBindTexture(GL_TEXTURE_2D, m_id);

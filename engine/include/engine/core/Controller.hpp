@@ -15,12 +15,12 @@ namespace engine::core {
 /**
 * @class Controller
 * @brief Controllers are a hook into the @ref App `main loop` execution.
-* By overriding virtual functions of this class the user can
+* By overriding virtual functions of this class, the user can
 * execute custom code during each of the `main loop` phases.
 *
-* Register controller with @ref App::register_controller during the @ref App::app_setup function.
+* Register a controller with @ref App::register_controller during the @ref App::app_setup function.
 *
-* Every controller instance is a singleton instance that is managed by the @ref App.
+* Every controller instance is a singleton instance managed by the @ref App.
 * There can be no two instances of the same controller.
 *
 * \code
@@ -30,7 +30,7 @@ namespace engine::core {
 *   void terminate() override { spdlog::log("Logging::terminate"); }
 * };
 * \endcode
-* To have the engine execute the code from the `LoggingController` we must first register it:
+* To have the engine execute the code from the `LoggingController,` we must first register it:
 * \code
 * void MyApp::app_setup() {
 *   register_controller<LoggingController>();
@@ -61,7 +61,7 @@ public:
     * Returns the controller class name; used for logging.
     * @return Controller name
     */
-    virtual std::string_view name() const {
+    [[nodiscard]] virtual std::string_view name() const {
         return typeid(*this).name();
     }
 
@@ -90,7 +90,7 @@ public:
     * Returns the controllers that have a direct dependency to `this` controller.
     * @returns Controllers executing after `this`
     */
-    const std::vector<Controller *> &next() const {
+    [[nodiscard]] const std::vector<Controller *> &next() const {
         return m_next;
     }
 
@@ -99,7 +99,7 @@ public:
     *
     * You can turn the controller on/off by calling @ref Controller::set_enable.
     */
-    bool is_enabled() const {
+    [[nodiscard]] bool is_enabled() const {
         return m_enabled;
     }
 
@@ -118,7 +118,7 @@ private:
         m_registered = true;
     }
 
-    bool is_registered() const {
+    [[nodiscard]] bool is_registered() const {
         return m_registered;
     }
 
@@ -169,7 +169,7 @@ private:
     /**
     * @brief Terminate the controller. Executes in the @ref core::App::terminate.
     *
-    * Note that the `terminate` executes in the reverse order from initialize.
+    * Note that the `terminate` executes in the reverse order from initializing.
     */
     virtual void terminate() {
     }
@@ -201,7 +201,7 @@ private:
 
 /**
  * @class EngineControllersBegin
- * @brief This controller does nothing and together with @ref EngineControllersEnd it servers as a sentinel
+ * @brief This controller does nothing, and together with @ref EngineControllersEnd it servers as a sentinel
  * controller for marking the engine controllers.
  *
  * This makes it easier for the concrete `App` implementation to order its custom controllers before/after
@@ -215,14 +215,14 @@ private:
  */
 class EngineControllersBegin final : public Controller {
 public:
-    std::string_view name() const override {
+    [[nodiscard]] std::string_view name() const override {
         return "EngineControllersBegin";
     }
 };
 
 /**
  * @class EngineControllersEnd
- * @brief This controller does nothing and together with @ref EngineControllersEnd it servers as a sentinel
+ * @brief This controller does nothing, and together with @ref EngineControllersEnd it servers as a sentinel
  * controller for marking the engine controllers.
  *
  * This makes it easier for the concrete `App` implementation to order its custom controllers before/after
@@ -236,7 +236,7 @@ public:
  */
 class EngineControllersEnd final : public Controller {
 public:
-    std::string_view name() const override {
+    [[nodiscard]] std::string_view name() const override {
         return "EngineControllersEnd";
     }
 };

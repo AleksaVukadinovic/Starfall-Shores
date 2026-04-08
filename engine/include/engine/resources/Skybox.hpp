@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <filesystem>
 #include <utility>
 
@@ -22,7 +21,7 @@ public:
     * @brief Returns the OpenGL ID of the skybox.
     * @returns The OpenGL ID of the skybox.
     */
-    uint32_t vao() const {
+    [[nodiscard]] uint32_t vao() const {
         return m_vao;
     }
 
@@ -30,7 +29,7 @@ public:
     * @brief Returns the OpenGL ID of the skybox texture.
     * @returns The OpenGL ID of the skybox texture.
     */
-    uint32_t texture() const {
+    [[nodiscard]] uint32_t texture() const {
         return m_texture_id;
     }
 
@@ -55,12 +54,10 @@ private:
     * @param name The name of the skybox.
     */
     Skybox(uint32_t vao, uint32_t texture_id, std::filesystem::path path, std::string name)
-            : m_vao(vao)
-              , m_texture_id(texture_id)
-              , m_path(std::move(path))
-              , m_name(std::move(name)) {
+        : m_vao(vao)
+        , m_texture_id(texture_id)
+        , m_path(std::move(path))
+        , m_name(std::move(name)) {
     }
 };
-}
-
-
+}// namespace engine::resources

@@ -33,7 +33,7 @@ public:
     * @brief Get the error message.
     * @returns The error message.
     */
-    const std::string &message() const {
+    [[nodiscard]] const std::string &message() const {
         return m_message;
     }
 
@@ -41,7 +41,7 @@ public:
     * @brief Get the location of the error.
     * @returns The location of the error.
     */
-    std::source_location location() const {
+    [[nodiscard]] std::source_location location() const {
         return m_location;
     }
 
@@ -49,7 +49,7 @@ public:
     * @brief Get the error report. You can override this method in derived classes to provide a more detailed error report.
     * @returns The error report.
     */
-    virtual std::string report() const {
+    [[nodiscard]] virtual std::string report() const {
         return m_message;
     };
 
@@ -121,7 +121,7 @@ public:
     */
     EngineError(Type error_type, std::string message,
                 std::source_location location = std::source_location::current())
-            : Error(std::move(message), std::move(location))
+            : Error(std::move(message), location)
               , m_error(error_type) {
     }
 
@@ -129,7 +129,7 @@ public:
     * @brief Get the error report.
     * @returns The error report.
     */
-    std::string report() const override;
+    [[nodiscard]] std::string report() const override;
 
 private:
     Type m_error;

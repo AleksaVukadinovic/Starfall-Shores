@@ -28,7 +28,7 @@ public:
     * @returns The value of the argument.
     */
     template<typename T>
-    std::optional<T> arg(std::string_view name, std::optional<T> default_value = {}) {
+    std::optional<T> arg(const std::string_view name, std::optional<T> default_value = {}) {
         std::string arg_value = get_arg_value(name);
         if (arg_value.empty()) {
             return default_value.has_value() ? default_value.value() : T{};
@@ -46,6 +46,7 @@ public:
             return arg_value;
         } else {
             static_assert(false, "This type is not supported!");
+            return T{};
         }
     }
 

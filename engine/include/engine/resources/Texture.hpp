@@ -49,13 +49,13 @@ public:
     /**
     * @brief Destroys the texture object in the OpenGL context.
     */
-    void destroy();
+    void destroy() const;
 
     /**
     * @brief Returns the type of the texture.
     * @returns The type of the texture.
     */
-    TextureType type() const {
+    [[nodiscard]] TextureType type() const {
         return m_type;
     }
 
@@ -63,7 +63,7 @@ public:
     * @brief Returns the OpenGL ID of the texture.
     * @returns The OpenGL ID of the texture.
     */
-    uint32_t id() const {
+    [[nodiscard]] uint32_t id() const {
         return m_id;
     }
 
@@ -71,13 +71,13 @@ public:
     * @brief Binds the texture to a given sampler.
     * @param sampler The sampler to bind the texture to.
     */
-    void bind(int32_t sampler);
+    void bind(int32_t sampler) const;
 
     /**
     * @brief Returns the path to the texture file from which the texture was loaded.
     * @returns The path to the texture file.
     */
-    const std::filesystem::path &path() const {
+    [[nodiscard]] const std::filesystem::path &path() const {
         return m_path;
     }
 
@@ -85,7 +85,7 @@ public:
     * @brief Returns the name of the texture by which it can be referenced using the @ref engine::resources::ResourcesController::texture function.
     * @returns The name of the texture.
     */
-    const std::string &name() const {
+    [[nodiscard]] const std::string &name() const {
         return m_name;
     }
 
@@ -99,7 +99,7 @@ private:
     * @param path The path to the texture file.
     * @param name The name of the texture.
     */
-    Texture(uint32_t id, TextureType type, std::filesystem::path path, std::string name)
+    Texture(const uint32_t id, const TextureType type, std::filesystem::path path, std::string name)
             : m_id(id)
               , m_type(type)
               , m_path(std::move(path))

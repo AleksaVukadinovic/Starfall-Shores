@@ -81,7 +81,7 @@ private:
     /**
     * @brief Initializes all the controllers registered in @ref App::app_setup. Calls @ref engine::core::Controller::initialize for registered controllers.
     *
-    * After this functions finishes all the controllers have been initialized, and they can be now used
+    * After this function finishes, all the controllers have been initialized, and they can be now used
     * by calling @ref engine::core::Controller::get<TController>()
     */
     void initialize();
@@ -92,33 +92,33 @@ private:
     * It handles input events, system events, and any other types of events
     * that have been queued. This is where the platform events are processed.
     */
-    void poll_events();
+    void poll_events() const;
 
     /**
     * @brief Checks whether the render loop should continue executing. Calls @ref engine::core::Controller::loop for registered controllers.
     *
     * This is where you should check if an internal or external event happened
-    * that stops the main render loop. For example the user presses ESC.
+    * that stops the main render loop. For example, the user presses ESC.
     *
     * @returns true if the main loop should continue, false otherwise.
     */
-    bool loop();
+    bool loop() const;
 
     /**
     * @brief Updates the app logic state. Calls @ref engine::core::Controller::update for registered controllers.
     *
-    * This is where all the App state should be updated including handling events
-    * registered in @ref App::poll_events, processing physics, world logic etc.
+    * This is where all the App state should be updated, including handling events
+    * registered in @ref App::poll_events, processing physics, world logic, etc.
     */
-    void update();
+    void update() const;
 
     /**
     * @brief Draws the frame. Calls @ref engine::core::Controller::draw for registered controllers.
     *
-    * This is where all the drawing should happen based on the state
+    * This is where all the drawings should happen based on the state
     * that the @ref App::update computed.
     */
-    void draw();
+    void draw() const;
 
     /**
     * @brief Terminates the app. Calls @ref engine::core::Controller::terminate for registered controllers in the **reverse order**.

@@ -1,5 +1,4 @@
 #include <glad/glad.h>
-#include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/graphics/BloomController.hpp>

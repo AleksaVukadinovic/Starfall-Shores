@@ -190,7 +190,7 @@ public:
     /**
     * @returns The id of the key.
     */
-    KeyId id() const {
+    [[nodiscard]] KeyId id() const {
         return m_key;
     }
 
@@ -199,20 +199,20 @@ public:
     */
     std::string_view name();
 
-    State state() const {
+    [[nodiscard]] State state() const {
         return m_state;
     }
 
     /**
     *  @returns The @ref State of the key as a string_view.
     */
-    std::string_view state_str() const;
+    [[nodiscard]] std::string_view state_str() const;
 
     /**
     * @brief Shorthand method for checking whether the key is down.
     * @returns True if the key is Pressed or JustPressed
     */
-    bool is_down() const {
+    [[nodiscard]] bool is_down() const {
         return (m_state == State::Pressed || m_state == State::JustPressed);
     }
 
@@ -220,7 +220,7 @@ public:
     * @brief Shorthand method for checking whether the key is up.
     * @returns True if the key is Released or JustReleased
     */
-    bool is_up() const {
+    [[nodiscard]] bool is_up() const {
         return (m_state == State::Released || m_state == State::JustReleased);
     }
 
