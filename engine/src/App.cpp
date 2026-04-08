@@ -33,11 +33,11 @@ void App::engine_setup(int argc, char **argv) {
     util::Configuration::instance()->initialize();
 
     // register engine controllers
-    auto begin = register_controller<EngineControllersBegin>();
-    auto platform = register_controller<platform::PlatformController>();
-    auto graphics = register_controller<graphics::GraphicsController>();
-    auto resources = register_controller<resources::ResourcesController>();
-    auto end = register_controller<EngineControllersEnd>();
+    const auto begin = register_controller<EngineControllersBegin>();
+    const auto platform = register_controller<platform::PlatformController>();
+    const auto graphics = register_controller<graphics::GraphicsController>();
+    const auto resources = register_controller<resources::ResourcesController>();
+    const auto end = register_controller<EngineControllersEnd>();
     begin->before(platform);
     platform->before(graphics);
     graphics->before(resources);
@@ -47,20 +47,20 @@ void App::engine_setup(int argc, char **argv) {
 void App::initialize() {
     // Topologically sort controllers based on their dependency graph formed by before/after methods.
     {
-        auto adjacent_controllers = [](Controller *curr) {
+        auto adjacent_controllers = [](const Controller *curr) {
             return curr->next();
         };
         RG_GUARANTEE(!util::alg::has_cycle(range(m_controllers), adjacent_controllers),
                      "Please make sure that there are no cycles in the controller dependency graph.");
         util::alg::topological_sort(range(m_controllers), adjacent_controllers);
     }
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         spdlog::info("{}::initialize", controller->name());
         controller->initialize();
     }
 }
 
-bool App::loop() {
+bool App::loop() const {
     for (auto controller: m_controllers) {
         if (controller->is_enabled() && !controller->loop()) {
             return false;
@@ -69,7 +69,7 @@ bool App::loop() {
     return true;
 }
 
-void App::poll_events() {
+void App::poll_events() const {
     for (auto controller: m_controllers) {
         // We don't check if the controller is enabled for poll_events because the controller may enable itself in the poll_events if it needs to.
         // For example, a GUIController may enable itself in the poll_events method if a button to enable/disable the GUI was pressed.
@@ -77,7 +77,7 @@ void App::poll_events() {
     }
 }
 
-void App::update() {
+void App::update() const {
     for (auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->update();
@@ -85,18 +85,18 @@ void App::update() {
     }
 }
 
-void App::draw() {
-    for (auto controller: m_controllers) {
+void App::draw() const {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->begin_draw();
         }
     }
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->draw();
         }
     }
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->end_draw();
         }
@@ -106,7 +106,7 @@ void App::draw() {
 void App::terminate() {
     // We terminate controllers in reverse order of their registration to ensure that controllers that depend on other controllers are terminated last.
     for (auto it = m_controllers.rbegin(); it != m_controllers.rend(); ++it) {
-        auto controller = *it;
+        const auto controller = *it;
         controller->terminate();
         spdlog::info("{}::terminate", controller->name());
     }

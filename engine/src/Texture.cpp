@@ -3,7 +3,7 @@
 #include <engine/util/Errors.hpp>
 
 namespace engine::resources {
-std::string_view texture_type_to_string(TextureType type) {
+std::string_view texture_type_to_string(const TextureType type) {
     switch (type) {
         case TextureType::Diffuse: return "Diffuse";
         case TextureType::Specular: return "Specular";
@@ -13,17 +13,17 @@ std::string_view texture_type_to_string(TextureType type) {
     }
 }
 
-void Texture::destroy() {
+void Texture::destroy() const {
     glDeleteTextures(1, &m_id);
 }
 
-void Texture::bind(int32_t sampler) {
+void Texture::bind(const int32_t sampler) const {
     RG_GUARANTEE(sampler >= GL_TEXTURE0 && sampler <= GL_TEXTURE31, "sampler out of range");
     glActiveTexture(sampler);
     glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
-std::string_view Texture::uniform_name_convention(TextureType type) {
+std::string_view Texture::uniform_name_convention(const TextureType type) {
     switch (type) {
         case TextureType::Diffuse: return "texture_diffuse";
         case TextureType::Specular: return "texture_specular";

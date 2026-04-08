@@ -3,8 +3,7 @@
  * @brief Defines the Shader class that serves as an abstraction over OpenGL shaders.
  */
 
-#ifndef MATF_RG_PROJECT_SHADER_HPP
-#define MATF_RG_PROJECT_SHADER_HPP
+#pragma once
 
 #include <engine/util/Utils.hpp>
 #include <string>
@@ -45,7 +44,7 @@ public:
     * @brief Returns the OpenGL ID of the shader program.
     * @returns The OpenGL ID of the shader program.
     */
-    unsigned id() const;
+    [[nodiscard]] unsigned id() const;
 
     /**
     * @brief Sets a boolean uniform value.
@@ -110,24 +109,6 @@ public:
     */
     void set_mat4(const std::string &name, const glm::mat4 &mat) const;
 
-    /**
-    * @brief Returns the name of the shader program by which it can be referenced using the @ref engine::resources::ResourcesController::shader function.
-    * @returns The name of the shader.
-    */
-    const std::string &name() const;
-
-    /**
-    * @brief Returns the source code of the shader program.
-    * @returns The source code of the shader.
-    */
-    const std::string &source() const;
-
-    /**
-    * @brief Returns the path to the source file from which the shader program was compiled.
-    * @returns The path to the source file of the shader program.
-    */
-    const std::filesystem::path &source_path() const;
-
 private:
     /**
     * @brief Constructs a Shader object.
@@ -158,4 +139,4 @@ private:
 };
 } // namespace engine
 
-#endif//MATF_RG_PROJECT_SHADER_HPP
+

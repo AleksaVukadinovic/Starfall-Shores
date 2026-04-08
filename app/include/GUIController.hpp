@@ -1,5 +1,4 @@
-#ifndef GUICONTROLLER_HPP
-#define GUICONTROLLER_HPP
+#pragma once
 #include <engine/core/Engine.hpp>
 
 namespace app {
@@ -17,4 +16,3 @@ namespace app {
         void draw() override;
     };
 }
-#endif //GUICONTROLLER_HPP

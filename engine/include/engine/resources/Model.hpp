@@ -3,8 +3,7 @@
  * @brief Defines the Model class that serves as the interface for model rendering.
 */
 
-#ifndef MATF_RG_PROJECT_MODEL_HPP
-#define MATF_RG_PROJECT_MODEL_HPP
+#pragma once
 #include <engine/resources/Mesh.hpp>
 #include <algorithm>
 #include <utility>
@@ -22,7 +21,7 @@ namespace engine::resources {
         * @brief Draws the model using a given shader by drawing all the meshes in the model.
         * @param shader The shader to use for drawing.
         */  
-        void draw(const Shader *shader);
+        void draw(const Shader *shader) const;
 
         /**
          * @brief Enables blending
@@ -35,7 +34,7 @@ namespace engine::resources {
         * @param shader The shader to use for drawing.
         * @param model_matrices Model matrix for each transition
         */
-        void draw_instanced(const Shader *shader, const std::vector<glm::mat4> &model_matrices);
+        void draw_instanced(const Shader *shader, const std::vector<glm::mat4> &model_matrices) const;
 
         /**
         * @brief Destroys the model in the OpenGL context.
@@ -46,7 +45,7 @@ namespace engine::resources {
         * @brief Returns the meshes in the model.
         * @returns The meshes in the model.
         */  
-        const std::vector<Mesh> &meshes() const {
+        [[nodiscard]] const std::vector<Mesh> &meshes() const {
             return m_meshes;
         }
 
@@ -54,7 +53,7 @@ namespace engine::resources {
         * @brief Returns the path to the model file from which the model was loaded.
         * @returns The path to the model.
         */  
-        const std::filesystem::path &path() const {
+        [[nodiscard]] const std::filesystem::path &path() const {
             return m_path;
         }
 
@@ -62,7 +61,7 @@ namespace engine::resources {
         * @brief Returns the name of the model by which it can be referenced using the @ref engine::resources::ResourcesController::model function.
         * @returns The name of the model.
         */  
-        const std::string &name() const {
+        [[nodiscard]] const std::string &name() const {
             return m_name;
         }
 
@@ -96,4 +95,4 @@ namespace engine::resources {
     };
 } // namespace engine
 
-#endif//MATF_RG_PROJECT_MODEL_HPP
+

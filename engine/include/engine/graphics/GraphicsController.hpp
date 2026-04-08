@@ -3,9 +3,7 @@
  * @brief Defines the GraphicsController class that initializes OpenGL and ImGUI, and provides basic drawing functions.
 */
 
-#ifndef GRAPHICSCONTROLLER_HPP
-#define GRAPHICSCONTROLLER_HPP
-
+#pragma once
 #include <engine/graphics/Camera.hpp>
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformEventObserver.hpp>
@@ -52,14 +50,14 @@ enum ProjectionType {
 * @brief Implements basic drawing methods that the @ref core::App implementation uses.
 *
 * This class should implement all the complex functions needed for drawing an entity in the scene.
-* For example @ref GraphicsController::draw_skybox.
+* For example, @ref GraphicsController::draw_skybox.
 */
 class GraphicsController final : public core::Controller {
 public:
-    std::string_view name() const override;
+    [[nodiscard]] std::string_view name() const override;
 
     /**
-    * @brief Calls internal methods for the beginning of gui drawing. Should be called in pair with @ref GraphicsController::end_gui.
+    * @brief Calls internal methods for the beginning of gui drawing. Should be called in a pair with @ref GraphicsController::end_gui.
     *
     * Example:
     * @code
@@ -77,7 +75,7 @@ public:
     void begin_gui();
 
     /**
-    * @brief Calls internal method for the ending of gui drawing. Should be called in pair with @ref GraphicsController::begin_gui.
+    * @brief Calls internal method for the ending of gui drawing. Should be called in a pair with @ref GraphicsController::begin_gui.
     */
     void end_gui();
 
@@ -95,7 +93,7 @@ public:
     * @returns Return perspective projection by default.
     */
     template<ProjectionType type = Perspective>
-    glm::mat4 projection_matrix() const {
+    [[nodiscard]] glm::mat4 projection_matrix() const {
         if constexpr (type == Perspective) {
             return glm::perspective(m_perspective_params.FOV,
                                     m_perspective_params.Width / m_perspective_params.Height,
@@ -110,7 +108,7 @@ public:
     * @brief Compute the projection matrix.
     * @returns Return perspective projection by default.
     */
-    glm::mat4 projection_matrix(ProjectionType type = Perspective) const {
+    [[nodiscard]] glm::mat4 projection_matrix(ProjectionType type = Perspective) const {
         switch (type) {
             case Perspective: return projection_matrix<Perspective>();
             case Orthographic: return projection_matrix<Orthographic>();
@@ -131,7 +129,7 @@ public:
     * @brief Get the current @ref PerspectiveMatrixParams values.
     * @returns @ref PerspectiveMatrixParams
     */
-    const PerspectiveMatrixParams &perspective_params() const {
+    [[nodiscard]] const PerspectiveMatrixParams &perspective_params() const {
         return m_perspective_params;
     }
 
@@ -149,7 +147,7 @@ public:
     * @brief Get the current @ref OrthographicMatrixParams values.
     * @returns @ref PerspectiveMatrixParams
     */
-    const OrthographicMatrixParams &orthographic_params() const {
+    [[nodiscard]] const OrthographicMatrixParams &orthographic_params() const {
         return m_ortho_params;
     }
 
@@ -159,7 +157,7 @@ private:
     */
     void initialize() override;
 
-    void terminate();
+    void terminate() override;
 
     PerspectiveMatrixParams m_perspective_params{};
     OrthographicMatrixParams m_ortho_params{};
@@ -171,7 +169,7 @@ private:
 
 /**
 * @class GraphicsPlatformEventObserver
-* @brief Observers change in window size in order to update the projection matrix.
+* @brief Observers change in window size to update the projection matrix.
 */
 class GraphicsPlatformEventObserver final : public platform::PlatformEventObserver {
 public:
@@ -184,4 +182,3 @@ private:
     GraphicsController *m_graphics;
 };
 }
-#endif //GRAPHICSCONTROLLER_HPP

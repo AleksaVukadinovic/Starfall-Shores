@@ -3,8 +3,7 @@
  * @brief Defines the Mesh class that serves as the interface for mesh rendering and storing processed assimp scenes.
  */
 
-#ifndef MATF_RG_PROJECT_MESH_HPP
-#define MATF_RG_PROJECT_MESH_HPP
+#pragma once
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -36,19 +35,19 @@ namespace engine::resources {
         * @brief Draws the mesh using a given shader. Called by the @ref Model::draw function to draw all the meshes in the model.
         * @param shader The shader to use for drawing.
         */
-        void draw(const Shader *shader);
+        void draw(const Shader *shader) const;
 
         /**
         * @brief Draws the mesh using a given shader. Called by the @ref Model::draw function to draw all the meshes in the model.
         * @param shader The shader to use for drawing.
         * @param number_of_instances Number of instances that will be drawn
         */
-        void draw_instanced(const Shader *shader, unsigned int number_of_instances);
+        void draw_instanced(const Shader *shader, unsigned int number_of_instances) const;
 
         /**
         * @brief Destroys the mesh in the OpenGL context.
         */
-        void destroy();
+        void destroy() const;
 
     private:
         /**
@@ -67,4 +66,4 @@ namespace engine::resources {
     };
 } // namespace engine
 
-#endif//MATF_RG_PROJECT_MESH_HPP
+

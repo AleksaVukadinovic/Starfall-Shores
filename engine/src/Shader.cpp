@@ -17,47 +17,47 @@ unsigned Shader::id() const {
 }
 
 void Shader::set_bool(const std::string &name, bool value) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform1i, location, static_cast<int>(value));
 }
 
 void Shader::set_int(const std::string &name, int value) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform1i, location, value);
 }
 
 void Shader::set_float(const std::string &name, float value) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform1f, location, value);
 }
 
 void Shader::set_vec2(const std::string &name, const glm::vec2 &value) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform2fv, location, 1, &value[0]);
 }
 
 void Shader::set_vec3(const std::string &name, const glm::vec3 &value) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform3fv, location, 1, &value[0]);
 }
 
 void Shader::set_vec4(const std::string &name, const glm::vec4 &value) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform4fv, location, 1, &value[0]);
 }
 
 void Shader::set_mat2(const std::string &name, const glm::mat2 &mat) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniformMatrix2fv, location, 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::set_mat3(const std::string &name, const glm::mat3 &mat) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniformMatrix3fv, location, 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::set_mat4(const std::string &name, const glm::mat4 &mat) const {
-    uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
+    const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniformMatrix4fv, location, 1, GL_FALSE, &mat[0][0]);
 }
 

@@ -3,9 +3,7 @@
  * @brief Defines the Configuration class that serves as the interface for configuration management.
 */
 
-#ifndef CONFIGURATION_HPP
-#define CONFIGURATION_HPP
-
+#pragma once
 #include <json.hpp>
 
 namespace engine::util {
@@ -63,4 +61,3 @@ private:
     json m_config;
 };
 }
-#endif //CONFIGURATION_HPP

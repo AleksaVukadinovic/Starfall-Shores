@@ -3,9 +3,7 @@
  * @brief Defines the ArgParser class that serves as the interface for argument parsing.
 */
 
-#ifndef ARGPARSER_HPP
-#define ARGPARSER_HPP
-
+#pragma once
 #include <string_view>
 #include <optional>
 #include <string>
@@ -30,7 +28,7 @@ public:
     * @returns The value of the argument.
     */
     template<typename T>
-    std::optional<T> arg(std::string_view name, std::optional<T> default_value = {}) {
+    std::optional<T> arg(const std::string_view name, std::optional<T> default_value = {}) {
         std::string arg_value = get_arg_value(name);
         if (arg_value.empty()) {
             return default_value.has_value() ? default_value.value() : T{};
@@ -48,6 +46,7 @@ public:
             return arg_value;
         } else {
             static_assert(false, "This type is not supported!");
+            return T{};
         }
     }
 
@@ -64,7 +63,7 @@ private:
     * @param arg_name The name of the argument.
     * @returns The string value of the argument.
     */
-    std::string get_arg_value(std::string_view arg_name);
+    std::string get_arg_value(std::string_view arg_name) const;
 
     ArgParser() = default;
 
@@ -72,4 +71,3 @@ private:
     char **m_argv = nullptr;
 };
 }
-#endif //ARGPARSER_HPP

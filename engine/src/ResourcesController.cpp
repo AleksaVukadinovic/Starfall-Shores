@@ -21,7 +21,7 @@ void ResourcesController::initialize() {
 
 void ResourcesController::load_shaders() {
     if (!exists(m_shaders_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the shaders from", m_shaders_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the shaders from", m_shaders_path.string());
         return;
     }
     for (const auto &shader_path: std::filesystem::directory_iterator(m_shaders_path)) {
@@ -34,7 +34,7 @@ void ResourcesController::load_shaders() {
 
 void ResourcesController::load_models() {
     if (!exists(m_models_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the models from", m_models_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the models from", m_models_path.string());
         return;
     }
     const auto &config = util::Configuration::config();
@@ -49,7 +49,7 @@ void ResourcesController::load_models() {
 
 void ResourcesController::load_textures() {
     if (!exists(m_textures_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
         return;
     }
     for (const auto &texture_entry: std::filesystem::directory_iterator(m_textures_path)) {
@@ -61,7 +61,7 @@ void ResourcesController::load_textures() {
 
 void ResourcesController::load_skyboxes() {
     if (!exists(m_skyboxes_path)) {
-        spdlog::info("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string());
+        spdlog::error("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string());
         return;
     }
     for (const auto &sky_boxes_entry: std::filesystem::directory_iterator(m_skyboxes_path)) {
@@ -93,9 +93,9 @@ private:
 
     void process_mesh(aiMesh *mesh);
 
-    std::vector<Texture *> process_materials(const aiMaterial *material);
+    std::vector<Texture *> process_materials(const aiMaterial *material) const;
 
-    void process_material_type(std::vector<Texture *> &textures, const aiMaterial *material, aiTextureType type);
+    void process_material_type(std::vector<Texture *> &textures, const aiMaterial *material, aiTextureType type) const;
 
     static TextureType assimp_texture_type_to_engine(aiTextureType type);
 
@@ -145,11 +145,11 @@ Model *ResourcesController::model(
 
 Texture *ResourcesController::texture(const std::string &name,
                                       const std::filesystem::path &path,
-                                      TextureType type, bool flip_uvs) {
+                                      TextureType texture_type, const bool flip_uvs) {
     auto &result = m_textures[name];
     if (!result) {
         spdlog::info("load_texture(path={})", path.string());
-        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture(path, flip_uvs), type, path,
+        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture(path, flip_uvs), texture_type, path,
                                                    path.stem()));
     }
     return result.get();
@@ -157,7 +157,7 @@ Texture *ResourcesController::texture(const std::string &name,
 
 Skybox *ResourcesController::skybox(const std::string &name,
                                     const std::filesystem::path &path,
-                                    bool flip_uvs) {
+                                    const bool flip_uvs) {
     auto &result = m_sky_boxes[name];
     if (!result) {
         spdlog::info("load_skybox(path={})", path.string());
@@ -185,7 +185,7 @@ std::vector<Mesh> AssimpSceneProcessor::process_meshes() {
 
 void AssimpSceneProcessor::process_node(const aiNode *node) {
     for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
-        auto mesh = m_scene->mMeshes[node->mMeshes[i]];
+        const auto mesh = m_scene->mMeshes[node->mMeshes[i]];
         process_mesh(mesh);
     }
     for (uint32_t i = 0; i < node->mNumChildren; ++i) {
@@ -251,24 +251,24 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
     m_meshes.emplace_back(Mesh(vertices, indices, std::move(textures)));
 }
 
-std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) {
+std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) const {
     std::vector<Texture *> textures;
-    auto ai_texture_types = {
+    const auto ai_texture_types = {
             aiTextureType_DIFFUSE,
             aiTextureType_SPECULAR,
             aiTextureType_NORMALS,
             aiTextureType_HEIGHT,
     };
 
-    for (auto ai_texture_type: ai_texture_types) {
+    for (const auto ai_texture_type: ai_texture_types) {
         process_material_type(textures, material, ai_texture_type);
     }
     return textures;
 }
 
 void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &textures, const aiMaterial *material,
-                                                 aiTextureType type) {
-    auto material_count = material->GetTextureCount(type);
+                                                 const aiTextureType type) const {
+    const auto material_count = material->GetTextureCount(type);
     for (uint32_t i = 0; i < material_count; ++i) {
         aiString ai_texture_path_string;
         material->GetTexture(type, i, &ai_texture_path_string);
@@ -279,7 +279,7 @@ void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &texture
     }
 }
 
-TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(aiTextureType type) {
+TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(const aiTextureType type) {
     switch (type) {
         case aiTextureType_DIFFUSE: return TextureType::Diffuse;
         case aiTextureType_SPECULAR: return TextureType::Specular;

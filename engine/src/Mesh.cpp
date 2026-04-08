@@ -45,7 +45,7 @@ namespace engine::resources {
         m_textures    = std::move(textures);
     }
 
-    void Mesh::draw(const Shader *shader) {
+    void Mesh::draw(const Shader *shader) const {
         std::unordered_map<std::string_view, uint32_t> counts;
         std::string uniform_name;
         uniform_name.reserve(32);
@@ -64,7 +64,7 @@ namespace engine::resources {
         glBindVertexArray(0);
     }
 
-    void Mesh::draw_instanced(const Shader *shader, const unsigned int number_of_instances) {
+    void Mesh::draw_instanced(const Shader *shader, const unsigned int number_of_instances) const {
         std::unordered_map<std::string_view, uint32_t> counts;
         std::string uniform_name;
         uniform_name.reserve(32);
@@ -83,7 +83,7 @@ namespace engine::resources {
         CHECKED_GL_CALL(glBindVertexArray, 0);
     }
 
-    void Mesh::destroy() {
+    void Mesh::destroy() const {
         glDeleteVertexArrays(1, &m_vao);
     }
 

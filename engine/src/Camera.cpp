@@ -18,8 +18,8 @@ glm::mat4 Camera::view_matrix() const {
 }
 
 // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-void Camera::move_camera(Movement direction, float delta_time) {
-    float velocity = MovementSpeed * delta_time;
+void Camera::move_camera(const Movement direction, const float delta_time) {
+    const float velocity = MovementSpeed * delta_time;
     if (direction == FORWARD) {
         Position += Front * velocity;
     }
@@ -64,8 +64,8 @@ void Camera::rotate_camera(float x_offset, float y_offset, bool constrain_pitch)
 }
 
 // processes input received from a mouse scroll-wheel event. Only requires to be input on the vertical wheel-axis
-void Camera::zoom(float offset) {
-    Zoom -= (float) offset;
+void Camera::zoom(const float offset) {
+    Zoom -= offset;
     if (Zoom < 1.0f) {
         Zoom = 1.0f;
     }
@@ -84,7 +84,7 @@ void Camera::update_camera_vectors() {
     Front = glm::normalize(front);
     // also re-calculate the Right and Up vector
     Right = glm::normalize(glm::cross(Front, WorldUp));
-    // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+    // normalize the vectors, because their length gets closer to 0 the more you look up or down, which results in slower movement.
     Up = glm::normalize(glm::cross(Right, Front));
 }
 }

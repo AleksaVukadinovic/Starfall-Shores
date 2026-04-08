@@ -3,21 +3,19 @@
  * @brief Defines the Camera class for rendering.
  */
 
-#ifndef CAMERA_H
-#define CAMERA_H
-
+#pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace engine::graphics {
 /**
  *  @class Camera
- *  @brief Camera processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL.
+ *  @brief Camera processes input and calculates the corresponding Euler Angles, Vectors, and Matrices for use in OpenGL.
  */
 class Camera {
 public:
     /**
-     * @brief  Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
+     * @brief  Defines several possible options for camera movement. Used as an abstraction to stay away from window-system specific input methods
      */
     enum Movement {
         None,
@@ -68,12 +66,12 @@ public:
     float Pitch{};
 
     /**
-    * @brief Used in @ref Camera::move_camera. The higher the value the faster the camera will move on keyboard action.
+    * @brief Used in @ref Camera::move_camera. The higher the value, the faster the camera will move on keyboard action.
     */
     float MovementSpeed{};
 
     /**
-    * @brief Used in @ref Camera::rotate_camera. The higher the value the faster the camera will move on mouse action.
+    * @brief Used in @ref Camera::rotate_camera. The higher the value, the faster the camera will move on mouse action.
     */
     float MouseSensitivity{};
 
@@ -91,10 +89,10 @@ public:
     /**
      * @returns  returns the view matrix calculated using Euler Angles and the LookAt Matrix.
      */
-    glm::mat4 view_matrix() const;
+    [[nodiscard]] glm::mat4 view_matrix() const;
 
     /**
-     * @brief Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems).
+     * @brief Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera-defined ENUM (to abstract it from windowing systems).
      */
     void move_camera(Movement direction, float delta_time);
 
@@ -115,7 +113,6 @@ private:
     void update_camera_vectors();
 };
 }
-#endif
 
 
 

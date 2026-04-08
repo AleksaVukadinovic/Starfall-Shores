@@ -1,4 +1,4 @@
-set(VENV_PYTHON "${CMAKE_SOURCE_DIR}/.venv/bin/python")
+set(VENV_PYTHON "${CMAKE_SOURCE_DIR}/venv/bin/python")
 
 if (EXISTS "${VENV_PYTHON}")
     message(STATUS "Using Python from virtual environment: ${VENV_PYTHON}")

@@ -3,9 +3,7 @@
  * @brief Defines  Error, UserError, and EngineError classes, along with macros for error handling.
 */
 
-#ifndef MATF_RG_PROJECT_ERRORS_HPP
-#define MATF_RG_PROJECT_ERRORS_HPP
-
+#pragma once
 #include <source_location>
 #include <string>
 #include <utility>
@@ -35,7 +33,7 @@ public:
     * @brief Get the error message.
     * @returns The error message.
     */
-    const std::string &message() const {
+    [[nodiscard]] const std::string &message() const {
         return m_message;
     }
 
@@ -43,7 +41,7 @@ public:
     * @brief Get the location of the error.
     * @returns The location of the error.
     */
-    std::source_location location() const {
+    [[nodiscard]] std::source_location location() const {
         return m_location;
     }
 
@@ -51,7 +49,7 @@ public:
     * @brief Get the error report. You can override this method in derived classes to provide a more detailed error report.
     * @returns The error report.
     */
-    virtual std::string report() const {
+    [[nodiscard]] virtual std::string report() const {
         return m_message;
     };
 
@@ -123,7 +121,7 @@ public:
     */
     EngineError(Type error_type, std::string message,
                 std::source_location location = std::source_location::current())
-            : Error(std::move(message), std::move(location))
+            : Error(std::move(message), location)
               , m_error(error_type) {
     }
 
@@ -131,7 +129,7 @@ public:
     * @brief Get the error report.
     * @returns The error report.
     */
-    std::string report() const override;
+    [[nodiscard]] std::string report() const override;
 
 private:
     Type m_error;
@@ -198,5 +196,3 @@ public:
     do {                                                                                                               \
         throw engine::util::EngineError(type, std::format(msg, ##__VA_ARGS__), std::source_location::current()); \
     } while(0)
-
-#endif//MATF_RG_PROJECT_ERRORS_HPP

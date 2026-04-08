@@ -3,8 +3,7 @@
  * @brief Defines the ResourcesController class  that manages resources such as models, textures, shaders, and skyboxes.
 */
 
-#ifndef MATF_RG_PROJECT_RESOURCES_CONTROLLER_HPP
-#define MATF_RG_PROJECT_RESOURCES_CONTROLLER_HPP
+#pragma once
 
 #include <engine/core/Controller.hpp>
 #include <engine/resources/Model.hpp>
@@ -20,7 +19,7 @@ namespace engine::resources {
 */
 class ResourcesController final : public core::Controller {
 public:
-    std::string_view name() const override {
+    [[nodiscard]] std::string_view name() const override {
         return "ResourcesController";
     }
 
@@ -34,10 +33,10 @@ public:
     /**
     * @brief Retrieves the @ref Texture with a given name. You are not supposed to call `delete` on this pointer.
     *
-    * Other params, except name, are optional. If not provided the function will search for a texture
+    * Other params, except name, are optional. If not provided, the function will search for a texture
     * in the: "resources/textures".
     * @param name of the texture without the extension.
-    * @param path form which to load the texture.
+    * @param path form that to load the texture.
     * @param texture_type
     * @param flip_uvs flip the uvs on load if set to true
     * @returns The pointer to the @ref Texture associated with the `name`.
@@ -50,11 +49,11 @@ public:
     /**
     * @brief Retrieves the @ref Skybox with a given name. You are not supposed to call `delete` on this pointer.
     *
-    * Other params, except name, are optional. If not provided the function will search for a skybox
+    * Other params, except name, are optional. If not provided, the function will search for a skybox
     * in the: "resources/skyboxes".
     * Images for the sides of the skybox cube should be named: left.jpg, right.jpg, top.jpg, bottom.jpg, front.jpg, back.jpg (any supported image extension).
     * @param name of the skybox directory that contains 6 images for each side of the cube.
-    * @param path form which to load the texture.
+    * @param path form that to load the texture.
     * @param flip_uvs flip the uvs on load if set to true
     * @returns The pointer to the @ref Skybox associated with the `name`.
     */
@@ -119,4 +118,4 @@ private:
 };
 } // namespace engine
 
-#endif//MATF_RG_PROJECT_RESOURCES_CONTROLLER_HPP
+

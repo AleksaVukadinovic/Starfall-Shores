@@ -41,10 +41,10 @@ namespace app {
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         platform->set_enable_cursor(false);
         m_is_day         = true;
-        camera->Front    = glm::vec3(0.77, -0.08, -0.6);
         camera->Position = glm::vec3(5, 27, 17);
         camera->Yaw      = -38;
         camera->Pitch    = -5;
+        camera->rotate_camera(0, 0);
     }
 
     bool MainController::loop() {
@@ -437,9 +437,9 @@ namespace app {
         const auto shader = get<engine::resources::ResourcesController>()->shader("skybox");
         engine::resources::Skybox *skybox_cube;
         if (m_is_day)
-            skybox_cube = get<engine::resources::ResourcesController>()->skybox(active_daytime_skybox);
+            skybox_cube = get<engine::resources::ResourcesController>()->skybox(m_active_daytime_skybox);
         else
-            skybox_cube = get<engine::resources::ResourcesController>()->skybox(active_nighttime_skybox);
+            skybox_cube = get<engine::resources::ResourcesController>()->skybox(m_active_nighttime_skybox);
         get<engine::graphics::GraphicsController>()->draw_skybox(shader, skybox_cube);
     }
 
@@ -501,7 +501,7 @@ namespace app {
             const double current_time = engine::platform::PlatformController::get_time();
             const double elapsed_time = current_time - m_day_change_timer;
 
-            if (const float transition_progress = static_cast<float>(elapsed_time / DAY_CHANGE_DELAY);
+            if (const auto transition_progress = static_cast<float>(elapsed_time / DAY_CHANGE_DELAY);
                 transition_progress >= 1.0f) {
                 m_is_day = !m_is_day;
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;

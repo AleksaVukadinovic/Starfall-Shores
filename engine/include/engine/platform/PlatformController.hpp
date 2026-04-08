@@ -3,9 +3,7 @@
  * @brief Defines the PlatformController class that serves as the interface for platform-specific functionality, such as input handling and window management.
  */
 
-#ifndef MATF_RG_PROJECT_PLATFORM_H
-#define MATF_RG_PROJECT_PLATFORM_H
-
+#pragma once
 #include <engine/core/Controller.hpp>
 #include <memory>
 #include <vector>
@@ -49,25 +47,25 @@ namespace engine::platform {
         * @param key An @ref KeyId for the key
         * @returns The state of the key in the current frame
         */
-        const Key &key(KeyId key) const;
+        [[nodiscard]] const Key &key(KeyId key) const;
 
         /**
         * @brief Get the state of the @ref MousePosition in the current frame
         * @returns @ref MousePosition for the current frame.
         */
-        const MousePosition &mouse() const;
+        [[nodiscard]] const MousePosition &mouse() const;
 
         /**
         * @brief Get the name of the Controller
         * @returns "PlatformController"
         */
-        std::string_view name() const override;
+        [[nodiscard]] std::string_view name() const override;
 
         /**
         * @brief Get the window
         * @returns @ref Window
         */
-        const Window *window() const {
+        [[nodiscard]] const Window *window() const {
             return &m_window;
         }
 
@@ -81,7 +79,7 @@ namespace engine::platform {
         * @brief Get @ref FrameTime for the previous frame. Updated in during @ref core::App::loop
         * @returns @ref FrameTime
         */
-        const FrameTime &frame_time() const {
+        [[nodiscard]] const FrameTime &frame_time() const {
             return m_frame_time;
         }
 
@@ -89,7 +87,7 @@ namespace engine::platform {
         * @brief Get elapsed time for the previous frame.
         *
         */
-        float dt() const {
+        [[nodiscard]] float dt() const {
             return m_frame_time.dt;
         }
 
@@ -155,11 +153,9 @@ namespace engine::platform {
 
         void poll_events() override;
 
-        void update_mouse();
-
         void update_key(Key &key_data) const;
 
-        FrameTime m_frame_time;
+        FrameTime m_frame_time = {};
         Window m_window;
         std::vector<Key> m_keys;
         std::vector<std::unique_ptr<PlatformEventObserver> > m_platform_event_observers;
@@ -170,5 +166,3 @@ namespace engine::platform {
         bool m_cursor_enabled = true;
     };
 } // namespace engine
-
-#endif//MATF_RG_PROJECT_PLATFORM_H
