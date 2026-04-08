@@ -76,6 +76,11 @@ namespace engine::platform {
         glfwSetMouseButtonCallback(m_window.handle_(), glfw_mouse_button_callback);
         glfwSetWindowCloseCallback(m_window.handle_(), glfw_window_close_callback);
 
+        double init_mouse_x, init_mouse_y;
+        glfwGetCursorPos(handle, &init_mouse_x, &init_mouse_y);
+        g_mouse_position.x = init_mouse_x;
+        g_mouse_position.y = init_mouse_y;
+
         int major, minor, revision;
         glfwGetVersion(&major, &minor, &revision);
         spdlog::info("Platform[GLFW {}.{}.{}]", major, minor, revision);
