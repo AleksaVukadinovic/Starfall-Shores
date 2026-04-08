@@ -3,8 +3,7 @@
  * @brief Defines the Controller class that serves as the base class for all controllers in the engine.
  */
 
-#ifndef MATF_RG_PROJECT_CONTROLLER_HPP
-#define MATF_RG_PROJECT_CONTROLLER_HPP
+#pragma once
 
 #include <engine/util/Errors.hpp>
 #include <memory>
@@ -243,4 +242,3 @@ public:
 };
 } // namespace engine
 
-#endif//MATF_RG_PROJECT_CONTROLLER_HPP

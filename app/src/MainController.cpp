@@ -501,7 +501,7 @@ namespace app {
             const double current_time = engine::platform::PlatformController::get_time();
             const double elapsed_time = current_time - m_day_change_timer;
 
-            if (const float transition_progress = static_cast<float>(elapsed_time / DAY_CHANGE_DELAY);
+            if (const auto transition_progress = static_cast<float>(elapsed_time / DAY_CHANGE_DELAY);
                 transition_progress >= 1.0f) {
                 m_is_day = !m_is_day;
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;

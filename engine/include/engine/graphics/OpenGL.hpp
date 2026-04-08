@@ -3,10 +3,7 @@
  * @brief Defines the OpenGL class that serves as the interface for OpenGL.
  */
 
-#ifndef OPENGL_HPP
-#define OPENGL_HPP
-
-#include <cstdint>
+#pragma once
 #include <filesystem>
 #include <engine/resources/Shader.hpp>
 
@@ -149,4 +146,3 @@ private:
     static void assert_no_error(std::source_location location);
 };
 }
-#endif //OPENGL_HPP

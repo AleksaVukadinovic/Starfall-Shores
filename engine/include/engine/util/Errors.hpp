@@ -3,9 +3,7 @@
  * @brief Defines  Error, UserError, and EngineError classes, along with macros for error handling.
 */
 
-#ifndef MATF_RG_PROJECT_ERRORS_HPP
-#define MATF_RG_PROJECT_ERRORS_HPP
-
+#pragma once
 #include <source_location>
 #include <string>
 #include <utility>
@@ -198,5 +196,3 @@ public:
     do {                                                                                                               \
         throw engine::util::EngineError(type, std::format(msg, ##__VA_ARGS__), std::source_location::current()); \
     } while(0)
-
-#endif//MATF_RG_PROJECT_ERRORS_HPP

@@ -3,8 +3,7 @@
  * @brief Includes all the engine headers.
  */
 
-#ifndef MATF_RG_PROJECT_ENGINE_HPP
-#define MATF_RG_PROJECT_ENGINE_HPP
+#pragma once
 
 #include <engine/core/App.hpp>
 
@@ -29,5 +28,3 @@
 #include <engine/resources/Shader.hpp>
 #include <engine/resources/Texture.hpp>
 #include <engine/resources/Skybox.hpp>
-
-#endif//MATF_RG_PROJECT_ENGINE_HPP

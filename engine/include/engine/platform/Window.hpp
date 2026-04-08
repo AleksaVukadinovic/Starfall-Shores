@@ -3,9 +3,7 @@
  * @brief Defines the Window class  that provides basic window properties.
 */
 
-#ifndef WINDOW_HPP
-#define WINDOW_HPP
-
+#pragma once
 #include <string>
 
 struct GLFWwindow;
@@ -21,21 +19,21 @@ public:
     /**
     * @brief Get the height of the window.
     */
-    int height() const {
+    [[nodiscard]] int height() const {
         return m_height;
     }
 
     /**
     * @brief Get the width of the window.
     */
-    int width() const {
+    [[nodiscard]] int width() const {
         return m_width;
     }
 
     /**
     * @brief Get the title of the window.
     */
-    const std::string &title() const {
+    [[nodiscard]] const std::string &title() const {
         return m_title;
     }
 
@@ -44,7 +42,7 @@ public:
     * @returns An opaque pointer to the GLFWwindow. You are not supposed to use this return value
     * outside the Engine.
     */
-    GLFWwindow *handle_() const {
+    [[nodiscard]] GLFWwindow *handle_() const {
         return m_handle;
     }
 
@@ -63,4 +61,3 @@ private:
     }
 };
 }
-#endif //WINDOW_HPP

@@ -3,9 +3,7 @@
  * @brief Defines utility functions, macros, algorithms, and data structures.
  */
 
-#ifndef MATF_RG_PROJECT_UTILS_HPP
-#define MATF_RG_PROJECT_UTILS_HPP
-
+#pragma once
 #include <format>
 #include <source_location>
 #include <vector>
@@ -208,5 +206,3 @@ bool has_cycle(It first, It last, Adjacent adjacent, OutputIt cycle_output = nul
 namespace ds {
 }
 } // namespace engine
-
-#endif//MATF_RG_PROJECT_UTILS_HPP

@@ -3,8 +3,7 @@
  * @brief Defines the Texture class that serves as an abstraction over OpenGL textures.
 */
 
-#ifndef MATF_RG_PROJECT_TEXTURE_HPP
-#define MATF_RG_PROJECT_TEXTURE_HPP
+#pragma once
 
 #include <string_view>
 #include <filesystem>
@@ -113,4 +112,4 @@ private:
     std::string m_name{};
 };
 } // namespace engine
-#endif//MATF_RG_PROJECT_TEXTURE_HPP
+

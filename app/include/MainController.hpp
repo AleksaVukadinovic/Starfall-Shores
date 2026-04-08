@@ -1,5 +1,4 @@
-#ifndef MAINCONTROLLER_HPP
-#define MAINCONTROLLER_HPP
+#pragma once
 #include <spdlog/spdlog.h>
 #include <engine/graphics/GraphicsController.hpp>
 
@@ -80,5 +79,3 @@ namespace app {
                                          const engine::graphics::GraphicsController *graphics) const;
     };
 }
-
-#endif //MAINCONTROLLER_HPP

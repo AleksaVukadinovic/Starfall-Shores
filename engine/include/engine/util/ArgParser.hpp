@@ -3,9 +3,7 @@
  * @brief Defines the ArgParser class that serves as the interface for argument parsing.
 */
 
-#ifndef ARGPARSER_HPP
-#define ARGPARSER_HPP
-
+#pragma once
 #include <string_view>
 #include <optional>
 #include <string>
@@ -72,4 +70,3 @@ private:
     char **m_argv = nullptr;
 };
 }
-#endif //ARGPARSER_HPP

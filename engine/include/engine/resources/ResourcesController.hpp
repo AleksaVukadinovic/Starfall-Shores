@@ -3,8 +3,7 @@
  * @brief Defines the ResourcesController class  that manages resources such as models, textures, shaders, and skyboxes.
 */
 
-#ifndef MATF_RG_PROJECT_RESOURCES_CONTROLLER_HPP
-#define MATF_RG_PROJECT_RESOURCES_CONTROLLER_HPP
+#pragma once
 
 #include <engine/core/Controller.hpp>
 #include <engine/resources/Model.hpp>
@@ -119,4 +118,4 @@ private:
 };
 } // namespace engine
 
-#endif//MATF_RG_PROJECT_RESOURCES_CONTROLLER_HPP
+

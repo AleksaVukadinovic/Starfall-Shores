@@ -3,9 +3,7 @@
  * @brief Defines the Input class that serves as the interface handling user input via keyboard and mouse.
  */
 
-#ifndef INPUT_HPP
-#define INPUT_HPP
-
+#pragma once
 #include <string_view>
 
 namespace engine::platform {
@@ -259,4 +257,3 @@ struct MousePosition {
     float scroll;
 };
 }
-#endif //INPUT_HPP

@@ -1,5 +1,4 @@
-#ifndef BLOOMCONTROLLER_HPP
-#define BLOOMCONTROLLER_HPP
+#pragma once
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformController.hpp>
 
@@ -38,5 +37,3 @@ namespace engine::graphics {
         void render_quad();
     };
 }
-
-#endif //BLOOMCONTROLLER_HPP

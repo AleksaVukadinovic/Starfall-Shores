@@ -3,8 +3,7 @@
  * @brief Defines the ShaderCompiler class that serves as the interface for shader compilation.
 */
 
-#ifndef SHADER_COMPILER_HPP
-#define SHADER_COMPILER_HPP
+#pragma once
 
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/resources/Shader.hpp>
@@ -101,4 +100,4 @@ private:
     std::string m_sources;
 };
 }
-#endif //SHADER_COMPILER_HPP
+

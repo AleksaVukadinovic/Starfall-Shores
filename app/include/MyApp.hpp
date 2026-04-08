@@ -1,5 +1,4 @@
-#ifndef MYAPP_HPP
-#define MYAPP_HPP
+#pragma once
 #include <engine/core/App.hpp>
 
 namespace app {
@@ -7,5 +6,3 @@ namespace app {
         void app_setup() override;
     };
 }
-
-#endif //MYAPP_HPP

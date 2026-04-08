@@ -3,9 +3,7 @@
  * @brief Defines the Camera class for rendering.
  */
 
-#ifndef CAMERA_H
-#define CAMERA_H
-
+#pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -115,7 +113,6 @@ private:
     void update_camera_vectors();
 };
 }
-#endif
 
 
 

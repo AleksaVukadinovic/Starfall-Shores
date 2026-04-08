@@ -3,9 +3,7 @@
  * @brief Defines the PlatformEventObserver class that serves as the interface for platform-specific event observers.
  */
 
-#ifndef PLATFORMEVENTOBSERVER_HPP
-#define PLATFORMEVENTOBSERVER_HPP
-
+#pragma once
 #include <engine/platform/Input.hpp>
 
 namespace engine::platform {
@@ -40,4 +38,3 @@ public:
     virtual ~PlatformEventObserver() = default;
 };
 }
-#endif //PLATFORMEVENTOBSERVER_HPP

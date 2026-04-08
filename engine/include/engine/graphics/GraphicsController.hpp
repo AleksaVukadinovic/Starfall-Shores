@@ -3,9 +3,7 @@
  * @brief Defines the GraphicsController class that initializes OpenGL and ImGUI, and provides basic drawing functions.
 */
 
-#ifndef GRAPHICSCONTROLLER_HPP
-#define GRAPHICSCONTROLLER_HPP
-
+#pragma once
 #include <engine/graphics/Camera.hpp>
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformEventObserver.hpp>
@@ -184,4 +182,3 @@ private:
     GraphicsController *m_graphics;
 };
 }
-#endif //GRAPHICSCONTROLLER_HPP

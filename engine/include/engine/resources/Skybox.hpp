@@ -3,8 +3,7 @@
  * @brief Defines the Skybox class that serves as the interface for skybox rendering.
 */
 
-#ifndef SKYBOX_HPP
-#define SKYBOX_HPP
+#pragma once
 
 #include <cstdint>
 #include <filesystem>
@@ -64,4 +63,4 @@ private:
 };
 }
 
-#endif //SKYBOX_HPP
+

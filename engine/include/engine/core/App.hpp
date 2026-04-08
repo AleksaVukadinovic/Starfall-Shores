@@ -3,9 +3,7 @@
  * @brief Defines the base App class that serves as the application core structure and the entry point.
  */
 
-#ifndef APP_H
-#define APP_H
-
+#pragma once
 namespace engine::util {
 class Error;
 }
@@ -170,6 +168,4 @@ private:
     std::vector<Controller *> m_controllers;
 };
 } // namespace engine
-
-#endif//APP_H
 

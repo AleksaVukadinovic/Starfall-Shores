@@ -145,11 +145,11 @@ Model *ResourcesController::model(
 
 Texture *ResourcesController::texture(const std::string &name,
                                       const std::filesystem::path &path,
-                                      TextureType type, bool flip_uvs) {
+                                      TextureType texture_type, const bool flip_uvs) {
     auto &result = m_textures[name];
     if (!result) {
         spdlog::info("load_texture(path={})", path.string());
-        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture(path, flip_uvs), type, path,
+        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture(path, flip_uvs), texture_type, path,
                                                    path.stem()));
     }
     return result.get();
@@ -157,7 +157,7 @@ Texture *ResourcesController::texture(const std::string &name,
 
 Skybox *ResourcesController::skybox(const std::string &name,
                                     const std::filesystem::path &path,
-                                    bool flip_uvs) {
+                                    const bool flip_uvs) {
     auto &result = m_sky_boxes[name];
     if (!result) {
         spdlog::info("load_skybox(path={})", path.string());
@@ -185,7 +185,7 @@ std::vector<Mesh> AssimpSceneProcessor::process_meshes() {
 
 void AssimpSceneProcessor::process_node(const aiNode *node) {
     for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
-        auto mesh = m_scene->mMeshes[node->mMeshes[i]];
+        const auto mesh = m_scene->mMeshes[node->mMeshes[i]];
         process_mesh(mesh);
     }
     for (uint32_t i = 0; i < node->mNumChildren; ++i) {
@@ -253,7 +253,7 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
 
 std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) {
     std::vector<Texture *> textures;
-    auto ai_texture_types = {
+    const auto ai_texture_types = {
             aiTextureType_DIFFUSE,
             aiTextureType_SPECULAR,
             aiTextureType_NORMALS,
@@ -267,7 +267,7 @@ std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial 
 }
 
 void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &textures, const aiMaterial *material,
-                                                 aiTextureType type) {
+                                                 const aiTextureType type) {
     auto material_count = material->GetTextureCount(type);
     for (uint32_t i = 0; i < material_count; ++i) {
         aiString ai_texture_path_string;
@@ -279,7 +279,7 @@ void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &texture
     }
 }
 
-TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(aiTextureType type) {
+TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(const aiTextureType type) {
     switch (type) {
         case aiTextureType_DIFFUSE: return TextureType::Diffuse;
         case aiTextureType_SPECULAR: return TextureType::Specular;
