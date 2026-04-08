@@ -26,14 +26,14 @@ namespace engine::graphics {
         void terminate() override;
 
     private:
-        unsigned int m_pingpong_FBO[2]          = {};
+        unsigned int m_pingpong_fbo[2]          = {};
         unsigned int m_pingpong_colorbuffers[2] = {};
-        unsigned int m_hdr_FBO                  = 0;
+        unsigned int m_hdr_fbo                  = 0;
         unsigned int m_color_buffers[2]         = {};
         unsigned int m_scr_width                  = 0;
         unsigned int m_scr_height                 = 0;
-        unsigned int m_quadVAO                  = 0;
-        unsigned int m_quadVBO                  = 0;
+        unsigned int m_quad_vao                  = 0;
+        unsigned int m_quad_vbo                  = 0;
 
         void render_quad();
     };

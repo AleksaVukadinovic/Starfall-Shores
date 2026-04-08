@@ -18,3 +18,4 @@ _deps
 /docs/
 engine/test/app/test-app
 app/APP
+venv/

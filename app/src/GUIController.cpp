@@ -5,7 +5,6 @@
 #include <GUIController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <MainController.hpp>
-#include <iostream>
 
 namespace app {
 

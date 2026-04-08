@@ -8,15 +8,15 @@ namespace engine::graphics {
 
     void BloomController::render_quad() {
         {
-            if (m_quadVAO == 0) {
+            if (m_quad_vao == 0) {
                 float quadVertices[] = {
                         -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
                         1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
                 };
-                CHECKED_GL_CALL(glGenVertexArrays, 1, &m_quadVAO);
-                CHECKED_GL_CALL(glGenBuffers, 1, &m_quadVBO);
-                CHECKED_GL_CALL(glBindVertexArray, m_quadVAO);
-                CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_quadVBO);
+                CHECKED_GL_CALL(glGenVertexArrays, 1, &m_quad_vao);
+                CHECKED_GL_CALL(glGenBuffers, 1, &m_quad_vbo);
+                CHECKED_GL_CALL(glBindVertexArray, m_quad_vao);
+                CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_quad_vbo);
                 CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
                 CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
                 CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
@@ -24,7 +24,7 @@ namespace engine::graphics {
                 CHECKED_GL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                                 (void *) (3 * sizeof(float)));
             }
-            CHECKED_GL_CALL(glBindVertexArray, m_quadVAO);
+            CHECKED_GL_CALL(glBindVertexArray, m_quad_vao);
             CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
             CHECKED_GL_CALL(glBindVertexArray, 0);
 
@@ -32,8 +32,8 @@ namespace engine::graphics {
     }
 
     void BloomController::bloom_setup() {
-        CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
-        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
+        CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_fbo);
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_color_buffers);
 
         if (m_scr_width == 0)
@@ -66,11 +66,11 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glDrawBuffers, 2, attachments);
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 
-        CHECKED_GL_CALL(glGenFramebuffers, 2, m_pingpong_FBO);
+        CHECKED_GL_CALL(glGenFramebuffers, 2, m_pingpong_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_pingpong_colorbuffers);
 
         for (unsigned int i = 0; i < 2; ++i) {
-            CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_pingpong_FBO[i]);
+            CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_pingpong_fbo[i]);
             CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_pingpong_colorbuffers[i]);
             CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, m_scr_width, m_scr_height, 0, GL_RGBA, GL_FLOAT,
                             nullptr);
@@ -108,7 +108,7 @@ namespace engine::graphics {
         blur_shader->use();
         const unsigned int amount = bloom_passes;
         for (unsigned int i = 0; i < amount; ++i) {
-            CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_pingpong_FBO[horizontal]);
+            CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_pingpong_fbo[horizontal]);
             blur_shader->set_int("horizontal", horizontal);
             CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
             CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D,
@@ -145,7 +145,7 @@ namespace engine::graphics {
         else
             m_scr_height = get<platform::PlatformController>()->window()->height();
 
-        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
         CHECKED_GL_CALL(glViewport, 0, 0, m_scr_width, m_scr_height);
         CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -156,20 +156,20 @@ namespace engine::graphics {
     }
 
     void BloomController::terminate() {
-        CHECKED_GL_CALL(glDeleteFramebuffers, 1, &m_hdr_FBO);
-        CHECKED_GL_CALL(glDeleteFramebuffers, 2, m_pingpong_FBO);
+        CHECKED_GL_CALL(glDeleteFramebuffers, 1, &m_hdr_fbo);
+        CHECKED_GL_CALL(glDeleteFramebuffers, 2, m_pingpong_fbo);
 
         CHECKED_GL_CALL(glDeleteTextures, 2, m_color_buffers);
         CHECKED_GL_CALL(glDeleteTextures, 2, m_pingpong_colorbuffers);
 
-        if (m_quadVAO != 0) {
-            CHECKED_GL_CALL(glDeleteVertexArrays, 1, &m_quadVAO);
-            m_quadVAO = 0;
+        if (m_quad_vao != 0) {
+            CHECKED_GL_CALL(glDeleteVertexArrays, 1, &m_quad_vao);
+            m_quad_vao = 0;
         }
 
-        if (m_quadVBO != 0) {
-            CHECKED_GL_CALL(glDeleteBuffers, 1, &m_quadVBO);
-            m_quadVBO = 0;
+        if (m_quad_vbo != 0) {
+            CHECKED_GL_CALL(glDeleteBuffers, 1, &m_quad_vbo);
+            m_quad_vbo = 0;
         }
     }
 }

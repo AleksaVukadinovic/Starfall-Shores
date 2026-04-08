@@ -437,9 +437,9 @@ namespace app {
         const auto shader = get<engine::resources::ResourcesController>()->shader("skybox");
         engine::resources::Skybox *skybox_cube;
         if (m_is_day)
-            skybox_cube = get<engine::resources::ResourcesController>()->skybox(active_daytime_skybox);
+            skybox_cube = get<engine::resources::ResourcesController>()->skybox(m_active_daytime_skybox);
         else
-            skybox_cube = get<engine::resources::ResourcesController>()->skybox(active_nighttime_skybox);
+            skybox_cube = get<engine::resources::ResourcesController>()->skybox(m_active_nighttime_skybox);
         get<engine::graphics::GraphicsController>()->draw_skybox(shader, skybox_cube);
     }
 

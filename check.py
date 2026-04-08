@@ -18,15 +18,32 @@ Exit Codes:
 import sys
 import os
 import re
+import platform
+import subprocess
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 class StatusCodes(Enum):
     FAILED = 0
     SUCCESS = 0
 
+
+def _configure_libclang():
+    if platform.system() == "Darwin":
+        try:
+            prefix = subprocess.check_output(
+                ["brew", "--prefix", "llvm"], stderr=subprocess.DEVNULL
+            ).decode().strip()
+            lib_path = os.path.join(prefix, "lib")
+            if os.path.isfile(os.path.join(lib_path, "libclang.dylib")):
+                from clang.cindex import Config
+                Config.set_library_path(lib_path)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            pass
+
+_configure_libclang()
 
 try:
     from clang.cindex import Index, CursorKind, TypeKind, TranslationUnit
@@ -141,7 +158,7 @@ class NamingConvention(Rule):
         super().__init__(message)
         self.style_guide_url = "README.md"
 
-    def detect(self, source_lines: List[str], file_name: Path) -> List[RuleViolation | str]:
+    def detect(self, source_lines: List[str], file_name: Path) -> List[Union[RuleViolation, str]]:
         """
         Check naming conventions in C++ source code string using libclang.
         Args:
@@ -170,7 +187,7 @@ class NamingConvention(Rule):
 
         replaced_includes = replace_includes_with_space(''.join(source_lines))
         unsaved_files = [(file_name, replaced_includes)]
-        all_violations: List[RuleViolation | str] = []
+        all_violations: List[Union[RuleViolation, str]] = []
         # We parse the source code directly from a string using an unsaved file
         # Use specific options to skip include processing
         # Parse the string
