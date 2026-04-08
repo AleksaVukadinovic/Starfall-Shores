@@ -93,9 +93,9 @@ private:
 
     void process_mesh(aiMesh *mesh);
 
-    std::vector<Texture *> process_materials(const aiMaterial *material);
+    std::vector<Texture *> process_materials(const aiMaterial *material) const;
 
-    void process_material_type(std::vector<Texture *> &textures, const aiMaterial *material, aiTextureType type);
+    void process_material_type(std::vector<Texture *> &textures, const aiMaterial *material, aiTextureType type) const;
 
     static TextureType assimp_texture_type_to_engine(aiTextureType type);
 
@@ -251,7 +251,7 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
     m_meshes.emplace_back(Mesh(vertices, indices, std::move(textures)));
 }
 
-std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) {
+std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) const {
     std::vector<Texture *> textures;
     const auto ai_texture_types = {
             aiTextureType_DIFFUSE,
@@ -260,15 +260,15 @@ std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial 
             aiTextureType_HEIGHT,
     };
 
-    for (auto ai_texture_type: ai_texture_types) {
+    for (const auto ai_texture_type: ai_texture_types) {
         process_material_type(textures, material, ai_texture_type);
     }
     return textures;
 }
 
 void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &textures, const aiMaterial *material,
-                                                 const aiTextureType type) {
-    auto material_count = material->GetTextureCount(type);
+                                                 const aiTextureType type) const {
+    const auto material_count = material->GetTextureCount(type);
     for (uint32_t i = 0; i < material_count; ++i) {
         aiString ai_texture_path_string;
         material->GetTexture(type, i, &ai_texture_path_string);

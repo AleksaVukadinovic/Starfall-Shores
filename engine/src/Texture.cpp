@@ -3,7 +3,7 @@
 #include <engine/util/Errors.hpp>
 
 namespace engine::resources {
-std::string_view texture_type_to_string(TextureType type) {
+std::string_view texture_type_to_string(const TextureType type) {
     switch (type) {
         case TextureType::Diffuse: return "Diffuse";
         case TextureType::Specular: return "Specular";
@@ -23,7 +23,7 @@ void Texture::bind(const int32_t sampler) const {
     glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
-std::string_view Texture::uniform_name_convention(TextureType type) {
+std::string_view Texture::uniform_name_convention(const TextureType type) {
     switch (type) {
         case TextureType::Diffuse: return "texture_diffuse";
         case TextureType::Specular: return "texture_specular";

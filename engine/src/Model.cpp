@@ -4,7 +4,7 @@
 
 namespace engine::resources {
 
-    void Model::draw(const Shader *shader) {
+    void Model::draw(const Shader *shader) const {
         shader->use();
         for (auto &mesh: m_meshes) {
             mesh.draw(shader);
@@ -18,7 +18,7 @@ namespace engine::resources {
         glDisable(GL_BLEND);
     }
 
-    void Model::draw_instanced(const Shader *shader, const std::vector<glm::mat4> &model_matrices) {
+    void Model::draw_instanced(const Shader *shader, const std::vector<glm::mat4> &model_matrices) const {
         const unsigned int number_of_instances = model_matrices.size();
         unsigned int buffer;
         glGenBuffers(1, &buffer);

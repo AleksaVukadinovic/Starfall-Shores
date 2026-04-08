@@ -51,7 +51,7 @@ std::filesystem::path Configuration::get_config_path() {
             throw EngineError(EngineError::Type::ConfigurationError,
                               std::format("Failed to open configuration file."));
         }
-        auto config = create_default();
+        const auto config = create_default();
         f << config.dump(4);
         return CONFIG_FILE_NAME;
     }
@@ -86,7 +86,7 @@ void ArgParser::initialize(int argc, char **argv) {
     spdlog::info("ArgParser initialized.");
 }
 
-std::string ArgParser::get_arg_value(std::string_view arg_name) {
+std::string ArgParser::get_arg_value(std::string_view arg_name) const {
     for (int i = 0; i < m_argc; ++i) {
         std::string_view token(m_argv[i]);
         if (token == arg_name) {

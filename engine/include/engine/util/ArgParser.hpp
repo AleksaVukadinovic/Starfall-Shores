@@ -63,7 +63,7 @@ private:
     * @param arg_name The name of the argument.
     * @returns The string value of the argument.
     */
-    std::string get_arg_value(std::string_view arg_name);
+    std::string get_arg_value(std::string_view arg_name) const;
 
     ArgParser() = default;
 

@@ -33,11 +33,11 @@ void App::engine_setup(int argc, char **argv) {
     util::Configuration::instance()->initialize();
 
     // register engine controllers
-    auto begin = register_controller<EngineControllersBegin>();
-    auto platform = register_controller<platform::PlatformController>();
-    auto graphics = register_controller<graphics::GraphicsController>();
-    auto resources = register_controller<resources::ResourcesController>();
-    auto end = register_controller<EngineControllersEnd>();
+    const auto begin = register_controller<EngineControllersBegin>();
+    const auto platform = register_controller<platform::PlatformController>();
+    const auto graphics = register_controller<graphics::GraphicsController>();
+    const auto resources = register_controller<resources::ResourcesController>();
+    const auto end = register_controller<EngineControllersEnd>();
     begin->before(platform);
     platform->before(graphics);
     graphics->before(resources);
@@ -91,12 +91,12 @@ void App::draw() const {
             controller->begin_draw();
         }
     }
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->draw();
         }
     }
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->end_draw();
         }

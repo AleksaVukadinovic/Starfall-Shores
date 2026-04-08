@@ -64,8 +64,8 @@ void Camera::rotate_camera(float x_offset, float y_offset, bool constrain_pitch)
 }
 
 // processes input received from a mouse scroll-wheel event. Only requires to be input on the vertical wheel-axis
-void Camera::zoom(float offset) {
-    Zoom -= (float) offset;
+void Camera::zoom(const float offset) {
+    Zoom -= offset;
     if (Zoom < 1.0f) {
         Zoom = 1.0f;
     }
