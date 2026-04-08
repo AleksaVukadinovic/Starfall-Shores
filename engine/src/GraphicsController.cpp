@@ -15,18 +15,23 @@ namespace engine::graphics {
         const int opengl_initialized = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
         RG_GUARANTEE(opengl_initialized, "OpenGL failed to init!");
 
-        auto platform               = get<platform::PlatformController>();
-        auto handle                 = platform->window()->handle_();
+        const auto platform               = get<platform::PlatformController>();
+        const auto handle                 = platform->window()->handle_();
+
+        int fb_width, fb_height;
+        glfwGetFramebufferSize(handle, &fb_width, &fb_height);
+        glViewport(0, 0, fb_width, fb_height);
+
         m_perspective_params.FOV    = glm::radians(m_camera.Zoom);
-        m_perspective_params.Width  = static_cast<float>(platform->window()->width());
-        m_perspective_params.Height = static_cast<float>(platform->window()->height());
+        m_perspective_params.Width  = static_cast<float>(fb_width);
+        m_perspective_params.Height = static_cast<float>(fb_height);
         m_perspective_params.Near   = 0.1f;
         m_perspective_params.Far    = 100.0f;
 
         m_ortho_params.Bottom = 0.0f;
-        m_ortho_params.Top    = static_cast<float>(platform->window()->height());
+        m_ortho_params.Top    = static_cast<float>(fb_height);
         m_ortho_params.Left   = 0.0f;
-        m_ortho_params.Right  = static_cast<float>(platform->window()->width());
+        m_ortho_params.Right  = static_cast<float>(fb_width);
         m_ortho_params.Near   = 0.1f;
         m_ortho_params.Far    = 100.0f;
         platform->register_platform_event_observer(
@@ -71,7 +76,7 @@ namespace engine::graphics {
     }
 
     void GraphicsController::draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) {
-        glm::mat4 view = glm::mat4(glm::mat3(m_camera.view_matrix()));
+        const auto view = glm::mat4(glm::mat3(m_camera.view_matrix()));
         shader->use();
         shader->set_mat4("view", view);
         shader->set_mat4("projection", projection_matrix<>());

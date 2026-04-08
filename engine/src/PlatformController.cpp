@@ -35,18 +35,25 @@ namespace engine::platform {
     void initialize_key_maps();
 
     void PlatformController::initialize() {
+#if defined(__linux__)
         if (glfwPlatformSupported(GLFW_PLATFORM_X11)) {
             glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
         } else if (glfwPlatformSupported(GLFW_PLATFORM_WAYLAND)) {
             glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
-        } else if (glfwPlatformSupported(GLFW_PLATFORM_WIN32)) {
+        }
+#elif defined(_WIN32)
+        if (glfwPlatformSupported(GLFW_PLATFORM_WIN32)) {
             glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WIN32);
         }
+#endif
         bool glfw_initialized = glfwInit();
         RG_GUARANTEE(glfw_initialized, "GLFW platform failed to initialize_controllers.");
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
         util::Configuration::json &config = util::Configuration::config();
         int window_width = config["window"]["width"];
@@ -57,6 +64,11 @@ namespace engine::platform {
         m_window = Window(handle, window_width, window_height, window_title);
 
         glfwMakeContextCurrent(m_window.handle_());
+
+        int fb_width, fb_height;
+        glfwGetFramebufferSize(handle, &fb_width, &fb_height);
+        m_window.m_width  = fb_width;
+        m_window.m_height = fb_height;
         glfwSetCursorPosCallback(m_window.handle_(), glfw_mouse_callback);
         glfwSetScrollCallback(m_window.handle_(), glfw_scroll_callback);
         glfwSetKeyCallback(m_window.handle_(), glfw_key_callback);
