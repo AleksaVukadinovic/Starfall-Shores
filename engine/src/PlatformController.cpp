@@ -113,7 +113,7 @@ namespace engine::platform {
         }
     }
 
-    void PlatformController::swap_buffers() {
+    void PlatformController::swap_buffers() const {
         glfwSwapBuffers(m_window.handle_());
     }
 
@@ -184,12 +184,12 @@ namespace engine::platform {
         }
     }
 
-    Key &PlatformController::key_ref(KeyId key) {
+    Key &PlatformController::key_ref(const KeyId key) {
         RG_GUARANTEE(key >= 0 && key < m_keys.size(), "KeyId out of bounds!");
         return m_keys[key];
     }
 
-    const Key &PlatformController::key(KeyId key) const {
+    const Key &PlatformController::key(const KeyId key) const {
         RG_GUARANTEE(key >= 0 && key < m_keys.size(), "KeyId out of bounds!");
         return m_keys[key];
     }
@@ -206,7 +206,7 @@ namespace engine::platform {
         m_platform_event_observers.emplace_back(std::move(observer));
     }
 
-    void PlatformController::_platform_on_mouse(double x, double y) {
+    void PlatformController::_platform_on_mouse(const double x, const double y) {
 
         const double last_x       = g_mouse_position.x;
         const double last_y       = g_mouse_position.y;
@@ -214,19 +214,19 @@ namespace engine::platform {
         g_mouse_position.dy = last_y - y; // because in glfw the top left corner is the (0,0)
         g_mouse_position.x  = x;
         g_mouse_position.y  = y;
-        for (auto &observer: m_platform_event_observers) {
+        for (const auto &observer: m_platform_event_observers) {
             observer->on_mouse_move(g_mouse_position);
         }
     }
 
-    void PlatformController::_platform_on_keyboard(int key_code, int action) {
+    void PlatformController::_platform_on_keyboard(int key_code, int action) const {
         const Key result = key(g_glfw_key_to_engine[key_code]);
         for (const auto &observer: m_platform_event_observers) {
             observer->on_key(result);
         }
     }
 
-    void PlatformController::_platform_on_scroll(double x, double y) {
+    void PlatformController::_platform_on_scroll(double x, double y) const {
         g_mouse_position.scroll = static_cast<float>(y);
         for (const auto &observer: m_platform_event_observers) {
             observer->on_scroll(g_mouse_position);
@@ -241,20 +241,20 @@ namespace engine::platform {
         }
     }
 
-    void PlatformController::_platform_on_window_close(GLFWwindow *window) {
+    void PlatformController::_platform_on_window_close(GLFWwindow *window) const {
         if (m_window.handle_() == window) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
     }
 
-    void PlatformController::_platform_on_mouse_button(const int button, int action) {
+    void PlatformController::_platform_on_mouse_button(const int button, int action) const {
         for (const auto &observer: m_platform_event_observers) {
             const auto result = key(g_glfw_key_to_engine[button]);
             observer->on_key(result);
         }
     }
 
-    void PlatformController::set_enable_cursor(bool enabled) {
+    void PlatformController::set_enable_cursor(const bool enabled) {
         m_cursor_enabled = enabled;
         if (enabled) {
             glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
