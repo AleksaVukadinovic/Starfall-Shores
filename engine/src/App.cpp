@@ -10,7 +10,7 @@
 #include <engine/util/Utils.hpp>
 
 namespace engine::core {
-int App::run(int argc, char **argv) {
+int App::run(const int argc, char **argv) {
     try {
         engine_setup(argc, argv);
         app_setup();
@@ -28,7 +28,7 @@ int App::run(int argc, char **argv) {
     return on_exit();
 }
 
-void App::engine_setup(int argc, char **argv) {
+void App::engine_setup(const int argc, char **argv) {
     util::ArgParser::instance()->initialize(argc, argv);
     util::Configuration::instance()->initialize();
 

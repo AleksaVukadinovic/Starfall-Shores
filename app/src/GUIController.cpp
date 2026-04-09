@@ -15,6 +15,7 @@ void GUIController::initialize() {
     m_platform = get<engine::platform::PlatformController>();
     m_main_controller = get<MainController>();
     m_current_time = m_platform->get_time();
+    m_fov = m_graphics->perspective_params().FOV;
 }
 
 void GUIController::poll_events() {
@@ -29,6 +30,7 @@ void GUIController::draw() {
     draw_bloom_controls();
     draw_skybox_controls();
     draw_camera_info();
+    draw_fov_slider();
     draw_tickrate_slider();
     draw_fps_counter();
     m_graphics->end_gui();
@@ -101,6 +103,13 @@ void GUIController::draw_fps_counter() {
 void GUIController::draw_tickrate_slider() {
     ImGui::Begin("Select tickrate");
     ImGui::SliderFloat("Select tickrate", &m_tickrate, 0.0f, 10.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_fov_slider() {
+    ImGui::Begin("Select FOV");
+    ImGui::SliderFloat("Select FOV", &m_fov, 0.0f, 10.0f);
+    m_graphics->perspective_params().FOV = m_fov;
     ImGui::End();
 }
 

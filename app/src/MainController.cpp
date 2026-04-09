@@ -239,7 +239,7 @@ namespace app {
 
         set_common_shader_variables(bush_shader, camera, graphics);
 
-        auto draw_model = [bush_shader](engine::resources::Model *model, const glm::mat4 &transform) {
+        auto draw_model = [bush_shader](const engine::resources::Model *model, const glm::mat4 &transform) {
             bush_shader->set_mat4("model", transform);
             model->draw_blended(bush_shader);
         };
@@ -252,7 +252,7 @@ namespace app {
             draw_model(bush1, model);
         };
 
-        auto draw_simple = [&](engine::resources::Model *model, const glm::vec3 &translation, const float scale) {
+        auto draw_simple = [&](const engine::resources::Model *model, const glm::vec3 &translation, const float scale) {
             auto m = glm::mat4(1.0f);
             m      = translate(m, translation);
             m      = glm::scale(m, glm::vec3(scale));
@@ -407,7 +407,7 @@ namespace app {
     }
 
     void MainController::draw_water() const {
-        engine::resources::Model *water_model         = resources->model("water");
+        const engine::resources::Model *water_model         = resources->model("water");
         const engine::resources::Shader *water_shader = resources->shader("water_shader");
 
         const auto light_pos = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
@@ -458,7 +458,7 @@ namespace app {
     }
 
     void MainController::draw_fire() {
-        engine::resources::Model *fire               = resources->model("fire");
+        const engine::resources::Model *fire               = resources->model("fire");
         const engine::resources::Shader *fire_shader = resources->shader("fire_shader");
         fire_shader->use();
         fire_shader->set_vec3("viewPos", camera->Position);

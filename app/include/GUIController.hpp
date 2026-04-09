@@ -26,11 +26,13 @@ namespace app {
         void draw_camera_info() const;
         void draw_fps_counter();
         void draw_tickrate_slider();
+        void draw_fov_slider();
 
         float m_current_time = 0.0f;
         float m_last_update_time = 0.0f;
         float m_last_recorded_fps = 0.0f;
 
         float m_tickrate = 1.0f;
+        float m_fov = 0.0f;
     };
 }

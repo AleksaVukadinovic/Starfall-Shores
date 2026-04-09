@@ -82,7 +82,7 @@ public:
     /**
     * @brief Draws a @ref resources::Skybox with the @ref resources::Shader.
     */
-    void draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox);
+    void draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) const;
 
     Camera *camera() {
         return &m_camera;
