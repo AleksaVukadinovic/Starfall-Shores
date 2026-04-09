@@ -45,6 +45,12 @@ uniform vec3 viewPos;
 uniform Material material;
 uniform Light light;
 
+uniform bool fogEnabled;
+uniform float fogIntensity;
+uniform float fogStart;
+uniform float fogEnd;
+uniform vec3 fogColor;
+
 void main()
 {
     vec4 texColor = texture(texture_diffuse1, TexCoords);
@@ -67,5 +73,14 @@ void main()
     vec3 specular = light.specular * spec * material.specular;
 
     vec3 result = ambient + diffuse + specular;
+
+    if (fogEnabled) {
+        float dist = length(viewPos - FragPos);
+        float fogRange = max(fogEnd - fogStart, 0.001);
+        float normalizedDist = max(dist - fogStart, 0.0) / fogRange;
+        float fogFactor = exp(-pow(normalizedDist * fogIntensity, 2.0));
+        result = mix(fogColor, result, fogFactor);
+    }
+
     FragColor = vec4(result, texColor.a);
 }

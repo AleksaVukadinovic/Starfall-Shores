@@ -1,5 +1,6 @@
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/BloomController.hpp>
+#include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/platform/PlatformController.hpp>
@@ -28,6 +29,7 @@ namespace app {
         m_graphics->perspective_params().Far = 250.0f;
         m_bloom = get<engine::graphics::BloomController>();
         m_bloom->bloom_setup();
+        m_fog               = get<FogController>();
         m_resources         = get<engine::resources::ResourcesController>();
         m_camera            = m_graphics->camera();
         const auto platform = get<engine::platform::PlatformController>();
@@ -72,6 +74,11 @@ namespace app {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
+        shader->set_bool("fogEnabled", m_fog->fog_enabled);
+        shader->set_float("fogIntensity", m_fog->fog_intensity);
+        shader->set_float("fogStart", m_fog->fog_start);
+        shader->set_float("fogEnd", m_fog->fog_end);
+        shader->set_vec3("fogColor", m_fog->fog_color);
     }
 
     void MainController::draw() {
@@ -405,6 +412,11 @@ namespace app {
         water_shader->set_vec3("viewPos", m_camera->Position);
         water_shader->set_mat4("projection", m_graphics->projection_matrix());
         water_shader->set_mat4("view", m_camera->view_matrix());
+        water_shader->set_bool("fogEnabled", m_fog->fog_enabled);
+        water_shader->set_float("fogIntensity", m_fog->fog_intensity);
+        water_shader->set_float("fogStart", m_fog->fog_start);
+        water_shader->set_float("fogEnd", m_fog->fog_end);
+        water_shader->set_vec3("fogColor", m_fog->fog_color);
 
         auto model = glm::mat4(1.0f);
         model      = scale(model, glm::vec3(30, 1, 30));
@@ -417,6 +429,12 @@ namespace app {
 
     void MainController::draw_skybox() const {
         const auto shader = m_resources->shader("skybox");
+        shader->use();
+        shader->set_bool("fogEnabled", m_fog->fog_enabled);
+        shader->set_float("fogIntensity", m_fog->fog_intensity);
+        shader->set_float("fogStart", m_fog->fog_start);
+        shader->set_float("fogEnd", m_fog->fog_end);
+        shader->set_vec3("fogColor", m_fog->fog_color);
         engine::resources::Skybox *skybox_cube;
         if (m_is_day)
             skybox_cube = m_resources->skybox(m_active_daytime_skybox);

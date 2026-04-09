@@ -1,5 +1,6 @@
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/BloomController.hpp>
+#include <engine/graphics/FogController.hpp>
 #include <imgui.h>
 #include <GUIController.hpp>
 #include <MainController.hpp>
@@ -13,6 +14,7 @@ void GUIController::initialize() {
     m_camera = get<engine::graphics::GraphicsController>()->camera();
     m_bloom = get<engine::graphics::BloomController>();
     m_platform = get<engine::platform::PlatformController>();
+    m_fog = get<FogController>();
     m_main_controller = get<MainController>();
     m_current_time = m_platform->get_time();
     m_fov = m_graphics->perspective_params().FOV;
@@ -28,6 +30,7 @@ void GUIController::poll_events() {
 void GUIController::draw() {
     m_graphics->begin_gui();
     draw_bloom_controls();
+    draw_fog_controls();
     draw_skybox_controls();
     draw_camera_info();
     draw_fov_slider();
@@ -41,6 +44,15 @@ void GUIController::draw_bloom_controls() const {
     ImGui::DragFloat("Bloom Intensity", &m_bloom->bloom_strength, 0.1f, 0.0f, 50.0f);
     ImGui::DragFloat("Exposure", &m_bloom->exposure, 0.1f, 0.1f, 20.0f);
     ImGui::DragScalar("Bloom passes", ImGuiDataType_U32, &m_bloom->bloom_passes, 1.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_fog_controls() const {
+    ImGui::Begin("Fog");
+    ImGui::Checkbox("Enable Fog", &m_fog->fog_enabled);
+    ImGui::SliderFloat("Fog Intensity", &m_fog->fog_intensity, 0.1f, 10.0f);
+    ImGui::SliderFloat("Fog Start", &m_fog->fog_start, 0.0f, 500.0f);
+    ImGui::SliderFloat("Fog End", &m_fog->fog_end, 0.0f, 500.0f);
     ImGui::End();
 }
 

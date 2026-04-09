@@ -46,6 +46,12 @@ uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform vec3 waterColor;
 
+uniform bool fogEnabled;
+uniform float fogIntensity;
+uniform float fogStart;
+uniform float fogEnd;
+uniform vec3 fogColor;
+
 void main()
 {
     vec2 movingTexCoords = TexCoords;
@@ -74,6 +80,14 @@ void main()
     vec3 normViewDir = normalize(viewPos - FragPos);
     float fresnel = pow(1.0 - max(dot(normViewDir, norm), 0.0), 2.0);
     float alpha = mix(0.8, 1.0, fresnel);
+
+    if (fogEnabled) {
+        float dist = length(viewPos - FragPos);
+        float fogRange = max(fogEnd - fogStart, 0.001);
+        float normalizedDist = max(dist - fogStart, 0.0) / fogRange;
+        float fogFactor = exp(-pow(normalizedDist * fogIntensity, 2.0));
+        finalColor = mix(fogColor, finalColor, fogFactor);
+    }
 
     FragColor = vec4(finalColor, alpha);
 }

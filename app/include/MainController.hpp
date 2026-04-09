@@ -1,6 +1,7 @@
 #pragma once
 #include <spdlog/spdlog.h>
 #include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/FogController.hpp>
 
 namespace engine::resources {
     class ResourcesController;
@@ -44,6 +45,7 @@ namespace app {
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
         engine::graphics::BloomController *m_bloom          = nullptr;
+        FogController *m_fog                                 = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
 
         bool m_is_day                            = true;
