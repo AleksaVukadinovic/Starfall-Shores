@@ -40,7 +40,7 @@ void GUIController::draw_bloom_controls() const {
     ImGui::Begin("Bloom");
     ImGui::DragFloat("Bloom Intensity", &m_bloom->bloom_strength, 0.1f, 0.0f, 50.0f);
     ImGui::DragFloat("Exposure", &m_bloom->exposure, 0.1f, 0.1f, 20.0f);
-    ImGui::DragInt("Bloom passes", &m_bloom->bloom_passes, 1, 0, 50);
+    ImGui::DragScalar("Bloom passes", ImGuiDataType_U32, &m_bloom->bloom_passes, 1.0f);
     ImGui::End();
 }
 
@@ -73,10 +73,7 @@ void GUIController::draw_skybox_controls() const {
         m_main_controller->set_skybox(skybox_name, false);
     }
     ImGui::End();
-
-
 }
-
 
 void GUIController::draw_camera_info() const {
     ImGui::Begin("Camera info");
@@ -90,7 +87,7 @@ void GUIController::draw_camera_info() const {
 void GUIController::draw_fps_counter() {
     ImGui::Begin("FPS");
     m_current_time = m_platform->get_time();
-    if (m_last_update_time + 1/m_tickrate >= m_current_time) {
+    if (m_tickrate > 0.0f && m_last_update_time + 1.0f/m_tickrate >= m_current_time) {
         ImGui::Text("%.0f", m_last_recorded_fps);
     } else {
         m_last_update_time = m_current_time;
@@ -102,13 +99,13 @@ void GUIController::draw_fps_counter() {
 
 void GUIController::draw_tickrate_slider() {
     ImGui::Begin("Select tickrate");
-    ImGui::SliderFloat("Select tickrate", &m_tickrate, 0.0f, 10.0f);
+    ImGui::SliderFloat("Select tickrate", &m_tickrate, 0.1f, 10.0f);
     ImGui::End();
 }
 
 void GUIController::draw_fov_slider() {
     ImGui::Begin("Select FOV");
-    ImGui::SliderFloat("Select FOV", &m_fov, 0.0f, 10.0f);
+    ImGui::SliderFloat("Select FOV", &m_fov, 1.0f, 50.0f);
     m_graphics->perspective_params().FOV = m_fov;
     ImGui::End();
 }
