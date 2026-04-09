@@ -5,12 +5,10 @@
 namespace engine::graphics {
     class BloomController final : public core::Controller {
     public:
-        int bloom_passes     = 10;
-        float exposure       = 1.3f;
-        bool bloom           = true;
-        float bloom_strength = 1.0f;
-
-        void render_bloom();
+        unsigned int bloom_passes = 10;
+        float exposure            = 1.3f;
+        bool bloom                = true;
+        float bloom_strength      = 1.0f;
 
         void prepare_hdr();
 
@@ -34,6 +32,8 @@ namespace engine::graphics {
         unsigned int m_quad_vao                  = 0;
         unsigned int m_quad_vbo                  = 0;
 
+        void update_screen_size();
+        void render_bloom();
         void render_quad();
     };
 }
