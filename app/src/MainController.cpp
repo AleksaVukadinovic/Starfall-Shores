@@ -75,6 +75,10 @@ namespace app {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
+        set_fog_shader_properties(shader);
+    }
+
+    void MainController::set_fog_shader_properties(const engine::resources::Shader* shader) const {
         shader->set_bool("fogEnabled", m_fog->fog_enabled);
         shader->set_float("fogIntensity", m_fog->fog_intensity);
         shader->set_float("fogStart", m_fog->fog_start);
@@ -301,8 +305,8 @@ void MainController::draw_forest() const {
     }
 
     void MainController::draw_red_flowers() const {
-        const engine::resources::Model *roses          = m_resources->model("roses");
-        const engine::resources::Shader *flower_shader = m_resources->shader("flower_shader");
+        const engine::resources::Model *roses = m_resources->model("roses");
+        const engine::resources::Shader *shader = m_resources->shader("flower_shader");
 
         constexpr std::array translations = {
             #include <red_flowers.include>
@@ -314,8 +318,8 @@ void MainController::draw_forest() const {
             model_matrices.emplace_back(model);
         }
 
-        set_common_shader_variables(flower_shader);
-        roses->draw_instanced(flower_shader, model_matrices);
+        set_common_shader_variables(shader);
+        roses->draw_instanced(shader, model_matrices);
     }
 
     void MainController::draw_terrain() const {
@@ -326,38 +330,27 @@ void MainController::draw_forest() const {
     }
 
     void MainController::draw_water() const {
-        const engine::resources::Model *water_model = m_resources->model("water");
-        const engine::resources::Shader *water_shader = m_resources->shader("water_shader");
+        const engine::resources::Model *water = m_resources->model("water");
+        const engine::resources::Shader *shader = m_resources->shader("water_shader");
 
-        const auto light_pos = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
-        water_shader->use();
-        water_shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
-
-        const vec3 water_color = m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT;
-        water_shader->set_vec3("waterColor", water_color);
-        water_shader->set_vec3("lightPos", light_pos);
-        water_shader->set_vec3("viewPos", m_camera->Position);
-        water_shader->set_mat4("projection", m_graphics->projection_matrix());
-        water_shader->set_mat4("view", m_camera->view_matrix());
-        water_shader->set_bool("fogEnabled", m_fog->fog_enabled);
-        water_shader->set_float("fogIntensity", m_fog->fog_intensity);
-        water_shader->set_float("fogStart", m_fog->fog_start);
-        water_shader->set_float("fogEnd", m_fog->fog_end);
-        water_shader->set_vec3("fogColor", m_fog->fog_color);
+        shader->use();
+        shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
+        shader->set_vec3("waterColor", m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT);
+        shader->set_vec3("lightPos", m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT);
+        shader->set_vec3("viewPos", m_camera->Position);
+        shader->set_mat4("projection", m_graphics->projection_matrix());
+        shader->set_mat4("view", m_camera->view_matrix());
+        set_fog_shader_properties(shader);
 
         const auto model = create_model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
-        water_shader->set_mat4("model", model);
-        water_model->draw_blended(water_shader);
+        shader->set_mat4("model", model);
+        water->draw_blended(shader);
     }
 
     void MainController::draw_skybox() const {
         const auto shader = m_resources->shader("skybox");
         shader->use();
-        shader->set_bool("fogEnabled", m_fog->fog_enabled);
-        shader->set_float("fogIntensity", m_fog->fog_intensity);
-        shader->set_float("fogStart", m_fog->fog_start);
-        shader->set_float("fogEnd", m_fog->fog_end);
-        shader->set_vec3("fogColor", m_fog->fog_color);
+        set_fog_shader_properties(shader);
         const engine::resources::Skybox *skybox_cube = m_resources->skybox(m_is_day ? m_active_daytime_skybox : m_active_nighttime_skybox);
         m_graphics->draw_skybox(shader, skybox_cube);
     }
@@ -376,19 +369,19 @@ void MainController::draw_forest() const {
 
     void MainController::draw_fire() const {
         const engine::resources::Model *fire = m_resources->model("fire");
-        const engine::resources::Shader *fire_shader = m_resources->shader("fire_shader");
-        fire_shader->use();
-        fire_shader->set_vec3("viewPos", m_camera->Position);
-        fire_shader->set_mat4("projection", m_graphics->projection_matrix());
-        fire_shader->set_mat4("view", m_camera->view_matrix());
-        fire_shader->set_mat4("model", create_model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f));
-        fire_shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time() - m_fire_start_time));
-        fire_shader->set_vec3("fireColor", vec3(1.0f, 0.6f, 0.2f));
-        fire_shader->set_vec3("glowColor", vec3(1.0f, 0.3f, 0.0f));
-        fire_shader->set_float("intensity", 50.0f);
-        fire_shader->set_float("flickerSpeed", 5.0f);
-        fire_shader->set_float("distortionAmount", 0.1f);
-        fire->draw_blended(fire_shader);
+        const engine::resources::Shader *shader = m_resources->shader("fire_shader");
+        shader->use();
+        shader->set_vec3("viewPos", m_camera->Position);
+        shader->set_mat4("projection", m_graphics->projection_matrix());
+        shader->set_mat4("view", m_camera->view_matrix());
+        shader->set_mat4("model", create_model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f));
+        shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time() - m_fire_start_time));
+        shader->set_vec3("fireColor", vec3(1.0f, 0.6f, 0.2f));
+        shader->set_vec3("glowColor", vec3(1.0f, 0.3f, 0.0f));
+        shader->set_float("intensity", 50.0f);
+        shader->set_float("flickerSpeed", 5.0f);
+        shader->set_float("distortionAmount", 0.1f);
+        fire->draw_blended(shader);
     }
 
     void MainController::update() {

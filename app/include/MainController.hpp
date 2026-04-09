@@ -69,5 +69,6 @@ namespace app {
         static constexpr auto LIGHT_COLOR_NIGHT = glm::vec3(1.0f, 0.7f, 0.1f);
 
         void set_common_shader_variables(const engine::resources::Shader *shader) const;
+        void set_fog_shader_properties(const engine::resources::Shader* shader) const;
     };
 }
