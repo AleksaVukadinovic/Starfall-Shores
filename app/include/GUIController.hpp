@@ -1,4 +1,6 @@
 #pragma once
+#include "MainController.hpp"
+#include "engine/graphics/GraphicsController.hpp"
 #include <engine/core/Engine.hpp>
 
 namespace app {
@@ -9,10 +11,17 @@ namespace app {
         }
 
     private:
+        engine::graphics::GraphicsController *m_graphics = nullptr;
+        engine::graphics::Camera *m_camera = nullptr;
+        engine::graphics::BloomController *m_bloom = nullptr;
+        MainController* m_main_controller = nullptr;
+
         void initialize() override;
-
         void poll_events() override;
-
         void draw() override;
+
+        void draw_bloom_controls() const;
+        void draw_skybox_controls();
+        void draw_camera_info() const;
     };
 }

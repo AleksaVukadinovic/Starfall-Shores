@@ -16,12 +16,12 @@ unsigned Shader::id() const {
     return m_shader_id;
 }
 
-void Shader::set_bool(const std::string &name, bool value) const {
+void Shader::set_bool(const std::string &name, const bool value) const {
     const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform1i, location, static_cast<int>(value));
 }
 
-void Shader::set_int(const std::string &name, int value) const {
+void Shader::set_int(const std::string &name, const int value) const {
     const uint32_t location = CHECKED_GL_CALL(glGetUniformLocation, m_shader_id, name.c_str());
     CHECKED_GL_CALL(glUniform1i, location, value);
 }

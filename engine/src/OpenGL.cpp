@@ -5,12 +5,11 @@
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/resources/Shader.hpp>
 #include <engine/resources/ShaderCompiler.hpp>
-#include <engine/resources/Skybox.hpp>
 #include <engine/util/Errors.hpp>
 #include <engine/util/Utils.hpp>
 
 namespace engine::graphics {
-int32_t OpenGL::shader_type_to_opengl_type(resources::ShaderType type) {
+int32_t OpenGL::shader_type_to_opengl_type(const resources::ShaderType type) {
     switch (type) {
         case resources::ShaderType::Vertex: return GL_VERTEX_SHADER;
         case resources::ShaderType::Fragment: return GL_FRAGMENT_SHADER;
@@ -19,7 +18,7 @@ int32_t OpenGL::shader_type_to_opengl_type(resources::ShaderType type) {
     }
 }
 
-uint32_t OpenGL::generate_texture(const std::filesystem::path &path, bool flip_uvs) {
+uint32_t OpenGL::generate_texture(const std::filesystem::path &path, const bool flip_uvs) {
     uint32_t texture_id = 0;
     CHECKED_GL_CALL(glGenTextures, 1, &texture_id);
 
@@ -30,7 +29,7 @@ uint32_t OpenGL::generate_texture(const std::filesystem::path &path, bool flip_u
         stbi_image_free(data);
     };
     if (data) {
-        int32_t format = texture_format(nr_components);
+        const int32_t format = texture_format(nr_components);
 
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
         CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
@@ -77,22 +76,22 @@ uint32_t OpenGL::init_skybox_cube() {
     return skybox_vao;
 }
 
-bool OpenGL::shader_compiled_successfully(uint32_t shader_id) {
+bool OpenGL::shader_compiled_successfully(const uint32_t shader_id) {
     int success;
     CHECKED_GL_CALL(glGetShaderiv, shader_id, GL_COMPILE_STATUS, &success);
     return success;
 }
 
 uint32_t OpenGL::compile_shader(const std::string &shader_source,
-                                resources::ShaderType shader_type) {
-    uint32_t shader_id = CHECKED_GL_CALL(glCreateShader, shader_type_to_opengl_type(shader_type));
+                                const resources::ShaderType shader_type) {
+    const uint32_t shader_id = CHECKED_GL_CALL(glCreateShader, shader_type_to_opengl_type(shader_type));
     const char *shader_source_cstr = shader_source.c_str();
     CHECKED_GL_CALL(glShaderSource, shader_id, 1, &shader_source_cstr, nullptr);
     CHECKED_GL_CALL(glCompileShader, shader_id);
     return shader_id;
 }
 
-std::string OpenGL::get_compilation_error_message(uint32_t shader_id) {
+std::string OpenGL::get_compilation_error_message(const uint32_t shader_id) {
     char infoLog[512];
     CHECKED_GL_CALL(glGetShaderInfoLog, shader_id, 512, nullptr, infoLog);
     return infoLog;
@@ -123,7 +122,7 @@ std::string_view gl_call_error_description(GLenum error) {
     }
 }
 
-void OpenGL::assert_no_error(std::source_location location) {
+void OpenGL::assert_no_error(const std::source_location location) {
     if (auto error = glGetError(); error != GL_NO_ERROR) {
         throw util::EngineError(util::EngineError::Type::OpenGLError,
                                 std::format("OpenGL call error: '{}'", gl_call_error_description(error)),
@@ -133,7 +132,7 @@ void OpenGL::assert_no_error(std::source_location location) {
 
 uint32_t face_index(std::string_view name);
 
-uint32_t OpenGL::load_skybox_textures(const std::filesystem::path &path, bool flip_uvs) {
+uint32_t OpenGL::load_skybox_textures(const std::filesystem::path &path, const bool flip_uvs) {
     RG_GUARANTEE(std::filesystem::is_directory(path),
                  "Directory '{}' doesn't exist. Please specify path to be a directory to where the cubemap textures are located. The cubemap textures should be named: right, left, top, bottom, front, back; by their respective faces in the cubemap.",
                  path.string());

@@ -278,7 +278,7 @@ namespace engine::platform {
         // formatter: on
     }
 
-    static void glfw_mouse_callback(GLFWwindow *window, double x, double y) {
+    static void glfw_mouse_callback(GLFWwindow *window, const double x, const double y) {
         core::Controller::get<PlatformController>()->_platform_on_mouse(x, y);
     }
 
@@ -286,7 +286,7 @@ namespace engine::platform {
         core::Controller::get<PlatformController>()->_platform_on_mouse_button(button, action);
     }
 
-    static void glfw_scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
+    static void glfw_scroll_callback(GLFWwindow *window, const double x_offset, const double y_offset) {
         g_mouse_position.scroll = static_cast<float>(y_offset);
         core::Controller::get<PlatformController>()->_platform_on_scroll(x_offset, y_offset);
     }

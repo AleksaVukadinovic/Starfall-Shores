@@ -8,7 +8,7 @@
 
 namespace engine::util {
 
-std::string_view EngineError::type_string(Type error) {
+std::string_view EngineError::type_string(const Type error) {
     switch (error) {
         case Type::Unimplemented: return "Unimplemented";
         case Type::ShouldNotReachHere: return "ShouldNotReachHere";

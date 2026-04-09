@@ -167,7 +167,7 @@ namespace app {
         draw_tree(old_tree, 65, 40, -39, 0.04f, 3.0f, glm::vec3(0, 0, 1));
     }
     void MainController::draw_campfire() const {
-        engine::resources::Model *campfire               = resources->model("campfire");
+        const engine::resources::Model *campfire               = resources->model("campfire");
         const engine::resources::Shader *campfire_shader = resources->shader("basic");
 
         set_common_shader_variables(campfire_shader, camera, graphics);
@@ -179,7 +179,7 @@ namespace app {
     }
 
     void MainController::draw_logs() const {
-        engine::resources::Model *log_seat               = resources->model("log_seat");
+        const engine::resources::Model *log_seat               = resources->model("log_seat");
         const engine::resources::Shader *log_seat_shader = resources->shader("basic");
 
         set_common_shader_variables(log_seat_shader, camera, graphics);
@@ -208,8 +208,8 @@ namespace app {
     }
 
     void MainController::draw_tents() const {
-        engine::resources::Model *viking_tent        = resources->model("viking_tent");
-        engine::resources::Model *stylized_tent      = resources->model("stylized_tent");
+        const engine::resources::Model *viking_tent        = resources->model("viking_tent");
+        const engine::resources::Model *stylized_tent      = resources->model("stylized_tent");
         const engine::resources::Shader *tent_shader = resources->shader("basic");
 
         set_common_shader_variables(tent_shader, camera, graphics);
@@ -275,7 +275,7 @@ namespace app {
     }
 
     void MainController::draw_white_flowers() const {
-        engine::resources::Model *white_flowers        = resources->model("flowers2");
+        const engine::resources::Model *white_flowers        = resources->model("flowers2");
         const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
 
         constexpr std::array translations = {
@@ -369,7 +369,7 @@ namespace app {
     }
 
     void MainController::draw_red_flowers() const {
-        engine::resources::Model *roses                = resources->model("roses");
+        const engine::resources::Model *roses                = resources->model("roses");
         const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
 
         constexpr std::array translations = {
@@ -396,7 +396,7 @@ namespace app {
     }
 
     void MainController::draw_terrain() const {
-        engine::resources::Model *terrain               = resources->model("terrain");
+        const engine::resources::Model *terrain               = resources->model("terrain");
         const engine::resources::Shader *terrain_shader = resources->shader("basic");
         set_common_shader_variables(terrain_shader, camera, graphics);
         auto model = glm::mat4(1.0f);
@@ -444,7 +444,7 @@ namespace app {
     }
 
     void MainController::draw_stones() const {
-        engine::resources::Model *grave               = resources->model("grave");
+        const engine::resources::Model *grave               = resources->model("grave");
         const engine::resources::Shader *stone_shader = resources->shader("basic");
 
         set_common_shader_variables(stone_shader, camera, graphics);
@@ -520,45 +520,28 @@ namespace app {
             return;
 
         const auto platform = get<engine::platform::PlatformController>();
-        const auto camera   = get<engine::graphics::GraphicsController>()->camera();
         const float dt      = platform->dt();
-        if (platform->key(engine::platform::KeyId::KEY_W).is_down() || platform->key(engine::platform::KeyId::KEY_UP).
-            is_down()) {
-            if (platform->key(engine::platform::KEY_LEFT_SHIFT).is_down())
-                camera->MovementSpeed = 20;
-            else
-                camera->MovementSpeed = 7;
+        if (platform->key(engine::platform::KeyId::KEY_W).is_down() ||
+            platform->key(engine::platform::KeyId::KEY_UP).is_down()) {
+            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
             camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
         }
-        if (platform->key(engine::platform::KeyId::KEY_S).is_down() || platform->key(engine::platform::KeyId::KEY_DOWN).
-            is_down()) {
-            if (platform->key(engine::platform::KEY_LEFT_SHIFT).is_down())
-                camera->MovementSpeed = 20;
-            else
-                camera->MovementSpeed = 7;
+        if (platform->key(engine::platform::KeyId::KEY_S).is_down() ||
+            platform->key(engine::platform::KeyId::KEY_DOWN).is_down()) {
+            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
             camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, dt);
         }
-        if (platform->key(engine::platform::KeyId::KEY_A).is_down() || platform->key(engine::platform::KeyId::KEY_LEFT).
-            is_down()) {
-            if (platform->key(engine::platform::KEY_LEFT_SHIFT).is_down())
-                camera->MovementSpeed = 20;
-            else
-                camera->MovementSpeed = 7;
+        if (platform->key(engine::platform::KeyId::KEY_A).is_down() || platform->key(engine::platform::KeyId::KEY_LEFT).is_down()) {
+            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
             camera->move_camera(engine::graphics::Camera::Movement::LEFT, dt);
         }
-        if (platform->key(engine::platform::KeyId::KEY_D).is_down() || platform->key(engine::platform::KeyId::KEY_RIGHT)
-                                                                               .is_down()) {
-            if (platform->key(engine::platform::KEY_LEFT_SHIFT).is_down())
-                camera->MovementSpeed = 20;
-            else
-                camera->MovementSpeed = 7;
+        if (platform->key(engine::platform::KeyId::KEY_D).is_down()
+            || platform->key(engine::platform::KeyId::KEY_RIGHT).is_down()) {
+            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
             camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_SPACE).is_down()) {
-            if (platform->key(engine::platform::KEY_LEFT_SHIFT).is_down())
-                camera->move_camera(engine::graphics::Camera::Movement::DOWN, dt);
-            else
-                camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
+            camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_P).state() == engine::platform::Key::State::JustPressed) {
             platform->set_enable_cursor(!platform->is_cursor_enabled());

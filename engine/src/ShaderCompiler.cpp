@@ -20,7 +20,7 @@ Shader ShaderCompiler::compile_from_source(std::string shader_name, std::string 
 }
 
 OpenGL::ShaderProgramId ShaderCompiler::compile(const ShaderParsingResult &shader_sources) {
-    uint32_t shader_program_id = glCreateProgram();
+    const uint32_t shader_program_id = glCreateProgram();
     uint32_t vertex_shader_id = 0;
     uint32_t fragment_shader_id = 0;
     uint32_t geometry_shader_id = 0;
@@ -45,7 +45,7 @@ OpenGL::ShaderProgramId ShaderCompiler::compile(const ShaderParsingResult &shade
 }
 
 uint32_t ShaderCompiler::compile(const std::string &shader_source, ShaderType type) {
-    uint32_t shader_id = OpenGL::compile_shader(shader_source, type);
+    const uint32_t shader_id = OpenGL::compile_shader(shader_source, type);
     if (!OpenGL::shader_compiled_successfully(shader_id)) {
         throw util::EngineError(util::EngineError::Type::ShaderCompilationError, std::format(
                 "{} shader compilation {} failed:\n{}", to_string(type),
