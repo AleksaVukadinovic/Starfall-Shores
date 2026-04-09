@@ -121,13 +121,7 @@ namespace app {
 
         auto draw_tree = [&](auto *tree_model, const float x, const float y, const float z, const float scale,
                              const float rotation_angle = 0.0f, const glm::vec3 &rotation_axis = CENTER) {
-            auto model = glm::mat4(1.0f);
-
-            if (rotation_angle != 0.0f)
-                model = rotate(model, glm::radians(rotation_angle), rotation_axis);
-
-            model = translate(model, glm::vec3(x, y, z));
-            model = glm::scale(model, glm::vec3(scale));
+            const auto model =create_model_matrix(glm::vec3(x, y, z), glm::vec3(scale), rotation_axis, rotation_angle);
             m_basic_shader->set_mat4("model", model);
             tree_model->draw(m_basic_shader);
         };
@@ -391,12 +385,8 @@ namespace app {
         water_shader->set_float("fogEnd", m_fog->fog_end);
         water_shader->set_vec3("fogColor", m_fog->fog_color);
 
-        auto model = glm::mat4(1.0f);
-        model      = scale(model, glm::vec3(30, 1, 30));
-        model      = translate(model, glm::vec3(0, 7, 0));
-        model      = rotate(model, glm::radians(-90.0f), X_AXIS);
+        const auto model = create_model_matrix(glm::vec3(0, 0, 7), glm::vec3(30, 30, 1), X_AXIS, -90.0f);
         water_shader->set_mat4("model", model);
-
         water_model->draw_blended(water_shader);
     }
 
