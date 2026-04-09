@@ -1,7 +1,6 @@
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/BloomController.hpp>
 #include <imgui.h>
-
 #include <GUIController.hpp>
 #include <MainController.hpp>
 #include <engine/graphics/GraphicsController.hpp>

@@ -42,7 +42,7 @@ namespace engine::graphics {
             m_scr_width = 1400;
         if (m_scr_height == 0)
             m_scr_height = 1000;
-        for (unsigned int i = 0; i < 2; ++i) {
+        for (uint8_t i = 0; i < 2; ++i) {
             CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[i]);
             CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, m_scr_width, m_scr_height, 0, GL_RGBA, GL_FLOAT,
                             nullptr);
@@ -67,7 +67,7 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glGenFramebuffers, 2, m_pingpong_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_pingpong_colorbuffers);
 
-        for (unsigned int i = 0; i < 2; ++i) {
+        for (uint8_t i = 0; i < 2; ++i) {
             CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_pingpong_fbo[i]);
             CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_pingpong_colorbuffers[i]);
             CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, m_scr_width, m_scr_height, 0, GL_RGBA, GL_FLOAT,

@@ -6,6 +6,7 @@
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <MainController.hpp>
+#include <Constants.hpp>
 #include <GUIController.hpp>
 
 namespace app {
@@ -114,7 +115,7 @@ namespace app {
         set_common_shader_variables(tree_shader, camera, graphics);
 
         auto draw_tree = [&](auto *tree_model, const float x, const float y, const float z, const float scale,
-                             const float rotation_angle = 0.0f, const glm::vec3 &rotation_axis = glm::vec3(0, 0, 0)) {
+                             const float rotation_angle = 0.0f, const glm::vec3 &rotation_axis = CENTER) {
             auto model = glm::mat4(1.0f);
 
             if (rotation_angle != 0.0f)
@@ -158,13 +159,13 @@ namespace app {
             draw_tree(tall_tree, x, y, z, scale);
         }
 
-        draw_tree(oak_tree, -17, 28, -17, 0.210f, 90.0f, glm::vec3(1, 0, 0));
+        draw_tree(oak_tree, -17, 28, -17, 0.210f, 90.0f, X_AXIS);
 
         for (const auto &pos: pine_trees) {
-            draw_tree(pine_tree, pos.x, pos.y, pos.z, 11.0f, -90.0f, glm::vec3(1, 0, 0));
+            draw_tree(pine_tree, pos.x, pos.y, pos.z, 11.0f, -90.0f, X_AXIS);
         }
 
-        draw_tree(old_tree, 65, 40, -39, 0.04f, 3.0f, glm::vec3(0, 0, 1));
+        draw_tree(old_tree, 65, 40, -39, 0.04f, 3.0f, Z_AXIS);
     }
     void MainController::draw_campfire() const {
         const engine::resources::Model *campfire               = resources->model("campfire");
@@ -198,7 +199,7 @@ namespace app {
 
         for (const auto &[rotation_angle, position]: logs) {
             auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(rotation_angle), glm::vec3(0, 1, 0));
+            model      = rotate(model, glm::radians(rotation_angle), Y_AXIS);
             model      = translate(model, position);
             model      = scale(model, glm::vec3(0.04));
 
@@ -216,14 +217,14 @@ namespace app {
         tent_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(2.0f));
 
         auto model = glm::mat4(1.0f);
-        model      = rotate(model, glm::radians(-20.0f), glm::vec3(0, 1, 0));
+        model      = rotate(model, glm::radians(-20.0f), Y_AXIS);
         model      = translate(model, glm::vec3(16, 17, -14));
         model      = scale(model, glm::vec3(0.037));
         tent_shader->set_mat4("model", model);
         viking_tent->draw(tent_shader);
 
         model = glm::mat4(1.0f);
-        model = rotate(model, glm::radians(-128.0f), glm::vec3(0, 1, 0));
+        model = rotate(model, glm::radians(-128.0f), Y_AXIS);
         model = translate(model, glm::vec3(0, 20, -33));
         model = scale(model, glm::vec3(0.06));
         tent_shader->set_mat4("model", model);
@@ -245,7 +246,7 @@ namespace app {
 
         auto draw_bush1 = [&](const glm::vec3 &translation, const float scale) {
             auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+            model      = rotate(model, glm::radians(-90.0f), X_AXIS);
             model      = translate(model, translation);
             model      = glm::scale(model, glm::vec3(scale));
             draw_model(bush1, model);
@@ -291,13 +292,13 @@ namespace app {
         std::vector<glm::mat4> model_matrices;
         model_matrices.reserve(amount);
 
-        for (unsigned int row = 0; row < row_count; row++) {
+        for (uint8_t row = 0; row < row_count; row++) {
             const float x = row == 0 ? 40.0f : 44.0f;
 
-            for (unsigned int col = 0; col < col_count; col++) {
+            for (uint8_t col = 0; col < col_count; col++) {
                 auto model = glm::mat4(1.0f);
                 model      = translate(model, glm::vec3(x, 17.4f, 4.0f * static_cast<float>(col) - 16));
-                model      = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+                model      = rotate(model, glm::radians(90.0f), X_AXIS);
                 model      = scale(model, glm::vec3(0.12f));
                 model_matrices.push_back(model);
             }
@@ -305,7 +306,7 @@ namespace app {
 
         for (const auto &translation: translations) {
             auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            model      = rotate(model, glm::radians(90.0f), X_AXIS);
             model      = translate(model, translation);
             model      = scale(model, glm::vec3(0.12f));
             model_matrices.push_back(model);
@@ -330,9 +331,9 @@ namespace app {
 
         auto draw_path_segment = [&](const glm::vec3 &translation, const float y_rotation, const float scale) {
             auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
-            model      = rotate(model, glm::radians(y_rotation), glm::vec3(0, 1, 0));
-            model      = rotate(model, glm::radians(15.0f), glm::vec3(0, 0, 1));
+            model      = rotate(model, glm::radians(90.0f), X_AXIS);
+            model      = rotate(model, glm::radians(y_rotation), Y_AXIS);
+            model      = rotate(model, glm::radians(15.0f), Z_AXIS);
             model      = translate(model, translation);
             model      = glm::scale(model, glm::vec3(scale));
             stone_shader->set_mat4("model", model);
@@ -353,8 +354,8 @@ namespace app {
 
         auto draw_mushroom = [&](const glm::vec3 &translation, const float scale, const float y_rotation = 0.0f) {
             auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-            model      = rotate(model, glm::radians(y_rotation), glm::vec3(0, 1, 0));
+            model      = rotate(model, glm::radians(-90.0f), X_AXIS);
+            model      = rotate(model, glm::radians(y_rotation), Y_AXIS);
             model      = translate(model, translation);
             model      = glm::scale(model, glm::vec3(scale));
             shroom_shader->set_mat4("model", model);
@@ -383,7 +384,7 @@ namespace app {
 
         for (const auto &translation: translations) {
             auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+            model      = rotate(model, glm::radians(-90.0f), X_AXIS);
             model      = translate(model, translation);
             model      = scale(model, glm::vec3(0.04f));
             model_matrices.push_back(model);
@@ -425,7 +426,7 @@ namespace app {
         auto model = glm::mat4(1.0f);
         model      = scale(model, glm::vec3(30, 1, 30));
         model      = translate(model, glm::vec3(0, 7, 0));
-        model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+        model      = rotate(model, glm::radians(-90.0f), X_AXIS);
         water_shader->set_mat4("model", model);
 
         water_model->draw_blended(water_shader);
@@ -448,8 +449,8 @@ namespace app {
         set_common_shader_variables(stone_shader, camera, graphics);
 
         auto model = glm::mat4(1.0f);
-        model      = rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-        model      = rotate(model, glm::radians(-48.0f), glm::vec3(0, 0, 1));
+        model      = rotate(model, glm::radians(-90.0f), X_AXIS);
+        model      = rotate(model, glm::radians(-48.0f), Z_AXIS);
         model      = translate(model, glm::vec3(29, 71, 12));
         model      = scale(model, glm::vec3(1.35));
         stone_shader->set_mat4("model", model);
