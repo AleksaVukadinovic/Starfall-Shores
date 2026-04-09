@@ -126,7 +126,7 @@ namespace engine::platform {
 
     /**
      * @brief Updates the state of a key. 
-     * Key states are repesented as a state machine with the following states: Released, JustPressed, Pressed, JustReleased.
+     * Key states are represented as a state machine with the following states: Released, JustPressed, Pressed, JustReleased.
      * The state machine transitions are as follows:
      * - Released -> JustPressed if the key is pressed.
      * - JustPressed -> Pressed if the key is still pressed.

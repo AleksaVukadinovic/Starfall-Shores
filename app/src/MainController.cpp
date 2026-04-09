@@ -50,7 +50,7 @@ namespace app {
 
     bool MainController::loop() {
         if (const auto platform = get<engine::platform::PlatformController>(); platform->key(
-                engine::platform::KeyId::KEY_ESCAPE).is_down())
+                engine::platform::KeyId::KEY_ESCAPE).is_down() && !gui.is_enabled())
             return false;
         return true;
     }
@@ -550,6 +550,9 @@ namespace app {
         }
         if (platform->key(engine::platform::KeyId::KEY_E).is_down()) {
             camera->rotate_camera(10, 0);
+        }
+        if (platform->key(engine::platform::KeyId::KEY_ESCAPE).state() == engine::platform::Key::State::JustPressed) {
+            gui.set_enable(false);
         }
     }
 
