@@ -44,10 +44,10 @@ namespace app {
         void update_camera() const;
 
         engine::resources::ResourcesController *m_resources = nullptr;
-        engine::resources::Shader *m_basic_shader = nullptr;
+        engine::resources::Shader *m_basic_shader           = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
         engine::graphics::BloomController *m_bloom          = nullptr;
-        FogController *m_fog                                 = nullptr;
+        FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
 
         bool m_is_day                            = true;
