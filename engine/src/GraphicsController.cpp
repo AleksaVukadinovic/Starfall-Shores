@@ -12,7 +12,7 @@
 namespace engine::graphics {
 
     void GraphicsController::initialize() {
-        const int opengl_initialized = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+        const int opengl_initialized = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); // NOLINT
         RG_GUARANTEE(opengl_initialized, "OpenGL failed to init!");
 
         const auto platform               = get<platform::PlatformController>();

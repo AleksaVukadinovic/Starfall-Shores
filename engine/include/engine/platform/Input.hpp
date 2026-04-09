@@ -197,7 +197,7 @@ public:
     /**
     * @returns The @ref KeyId as a string.
     */
-    std::string_view name();
+    std::string_view name() const;
 
     [[nodiscard]] State state() const {
         return m_state;

@@ -68,9 +68,7 @@ ShaderParsingResult ShaderCompiler::parse_source() {
             current_shader->push_back('\n');
         }
     }
-    if (parsing_result.vertex_shader
-                      .empty() || parsing_result.fragment_shader
-                                                .empty()) {
+    if (parsing_result.vertex_shader.empty() || parsing_result.fragment_shader.empty()) {
         throw util::EngineError(util::EngineError::Type::ShaderCompilationError, std::format(
                 "Error compiling: {}. Source for vertex and fragment shader must be defined. Vertex shader source must begin with: '//#shader vertex'; and fragment shader source must begin with: '//#shader fragment'",
                 m_shader_name));
@@ -82,9 +80,7 @@ Shader ShaderCompiler::compile_from_file(std::string shader_name,
                                          const std::filesystem::path &shader_path) {
     if (!exists(shader_path)) {
         throw util::EngineError(util::EngineError::Type::FileNotFound,
-                                std::format("Shader source file {} for shader {} not found.",
-                                            shader_path.string(),
-                                            shader_name));
+                                std::format("Shader source file {} for shader {} not found.",shader_path.string(),shader_name));
     }
     std::string shader_source = util::read_text_file(shader_path);
     ShaderCompiler compiler(std::move(shader_name), std::move(shader_source));

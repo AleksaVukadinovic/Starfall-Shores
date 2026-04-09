@@ -25,9 +25,7 @@ void ResourcesController::load_shaders() {
         return;
     }
     for (const auto &shader_path: std::filesystem::directory_iterator(m_shaders_path)) {
-        const auto name = shader_path.path()
-                                     .stem()
-                                     .string();
+        const auto name = shader_path.path().stem().string();
         shader(name, shader_path);
     }
 }
@@ -53,9 +51,7 @@ void ResourcesController::load_textures() {
         return;
     }
     for (const auto &texture_entry: std::filesystem::directory_iterator(m_textures_path)) {
-        texture(texture_entry.path()
-                             .stem()
-                             .string(), texture_entry.path());
+        texture(texture_entry.path().stem().string(), texture_entry.path());
     }
 }
 
@@ -65,9 +61,7 @@ void ResourcesController::load_skyboxes() {
         return;
     }
     for (const auto &sky_boxes_entry: std::filesystem::directory_iterator(m_skyboxes_path)) {
-        skybox(sky_boxes_entry.path()
-                              .stem()
-                              .string(), sky_boxes_entry.path());
+        skybox(sky_boxes_entry.path().stem().string(), sky_boxes_entry.path());
     }
 }
 
@@ -83,20 +77,15 @@ public:
      */
     std::vector<Mesh> process_meshes();
 
-    explicit AssimpSceneProcessor(ResourcesController *resources_controller, const aiScene *scene,
-                                  std::filesystem::path model_path) :
+    explicit AssimpSceneProcessor(ResourcesController *resources_controller, const aiScene *scene, std::filesystem::path model_path) :
             m_scene(scene), m_model_path(std::move(model_path)), m_resources_controller(resources_controller) {
     }
 
 private:
     void process_node(const aiNode *node);
-
     void process_mesh(aiMesh *mesh);
-
     std::vector<Texture *> process_materials(const aiMaterial *material) const;
-
     void process_material_type(std::vector<Texture *> &textures, const aiMaterial *material, aiTextureType type) const;
-
     static TextureType assimp_texture_type_to_engine(aiTextureType type);
 
     std::vector<Mesh> m_meshes;
@@ -111,40 +100,30 @@ Model *ResourcesController::model(const std::string &name) {
         auto &config = util::Configuration::config();
         if (!config["resources"]["models"].contains(name)) {
             throw util::EngineError(util::EngineError::Type::ConfigurationError, std::format(
-                    "No model ({}) specify in config.json. Please add the model to the config.json.",
-                    name));
+            "No model ({}) specify in config.json. Please add the model to the config.json.", name));
         }
-        std::filesystem::path model_path = m_models_path /
-                                           std::filesystem::path(
-                                                   config["resources"]["models"][name]["path"].get<
-                                                           std::string>());
+        const std::filesystem::path model_path = m_models_path / std::filesystem::path(config["resources"]["models"][name]["path"].get<std::string>());
         Assimp::Importer importer;
-        int flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-                    aiProcess_CalcTangentSpace;
+        int flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
         if (config["resources"]["models"][name].value<bool>("flip_uvs", false)) {
             flags |= aiProcess_FlipUVs;
         }
 
         spdlog::info("load_model(name={}, path={})", name, model_path.string());
-        const aiScene *scene =
-                importer.ReadFile(model_path, flags);
+        const aiScene *scene = importer.ReadFile(model_path, flags);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw util::EngineError(util::EngineError::Type::AssetLoadingError,
-                                    std::format("Assimp error while reading model: {} from path {}.",
-                                                model_path.string(), name));
+                                    std::format("Assimp error while reading model: {} from path {}.", model_path.string(), name));
         }
         AssimpSceneProcessor scene_processor(this, scene, model_path);
         std::vector<Mesh> meshes = scene_processor.process_meshes();
-        result = std::make_unique<Model>(Model(std::move(meshes), model_path,
-                                               name));
+        result = std::make_unique<Model>(Model(std::move(meshes), model_path, name));
     }
     return result.get();
 }
 
-Texture *ResourcesController::texture(const std::string &name,
-                                      const std::filesystem::path &path,
-                                      const TextureType texture_type, const bool flip_uvs) {
+Texture *ResourcesController::texture(const std::string &name, const std::filesystem::path &path, const TextureType texture_type, const bool flip_uvs) {
     auto &result = m_textures[name];
     if (!result) {
         spdlog::info("load_texture(path={})", path.string());
@@ -154,9 +133,7 @@ Texture *ResourcesController::texture(const std::string &name,
     return result.get();
 }
 
-Skybox *ResourcesController::skybox(const std::string &name,
-                                    const std::filesystem::path &path,
-                                    const bool flip_uvs) {
+Skybox *ResourcesController::skybox(const std::string &name, const std::filesystem::path &path, const bool flip_uvs) {
     auto &result = m_sky_boxes[name];
     if (!result) {
         spdlog::info("load_skybox(path={})", path.string());
@@ -197,41 +174,27 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
     vertices.reserve(mesh->mNumVertices);
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex{};
-        vertex.Position
-              .x = mesh->mVertices[i].x;
-        vertex.Position
-              .y = mesh->mVertices[i].y;
-        vertex.Position
-              .z = mesh->mVertices[i].z;
+        vertex.Position.x = mesh->mVertices[i].x;
+        vertex.Position.y = mesh->mVertices[i].y;
+        vertex.Position.z = mesh->mVertices[i].z;
 
         if (mesh->HasNormals()) {
-            vertex.Normal
-                  .x = mesh->mNormals[i].x;
-            vertex.Normal
-                  .y = mesh->mNormals[i].y;
-            vertex.Normal
-                  .z = mesh->mNormals[i].z;
+            vertex.Normal.x = mesh->mNormals[i].x;
+            vertex.Normal.y = mesh->mNormals[i].y;
+            vertex.Normal.z = mesh->mNormals[i].z;
         }
 
         if (mesh->mTextureCoords[0]) {
-            vertex.TexCoords
-                  .x = mesh->mTextureCoords[0][i].x;
-            vertex.TexCoords
-                  .y = mesh->mTextureCoords[0][i].y;
+            vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+            vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
 
-            vertex.Tangent
-                  .x = mesh->mTangents[i].x;
-            vertex.Tangent
-                  .y = mesh->mTangents[i].y;
-            vertex.Tangent
-                  .z = mesh->mTangents[i].z;
+            vertex.Tangent.x = mesh->mTangents[i].x;
+            vertex.Tangent.y = mesh->mTangents[i].y;
+            vertex.Tangent.z = mesh->mTangents[i].z;
 
-            vertex.Bitangent
-                  .x = mesh->mBitangents[i].x;
-            vertex.Bitangent
-                  .y = mesh->mBitangents[i].y;
-            vertex.Bitangent
-                  .z = mesh->mBitangents[i].z;
+            vertex.Bitangent.x = mesh->mBitangents[i].x;
+            vertex.Bitangent.y = mesh->mBitangents[i].y;
+            vertex.Bitangent.z = mesh->mBitangents[i].z;
         }
         vertices.push_back(vertex);
     }
@@ -241,7 +204,7 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
         aiFace face = mesh->mFaces[i];
 
         for (uint32_t j = 0; j < face.mNumIndices; ++j) {
-            indices.push_back(face.mIndices[j]);
+            indices.emplace_back(face.mIndices[j]);
         }
     }
 
@@ -284,8 +247,7 @@ TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(const aiTextureT
         case aiTextureType_SPECULAR: return TextureType::Specular;
         case aiTextureType_HEIGHT: return TextureType::Height;
         case aiTextureType_NORMALS: return TextureType::Normal;
-        default: RG_SHOULD_NOT_REACH_HERE("Engine currently doesn't support the aiTextureType: {}",
-                                          static_cast<int>(type));
+        default: RG_SHOULD_NOT_REACH_HERE("Engine currently doesn't support the aiTextureType: {}", static_cast<int>(type));
     }
 }
 

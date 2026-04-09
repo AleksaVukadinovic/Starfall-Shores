@@ -23,8 +23,7 @@ std::string_view EngineError::type_string(const Type error) {
 }
 
 std::string EngineError::report() const {
-    return std::format("{}: in {}:{}.\n Message: {}", type_string(m_error), location().file_name(),
-                       location().line(), message());
+    return std::format("{}: in {}:{}.\n Message: {}", type_string(m_error), location().file_name(), location().line(), message());
 }
 
 } // namespace engine

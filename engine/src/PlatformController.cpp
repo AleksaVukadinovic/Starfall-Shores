@@ -43,7 +43,7 @@ namespace engine::platform {
             glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WIN32);
         }
 #endif
-        bool glfw_initialized = glfwInit();
+        const bool glfw_initialized = glfwInit();
         RG_GUARANTEE(glfw_initialized, "GLFW platform failed to initialize_controllers.");
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -117,7 +117,7 @@ namespace engine::platform {
         glfwSwapBuffers(m_window.handle_());
     }
 
-    int glfw_platform_action(GLFWwindow *window, int glfw_key_code) {
+    int glfw_platform_action(GLFWwindow *window, const int glfw_key_code) {
         if (glfw_key_code >= GLFW_MOUSE_BUTTON_1 && glfw_key_code <= GLFW_MOUSE_BUTTON_LAST) {
             return glfwGetMouseButton(window, glfw_key_code);
         }
@@ -170,7 +170,7 @@ namespace engine::platform {
         }
     }
 
-    std::string_view Key::name() {
+    std::string_view Key::name() const {
         return g_engine_key_to_string[m_key];
     }
 
@@ -206,7 +206,7 @@ namespace engine::platform {
         m_platform_event_observers.emplace_back(std::move(observer));
     }
 
-    void PlatformController::_platform_on_mouse(const double x, const double y) {
+    void PlatformController::_platform_on_mouse(const double x, const double y) const {
 
         const double last_x       = g_mouse_position.x;
         const double last_y       = g_mouse_position.y;
@@ -226,7 +226,7 @@ namespace engine::platform {
         }
     }
 
-    void PlatformController::_platform_on_scroll(double x, double y) const {
+    void PlatformController::_platform_on_scroll(double x, const double y) const {
         g_mouse_position.scroll = static_cast<float>(y);
         for (const auto &observer: m_platform_event_observers) {
             observer->on_scroll(g_mouse_position);
@@ -256,11 +256,7 @@ namespace engine::platform {
 
     void PlatformController::set_enable_cursor(const bool enabled) {
         m_cursor_enabled = enabled;
-        if (enabled) {
-            glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        } else {
-            glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
+        glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, enabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     }
 
     bool PlatformController::is_cursor_enabled() const {
@@ -272,10 +268,8 @@ namespace engine::platform {
     }
 
     void initialize_key_maps() {
-        // formatter: off
 #include "glfw_key_mapping.include"
 #include "engine_key_to_string.include"
-        // formatter: on
     }
 
     static void glfw_mouse_callback(GLFWwindow *window, const double x, const double y) {

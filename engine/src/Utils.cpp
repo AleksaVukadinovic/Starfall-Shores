@@ -24,7 +24,7 @@ void trace(const std::source_location location) {
 }
 
 void Configuration::initialize() {
-    auto config_path = get_config_path();
+    const auto config_path = get_config_path();
     std::ifstream f(config_path);
     if (!f.is_open()) {
         throw EngineError(EngineError::Type::FileNotFound,
@@ -60,8 +60,8 @@ std::filesystem::path Configuration::get_config_path() {
 
 nlohmann::json Configuration::create_default() {
     json default_config;
-    default_config["window"]["width"] = 800;
-    default_config["window"]["height"] = 600;
+    default_config["window"]["width"] = 1400;
+    default_config["window"]["height"] = 1000;
     default_config["window"]["title"] = "Hello, window!";
     return default_config;
 }
@@ -88,8 +88,7 @@ void ArgParser::initialize(int argc, char **argv) {
 
 std::string ArgParser::get_arg_value(std::string_view arg_name) const {
     for (int i = 0; i < m_argc; ++i) {
-        std::string_view token(m_argv[i]);
-        if (token == arg_name) {
+        if (const std::string_view token(m_argv[i]); token == arg_name) {
             std::string arg_value(m_argv[i + 1]);
             RG_GUARANTEE(!arg_value.starts_with("--"), "No get_arg_value for argument: \"{}\" provided.", arg_name);
             return arg_value;

@@ -112,7 +112,7 @@ namespace engine::platform {
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.
         */
-        void _platform_on_mouse(double x, double y);
+        void _platform_on_mouse(double x, double y) const;
 
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.

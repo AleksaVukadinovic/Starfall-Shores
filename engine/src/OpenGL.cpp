@@ -61,9 +61,7 @@ uint32_t OpenGL::init_skybox_cube() {
         return skybox_vao;
     }
     float vertices[] = {
-            // @formatter:off
         #include <skybox_vertices.include>
-        // @formatter:on
     };
     uint32_t skybox_vbo = 0;
     CHECKED_GL_CALL(glGenVertexArrays, 1, &skybox_vao);

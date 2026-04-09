@@ -17,10 +17,9 @@ namespace engine::graphics {
             CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_quad_vbo);
             CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
             CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
-            CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+            CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0); // NOLINT
             CHECKED_GL_CALL(glEnableVertexAttribArray, 1);
-            CHECKED_GL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void *) (3 * sizeof(float)));
+            CHECKED_GL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float))); // NOLINT
         }
         CHECKED_GL_CALL(glBindVertexArray, m_quad_vao);
         CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
