@@ -2,6 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/FogController.hpp>
+#include <engine/graphics/BloomController.hpp>
 
 namespace engine::resources {
     class ResourcesController;
@@ -43,6 +44,7 @@ namespace app {
         void update_camera() const;
 
         engine::resources::ResourcesController *m_resources = nullptr;
+        engine::resources::Shader *m_basic_shader = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
         engine::graphics::BloomController *m_bloom          = nullptr;
         FogController *m_fog                                 = nullptr;
