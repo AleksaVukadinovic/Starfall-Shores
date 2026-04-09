@@ -13,6 +13,7 @@ void GUIController::initialize() {
     m_graphics = get<engine::graphics::GraphicsController>();
     m_camera = get<engine::graphics::GraphicsController>()->camera();
     m_bloom = get<engine::graphics::BloomController>();
+    m_platform = get<engine::platform::PlatformController>();
     m_main_controller = get<MainController>();
 }
 
@@ -28,6 +29,7 @@ void GUIController::draw() {
     draw_bloom_controls();
     draw_skybox_controls();
     draw_camera_info();
+    draw_fps_counter();
     m_graphics->end_gui();
 }
 
@@ -81,4 +83,11 @@ void GUIController::draw_camera_info() const {
     ImGui::Text("Camera front: (%f, %f, %f)", c.Front.x, c.Front.y, c.Front.z);
     ImGui::End();
 }
+
+void GUIController::draw_fps_counter() const {
+    ImGui::Begin("FPS");
+    ImGui::Text("%.0f", 1.0f/m_platform->dt());
+    ImGui::End();
+}
+
 }// namespace app
