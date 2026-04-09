@@ -39,7 +39,7 @@ void GUIController::draw_bloom_controls() const {
     ImGui::End();
 }
 
-void GUIController::draw_skybox_controls() {
+void GUIController::draw_skybox_controls() const {
     ImGui::Begin("Skybox Selection");
     const char* daytime_skyboxes[] = { "Sunny", "Cloudy", "Islands" };
     static int current_daytime_skybox = 0;

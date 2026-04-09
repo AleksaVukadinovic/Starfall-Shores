@@ -21,7 +21,7 @@ namespace app {
         void draw() override;
 
         void draw_bloom_controls() const;
-        void draw_skybox_controls();
+        void draw_skybox_controls() const;
         void draw_camera_info() const;
     };
 }

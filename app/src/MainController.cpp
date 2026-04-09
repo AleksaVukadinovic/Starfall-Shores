@@ -65,7 +65,7 @@ namespace app {
     void MainController::set_common_shader_variables(const engine::resources::Shader *shader,
                                                      const engine::graphics::Camera *camera,
                                                      const engine::graphics::GraphicsController *graphics) const {
-        const auto light_position = m_is_day ? glm::vec3(0.0f, 60.0f, 0.0f) : glm::vec3(12.0f, 25.0f, 6.0f);
+        const auto light_position = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
         const auto ambient        = m_is_day ? glm::vec3(0.2f) : glm::vec3(0.1f);
         const auto diffuse        = m_is_day ? glm::vec3(0.5f) : glm::vec3(0.3f);
         const auto specular       = m_is_day ? glm::vec3(0.1) : glm::vec3(0.05f);
@@ -409,15 +409,13 @@ namespace app {
         engine::resources::Model *water_model         = resources->model("water");
         const engine::resources::Shader *water_shader = resources->shader("water_shader");
 
-        const auto light_pos = m_is_day ? glm::vec3(0.0f, 60.0f, 0.0f) : glm::vec3(12.0f, 25.0f, 6.0f);
+        const auto light_pos = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
         water_shader->use();
 
         const auto current_time = static_cast<float>(engine::platform::PlatformController::get_time());
         water_shader->set_float("time", current_time);
 
-        const glm::vec3 water_color = m_is_day
-                                          ? glm::vec3(0.0f, 0.4f, 0.6f)
-                                          : glm::vec3(0.0f, 0.1f, 0.3f);
+        const glm::vec3 water_color = m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT;
         water_shader->set_vec3("waterColor", water_color);
         water_shader->set_vec3("lightPos", light_pos);
         water_shader->set_vec3("viewPos", camera->Position);
@@ -551,6 +549,14 @@ namespace app {
         }
         if (platform->key(engine::platform::KeyId::KEY_E).is_down()) {
             camera->rotate_camera(10, 0);
+        }
+    }
+
+    void MainController::set_skybox(const std::string &new_skybox, const bool is_daytime_skybox) {
+        if (m_is_day && is_daytime_skybox) {
+            m_active_daytime_skybox = new_skybox;
+        } else if (!m_is_day && !is_daytime_skybox) {
+            m_active_nighttime_skybox = new_skybox;
         }
     }
 }
