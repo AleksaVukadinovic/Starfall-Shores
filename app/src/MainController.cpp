@@ -61,7 +61,7 @@ namespace app {
         const auto diffuse        = m_is_day ? glm::vec3(0.5f) : glm::vec3(0.3f);
         const auto specular       = m_is_day ? glm::vec3(0.1) : glm::vec3(0.05f);
         const float shininess     = m_is_day ? 1024.0f : 2048.0f;
-        const auto light_color    = m_is_day ? glm::vec3(1.0f, 1.0f, 1.0f) : glm::vec3(1.0f, 0.7f, 0.1f);
+        const auto light_color    = m_is_day ? LIGHT_COLOR_DAY : LIGHT_COLOR_NIGHT;
         shader->use();
         shader->set_vec3("light.position", light_position);
         shader->set_vec3("light.ambient", ambient);
@@ -94,13 +94,13 @@ namespace app {
     }
 
     void MainController::draw_forest() const {
-        auto *yellow_tree       = m_resources->model("yellow_tree");
-        auto *green_tree        = m_resources->model("green_tree");
-        auto *tall_tree         = m_resources->model("beech_tree");
-        auto *oak_tree          = m_resources->model("oak_tree");
-        auto *pine_tree         = m_resources->model("pine_tree");
-        auto *old_tree          = m_resources->model("old_tree");
-        const auto *tree_shader = m_resources->shader("basic");
+        const auto yellow_tree       = m_resources->model("yellow_tree");
+        const auto green_tree        = m_resources->model("green_tree");
+        const auto tall_tree         = m_resources->model("beech_tree");
+        const auto oak_tree          = m_resources->model("oak_tree");
+        const auto pine_tree         = m_resources->model("pine_tree");
+        const auto old_tree          = m_resources->model("old_tree");
+        const auto tree_shader = m_resources->shader("basic");
 
         set_common_shader_variables(tree_shader);
 
@@ -164,7 +164,7 @@ namespace app {
         set_common_shader_variables(campfire_shader);
         campfire_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(5.0f));
 
-        constexpr glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(12.0f, 17.3f, 6.0f));
+        const glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(12.0f, 17.3f, 6.0f));
         campfire_shader->set_mat4("model", model);
         campfire->draw(campfire_shader);
     }
@@ -198,6 +198,14 @@ namespace app {
         }
     }
 
+    glm::mat4 create_model_matrix(const glm::vec3 &position, const glm::vec3 &scale, const glm::vec3 &rotation_axis, const float rotation_angle) {
+        auto model = glm::mat4(1.0f);
+        model      = rotate(model, glm::radians(rotation_angle), rotation_axis);
+        model      = translate(model, position);
+        model      = glm::scale(model, scale);
+        return model;
+    }
+
     void MainController::draw_tents() const {
         const engine::resources::Model *viking_tent        = m_resources->model("viking_tent");
         const engine::resources::Model *stylized_tent      = m_resources->model("stylized_tent");
@@ -206,17 +214,11 @@ namespace app {
         set_common_shader_variables(tent_shader);
         tent_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(2.0f));
 
-        auto model = glm::mat4(1.0f);
-        model      = rotate(model, glm::radians(-20.0f), Y_AXIS);
-        model      = translate(model, glm::vec3(16, 17, -14));
-        model      = scale(model, glm::vec3(0.037));
+        auto model = create_model_matrix(glm::vec3(16, 17, -14), glm::vec3(0.037), Y_AXIS, -20.0f);
         tent_shader->set_mat4("model", model);
         viking_tent->draw(tent_shader);
 
-        model = glm::mat4(1.0f);
-        model = rotate(model, glm::radians(-128.0f), Y_AXIS);
-        model = translate(model, glm::vec3(0, 20, -33));
-        model = scale(model, glm::vec3(0.06));
+        model = create_model_matrix(glm::vec3(0, 20, -33), glm::vec3(0.06), Y_AXIS, -128.0f);
         tent_shader->set_mat4("model", model);
         stylized_tent->draw(tent_shader);
     }
@@ -235,17 +237,12 @@ namespace app {
         };
 
         auto draw_bush1 = [&](const glm::vec3 &translation, const float scale) {
-            auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(-90.0f), X_AXIS);
-            model      = translate(model, translation);
-            model      = glm::scale(model, glm::vec3(scale));
+            const auto model = create_model_matrix(translation, glm::vec3(scale), X_AXIS, -90.0f);
             draw_model(bush1, model);
         };
 
         auto draw_simple = [&](const engine::resources::Model *model, const glm::vec3 &translation, const float scale) {
-            auto m = glm::mat4(1.0f);
-            m      = translate(m, translation);
-            m      = glm::scale(m, glm::vec3(scale));
+            const auto m = create_model_matrix(translation, glm::vec3(scale), Y_AXIS, 0.0f);
             draw_model(model, m);
         };
 
@@ -295,10 +292,7 @@ namespace app {
         }
 
         for (const auto &translation: translations) {
-            auto model = glm::mat4(1.0f);
-            model      = rotate(model, glm::radians(90.0f), X_AXIS);
-            model      = translate(model, translation);
-            model      = scale(model, glm::vec3(0.12f));
+            auto model = create_model_matrix(translation, glm::vec3(0.12f), X_AXIS, 90.0f);
             model_matrices.push_back(model);
         }
 
@@ -454,9 +448,7 @@ namespace app {
         fire_shader->set_mat4("projection", m_graphics->projection_matrix());
         fire_shader->set_mat4("view", m_camera->view_matrix());
 
-        auto model = glm::mat4(1.0f);
-        model      = translate(model, glm::vec3(12, 20.5, 6.5));
-        model      = scale(model, glm::vec3(3.1));
+        const auto model = create_model_matrix(glm::vec3(12, 20.5, 6.5), glm::vec3(3.1), Y_AXIS, 0.0f);
         fire_shader->set_mat4("model", model);
 
         const double current_time = engine::platform::PlatformController::get_time() - m_fire_start_time;
@@ -504,7 +496,7 @@ namespace app {
         }
     }
 
-    void MainController::update_camera() {
+    void MainController::update_camera() const {
         if (const auto gui = get<GUIController>(); gui->is_enabled())
             return;
 

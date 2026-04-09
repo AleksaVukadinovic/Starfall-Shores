@@ -39,7 +39,7 @@ namespace app {
 
         void update() override;
         void update_day_night_transition();
-        void update_camera();
+        void update_camera() const;
 
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
@@ -61,6 +61,8 @@ namespace app {
         static constexpr auto LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);
         static constexpr auto WATER_COLOR_DAY = glm::vec3(0.0f, 0.4f, 0.6f);
         static constexpr auto WATER_COLOR_NIGHT = glm::vec3(0.0f, 0.1f, 0.3f);
+        static constexpr auto LIGHT_COLOR_DAY = glm::vec3(1.0f, 1.0f, 1.0f);
+        static constexpr auto LIGHT_COLOR_NIGHT = glm::vec3(1.0f, 0.7f, 0.1f);
 
         void set_common_shader_variables(const engine::resources::Shader *shader) const;
     };
