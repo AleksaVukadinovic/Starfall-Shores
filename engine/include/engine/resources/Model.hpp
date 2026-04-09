@@ -27,7 +27,7 @@ namespace engine::resources {
          * @brief Enables blending
          * @param shader The shader to use for drawing
          */
-        void draw_blended(const Shader *shader);
+        void draw_blended(const Shader *shader) const;
 
         /**
         * @brief Draws the model using a given shader by drawing all the meshes in the model.
@@ -39,7 +39,7 @@ namespace engine::resources {
         /**
         * @brief Destroys the model in the OpenGL context.
         */  
-        void destroy();
+        void destroy() const;
 
         /**
         * @brief Returns the meshes in the model.

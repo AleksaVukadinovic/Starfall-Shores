@@ -1,6 +1,5 @@
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/BloomController.hpp>
-
 #include <GUIController.hpp>
 #include <MainController.hpp>
 #include <MyApp.hpp>

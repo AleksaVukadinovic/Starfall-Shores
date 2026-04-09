@@ -107,7 +107,7 @@ namespace engine::platform {
         /**
         * @brief Swaps the current draw buffer for the main window. Should be called at the end of the frame.
         */
-        void swap_buffers();
+        void swap_buffers() const;
 
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.
@@ -117,12 +117,12 @@ namespace engine::platform {
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.
         */
-        void _platform_on_keyboard(int key, int action);
+        void _platform_on_keyboard(int key, int action) const;
 
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.
         */
-        void _platform_on_scroll(double x, double y);
+        void _platform_on_scroll(double x, double y) const;
 
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.
@@ -132,9 +132,9 @@ namespace engine::platform {
         /**
         * @brief Called from the platform-specific callback. You shouldn't call this function directly.
         */
-        void _platform_on_window_close(GLFWwindow *window);
+        void _platform_on_window_close(GLFWwindow *window) const;
 
-        void _platform_on_mouse_button(int button, int action);
+        void _platform_on_mouse_button(int button, int action) const;
 
     private:
         Key &key_ref(KeyId key);

@@ -11,7 +11,7 @@ namespace engine::resources {
         }
     }
 
-    void Model::draw_blended(const Shader *shader) {
+    void Model::draw_blended(const Shader *shader) const {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         draw(shader);
@@ -53,7 +53,7 @@ namespace engine::resources {
         }
     }
 
-    void Model::destroy() {
+    void Model::destroy() const {
         for (auto &mesh: m_meshes) {
             mesh.destroy();
         }

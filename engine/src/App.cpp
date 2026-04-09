@@ -10,7 +10,7 @@
 #include <engine/util/Utils.hpp>
 
 namespace engine::core {
-int App::run(int argc, char **argv) {
+int App::run(const int argc, char **argv) {
     try {
         engine_setup(argc, argv);
         app_setup();
@@ -28,7 +28,7 @@ int App::run(int argc, char **argv) {
     return on_exit();
 }
 
-void App::engine_setup(int argc, char **argv) {
+void App::engine_setup(const int argc, char **argv) {
     util::ArgParser::instance()->initialize(argc, argv);
     util::Configuration::instance()->initialize();
 
@@ -61,7 +61,7 @@ void App::initialize() {
 }
 
 bool App::loop() const {
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled() && !controller->loop()) {
             return false;
         }
@@ -70,7 +70,7 @@ bool App::loop() const {
 }
 
 void App::poll_events() const {
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         // We don't check if the controller is enabled for poll_events because the controller may enable itself in the poll_events if it needs to.
         // For example, a GUIController may enable itself in the poll_events method if a button to enable/disable the GUI was pressed.
         controller->poll_events();
@@ -78,7 +78,7 @@ void App::poll_events() const {
 }
 
 void App::update() const {
-    for (auto controller: m_controllers) {
+    for (const auto controller: m_controllers) {
         if (controller->is_enabled()) {
             controller->update();
         }

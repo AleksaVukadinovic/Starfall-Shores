@@ -105,8 +105,7 @@ private:
     ResourcesController *m_resources_controller;
 };
 
-Model *ResourcesController::model(
-        const std::string &name) {
+Model *ResourcesController::model(const std::string &name) {
     auto &result = m_models[name];
     if (!result) {
         auto &config = util::Configuration::config();
@@ -145,7 +144,7 @@ Model *ResourcesController::model(
 
 Texture *ResourcesController::texture(const std::string &name,
                                       const std::filesystem::path &path,
-                                      TextureType texture_type, const bool flip_uvs) {
+                                      const TextureType texture_type, const bool flip_uvs) {
     auto &result = m_textures[name];
     if (!result) {
         spdlog::info("load_texture(path={})", path.string());

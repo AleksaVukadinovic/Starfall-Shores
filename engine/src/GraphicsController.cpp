@@ -52,7 +52,7 @@ namespace engine::graphics {
         }
     }
 
-    void GraphicsPlatformEventObserver::on_window_resize(int width, int height) {
+    void GraphicsPlatformEventObserver::on_window_resize(const int width, const int height) {
         m_graphics->perspective_params().Width  = static_cast<float>(width);
         m_graphics->perspective_params().Height = static_cast<float>(height);
 
@@ -75,7 +75,7 @@ namespace engine::graphics {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    void GraphicsController::draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) {
+    void GraphicsController::draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) const {
         const auto view = glm::mat4(glm::mat3(m_camera.view_matrix()));
         shader->use();
         shader->set_mat4("view", view);

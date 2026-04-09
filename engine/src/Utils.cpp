@@ -17,7 +17,7 @@ void tracing_off() {
     g_tracing = false;
 }
 
-void trace(std::source_location location) {
+void trace(const std::source_location location) {
     if (g_tracing) {
         spdlog::info("{}, in {}:{}", location.function_name(), location.file_name(), location.line());
     }

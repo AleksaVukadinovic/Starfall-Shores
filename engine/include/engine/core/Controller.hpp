@@ -109,7 +109,7 @@ public:
     * except for the @ref Controller::poll_events function, that's executed always.
     * By default, controllers are enabled when registered.
     */
-    void set_enable(bool value) {
+    void set_enable(const bool value) {
         m_enabled = value;
     }
 
