@@ -2,6 +2,10 @@
 #include <spdlog/spdlog.h>
 #include <engine/graphics/GraphicsController.hpp>
 
+namespace engine::resources {
+    class ResourcesController;
+}
+
 namespace app {
     class MainController final : public engine::core::Controller {
     public:
@@ -30,34 +34,34 @@ namespace app {
         void draw_flowers() const;
         void draw_path() const;
         void draw_mushrooms() const;
-
         void draw_stones() const;
-
-        static void draw_fire();
+        void draw_fire() const;
 
         void update() override;
-
         void update_day_night_transition();
+        void update_camera();
 
-        static void update_camera();
+        engine::resources::ResourcesController *m_resources = nullptr;
+        engine::graphics::GraphicsController *m_graphics    = nullptr;
+        engine::graphics::BloomController *m_bloom          = nullptr;
+        engine::graphics::Camera *m_camera                  = nullptr;
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;
         double m_day_change_timer                = 0.0;
         float m_current_exposure                 = DAY_EXPOSURE;
+        double m_fire_start_time                 = 0.0;
         static constexpr double DAY_CHANGE_DELAY = 5.0;
         static constexpr float DAY_EXPOSURE      = 1.3f;
         static constexpr float NIGHT_EXPOSURE    = 0.4f;
         std::string m_active_daytime_skybox        = "skybox_day";
         std::string m_active_nighttime_skybox      = "skybox_night";
 
-        const glm::vec3 LIGHT_POS_DAY = glm::vec3(0.0f, 60.0f, 0.0f);
-        const glm::vec3 LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);
-        const glm::vec3 WATER_COLOR_DAY = glm::vec3(0.0f, 0.4f, 0.6f);
-        const glm::vec3 WATER_COLOR_NIGHT = glm::vec3(0.0f, 0.1f, 0.3f);
+        static constexpr auto LIGHT_POS_DAY = glm::vec3(0.0f, 60.0f, 0.0f);
+        static constexpr auto LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);
+        static constexpr auto WATER_COLOR_DAY = glm::vec3(0.0f, 0.4f, 0.6f);
+        static constexpr auto WATER_COLOR_NIGHT = glm::vec3(0.0f, 0.1f, 0.3f);
 
-        void set_common_shader_variables(const engine::resources::Shader *shader,
-                                         const engine::graphics::Camera *camera,
-                                         const engine::graphics::GraphicsController *graphics) const;
+        void set_common_shader_variables(const engine::resources::Shader *shader) const;
     };
 }

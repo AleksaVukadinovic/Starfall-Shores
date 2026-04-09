@@ -10,12 +10,6 @@
 #include <GUIController.hpp>
 
 namespace app {
-    engine::resources::ResourcesController *resources;
-    engine::graphics::GraphicsController *graphics;
-    engine::graphics::BloomController *bloom_controller;
-    GUIController gui;
-    engine::graphics::Camera *camera;
-
     class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
     public:
         void on_mouse_move(engine::platform::MousePosition position) override;
@@ -30,27 +24,25 @@ namespace app {
 
     void MainController::initialize() {
         engine::graphics::OpenGL::enable_depth_testing();
-        graphics         = get<engine::graphics::GraphicsController>();
-        graphics->perspective_params().Far = 250.0f;
-        bloom_controller = get<engine::graphics::BloomController>();
-        bloom_controller->bloom_setup();
-        resources           = get<engine::resources::ResourcesController>();
-        camera              = graphics->camera();
-        resources           = get<engine::resources::ResourcesController>();
-        gui                 = GUIController();
+        m_graphics = get<engine::graphics::GraphicsController>();
+        m_graphics->perspective_params().Far = 250.0f;
+        m_bloom = get<engine::graphics::BloomController>();
+        m_bloom->bloom_setup();
+        m_resources         = get<engine::resources::ResourcesController>();
+        m_camera            = m_graphics->camera();
         const auto platform = get<engine::platform::PlatformController>();
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         platform->set_enable_cursor(false);
-        m_is_day         = true;
-        camera->Position = glm::vec3(5, 27, 17);
-        camera->Yaw      = -38;
-        camera->Pitch    = -5;
-        camera->rotate_camera(0, 0);
+        m_is_day           = true;
+        m_camera->Position = glm::vec3(5, 27, 17);
+        m_camera->Yaw      = -38;
+        m_camera->Pitch    = -5;
+        m_camera->rotate_camera(0, 0);
     }
 
     bool MainController::loop() {
         if (const auto platform = get<engine::platform::PlatformController>(); platform->key(
-                engine::platform::KeyId::KEY_ESCAPE).is_down() && !gui.is_enabled())
+                engine::platform::KeyId::KEY_ESCAPE).is_down() && !get<GUIController>()->is_enabled())
             return false;
         return true;
     }
@@ -63,9 +55,7 @@ namespace app {
         get<engine::platform::PlatformController>()->swap_buffers();
     }
 
-    void MainController::set_common_shader_variables(const engine::resources::Shader *shader,
-                                                     const engine::graphics::Camera *camera,
-                                                     const engine::graphics::GraphicsController *graphics) const {
+    void MainController::set_common_shader_variables(const engine::resources::Shader *shader) const {
         const auto light_position = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
         const auto ambient        = m_is_day ? glm::vec3(0.2f) : glm::vec3(0.1f);
         const auto diffuse        = m_is_day ? glm::vec3(0.5f) : glm::vec3(0.3f);
@@ -79,13 +69,13 @@ namespace app {
         shader->set_vec3("light.specular", specular);
         shader->set_vec3("lightColor", light_color);
         shader->set_float("material.shininess", shininess);
-        shader->set_vec3("viewPos", camera->Position);
-        shader->set_mat4("projection", graphics->projection_matrix());
-        shader->set_mat4("view", camera->view_matrix());
+        shader->set_vec3("viewPos", m_camera->Position);
+        shader->set_mat4("projection", m_graphics->projection_matrix());
+        shader->set_mat4("view", m_camera->view_matrix());
     }
 
     void MainController::draw() {
-        bloom_controller->prepare_hdr();
+        m_bloom->prepare_hdr();
         draw_water();
         draw_terrain();
         draw_campfire();
@@ -100,19 +90,19 @@ namespace app {
         if (!m_is_day)
             draw_fire();
         draw_skybox();
-        bloom_controller->finalize_bloom();
+        m_bloom->finalize_bloom();
     }
 
     void MainController::draw_forest() const {
-        auto *yellow_tree       = resources->model("yellow_tree");
-        auto *green_tree        = resources->model("green_tree");
-        auto *tall_tree         = resources->model("beech_tree");
-        auto *oak_tree          = resources->model("oak_tree");
-        auto *pine_tree         = resources->model("pine_tree");
-        auto *old_tree          = resources->model("old_tree");
-        const auto *tree_shader = resources->shader("basic");
+        auto *yellow_tree       = m_resources->model("yellow_tree");
+        auto *green_tree        = m_resources->model("green_tree");
+        auto *tall_tree         = m_resources->model("beech_tree");
+        auto *oak_tree          = m_resources->model("oak_tree");
+        auto *pine_tree         = m_resources->model("pine_tree");
+        auto *old_tree          = m_resources->model("old_tree");
+        const auto *tree_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(tree_shader, camera, graphics);
+        set_common_shader_variables(tree_shader);
 
         auto draw_tree = [&](auto *tree_model, const float x, const float y, const float z, const float scale,
                              const float rotation_angle = 0.0f, const glm::vec3 &rotation_axis = CENTER) {
@@ -168,10 +158,10 @@ namespace app {
         draw_tree(old_tree, 65, 40, -39, 0.04f, 3.0f, Z_AXIS);
     }
     void MainController::draw_campfire() const {
-        const engine::resources::Model *campfire               = resources->model("campfire");
-        const engine::resources::Shader *campfire_shader = resources->shader("basic");
+        const engine::resources::Model *campfire               = m_resources->model("campfire");
+        const engine::resources::Shader *campfire_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(campfire_shader, camera, graphics);
+        set_common_shader_variables(campfire_shader);
         campfire_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(5.0f));
 
         constexpr glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(12.0f, 17.3f, 6.0f));
@@ -180,10 +170,10 @@ namespace app {
     }
 
     void MainController::draw_logs() const {
-        const engine::resources::Model *log_seat               = resources->model("log_seat");
-        const engine::resources::Shader *log_seat_shader = resources->shader("basic");
+        const engine::resources::Model *log_seat               = m_resources->model("log_seat");
+        const engine::resources::Shader *log_seat_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(log_seat_shader, camera, graphics);
+        set_common_shader_variables(log_seat_shader);
         log_seat_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(4.0f));
 
         struct LogPlacement {
@@ -191,11 +181,11 @@ namespace app {
             glm::vec3 position;
         };
 
-        const std::vector<LogPlacement> logs = {
-                {42.0f, glm::vec3(6, 17.5, 2)},
-                {155.0f, glm::vec3(-16, 17.5, -9)},
-                {-100.0f, glm::vec3(1, 17.5, -26)}
-        };
+        constexpr std::array<LogPlacement, 3> logs = {{
+                LogPlacement{42.0f, glm::vec3(6, 17.5, 2)},
+                LogPlacement{155.0f, glm::vec3(-16, 17.5, -9)},
+                LogPlacement{-100.0f, glm::vec3(1, 17.5, -26)}
+        }};
 
         for (const auto &[rotation_angle, position]: logs) {
             auto model = glm::mat4(1.0f);
@@ -209,11 +199,11 @@ namespace app {
     }
 
     void MainController::draw_tents() const {
-        const engine::resources::Model *viking_tent        = resources->model("viking_tent");
-        const engine::resources::Model *stylized_tent      = resources->model("stylized_tent");
-        const engine::resources::Shader *tent_shader = resources->shader("basic");
+        const engine::resources::Model *viking_tent        = m_resources->model("viking_tent");
+        const engine::resources::Model *stylized_tent      = m_resources->model("stylized_tent");
+        const engine::resources::Shader *tent_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(tent_shader, camera, graphics);
+        set_common_shader_variables(tent_shader);
         tent_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(2.0f));
 
         auto model = glm::mat4(1.0f);
@@ -232,12 +222,12 @@ namespace app {
     }
 
     void MainController::draw_bushes() const {
-        const auto bush1       = resources->model("bush1");
-        const auto bush2       = resources->model("bush2");
-        const auto laurel_bush = resources->model("laurel_bush");
-        auto bush_shader       = resources->shader("basic");
+        const auto bush1       = m_resources->model("bush1");
+        const auto bush2       = m_resources->model("bush2");
+        const auto laurel_bush = m_resources->model("laurel_bush");
+        auto bush_shader       = m_resources->shader("basic");
 
-        set_common_shader_variables(bush_shader, camera, graphics);
+        set_common_shader_variables(bush_shader);
 
         auto draw_model = [bush_shader](const engine::resources::Model *model, const glm::mat4 &transform) {
             bush_shader->set_mat4("model", transform);
@@ -276,8 +266,8 @@ namespace app {
     }
 
     void MainController::draw_white_flowers() const {
-        const engine::resources::Model *white_flowers        = resources->model("flowers2");
-        const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
+        const engine::resources::Model *white_flowers        = m_resources->model("flowers2");
+        const engine::resources::Shader *flower_shader = m_resources->shader("flower_shader");
 
         constexpr std::array translations = {
             // formatter: off
@@ -312,7 +302,7 @@ namespace app {
             model_matrices.push_back(model);
         }
 
-        set_common_shader_variables(flower_shader, camera, graphics);
+        set_common_shader_variables(flower_shader);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
         white_flowers->draw_instanced(flower_shader, model_matrices);
@@ -324,10 +314,10 @@ namespace app {
     }
 
     void MainController::draw_path() const {
-        const auto path         = resources->model("path");
-        const auto stone_shader = resources->shader("basic");
+        const auto path         = m_resources->model("path");
+        const auto stone_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(stone_shader, camera, graphics);
+        set_common_shader_variables(stone_shader);
 
         auto draw_path_segment = [&](const glm::vec3 &translation, const float y_rotation, const float scale) {
             auto model = glm::mat4(1.0f);
@@ -347,10 +337,10 @@ namespace app {
     }
 
     void MainController::draw_mushrooms() const {
-        const auto mushroom      = resources->model("shrooms");
-        const auto shroom_shader = resources->shader("basic");
+        const auto mushroom      = m_resources->model("shrooms");
+        const auto shroom_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(shroom_shader, camera, graphics);
+        set_common_shader_variables(shroom_shader);
 
         auto draw_mushroom = [&](const glm::vec3 &translation, const float scale, const float y_rotation = 0.0f) {
             auto model = glm::mat4(1.0f);
@@ -370,8 +360,8 @@ namespace app {
     }
 
     void MainController::draw_red_flowers() const {
-        const engine::resources::Model *roses                = resources->model("roses");
-        const engine::resources::Shader *flower_shader = resources->shader("flower_shader");
+        const engine::resources::Model *roses                = m_resources->model("roses");
+        const engine::resources::Shader *flower_shader = m_resources->shader("flower_shader");
 
         constexpr std::array translations = {
             // formatter: off
@@ -390,25 +380,24 @@ namespace app {
             model_matrices.push_back(model);
         }
 
-        set_common_shader_variables(flower_shader, camera, graphics);
+        set_common_shader_variables(flower_shader);
         flower_shader->set_vec3("light.ambient", m_is_day ? glm::vec3(0.2f) : glm::vec3(0.05f));
         flower_shader->set_vec3("light.diffuse", m_is_day ? glm::vec3(0.5f) : glm::vec3(0.1f));
         roses->draw_instanced(flower_shader, model_matrices);
     }
 
     void MainController::draw_terrain() const {
-        const engine::resources::Model *terrain               = resources->model("terrain");
-        const engine::resources::Shader *terrain_shader = resources->shader("basic");
-        set_common_shader_variables(terrain_shader, camera, graphics);
+        const engine::resources::Model *terrain               = m_resources->model("terrain");
+        const engine::resources::Shader *terrain_shader = m_resources->shader("basic");
+        set_common_shader_variables(terrain_shader);
         auto model = glm::mat4(1.0f);
-        model      = translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         terrain_shader->set_mat4("model", model);
         terrain->draw(terrain_shader);
     }
 
     void MainController::draw_water() const {
-        const engine::resources::Model *water_model         = resources->model("water");
-        const engine::resources::Shader *water_shader = resources->shader("water_shader");
+        const engine::resources::Model *water_model         = m_resources->model("water");
+        const engine::resources::Shader *water_shader = m_resources->shader("water_shader");
 
         const auto light_pos = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
         water_shader->use();
@@ -419,9 +408,9 @@ namespace app {
         const glm::vec3 water_color = m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT;
         water_shader->set_vec3("waterColor", water_color);
         water_shader->set_vec3("lightPos", light_pos);
-        water_shader->set_vec3("viewPos", camera->Position);
-        water_shader->set_mat4("projection", graphics->projection_matrix());
-        water_shader->set_mat4("view", camera->view_matrix());
+        water_shader->set_vec3("viewPos", m_camera->Position);
+        water_shader->set_mat4("projection", m_graphics->projection_matrix());
+        water_shader->set_mat4("view", m_camera->view_matrix());
 
         auto model = glm::mat4(1.0f);
         model      = scale(model, glm::vec3(30, 1, 30));
@@ -433,20 +422,20 @@ namespace app {
     }
 
     void MainController::draw_skybox() const {
-        const auto shader = get<engine::resources::ResourcesController>()->shader("skybox");
+        const auto shader = m_resources->shader("skybox");
         engine::resources::Skybox *skybox_cube;
         if (m_is_day)
-            skybox_cube = get<engine::resources::ResourcesController>()->skybox(m_active_daytime_skybox);
+            skybox_cube = m_resources->skybox(m_active_daytime_skybox);
         else
-            skybox_cube = get<engine::resources::ResourcesController>()->skybox(m_active_nighttime_skybox);
-        get<engine::graphics::GraphicsController>()->draw_skybox(shader, skybox_cube);
+            skybox_cube = m_resources->skybox(m_active_nighttime_skybox);
+        m_graphics->draw_skybox(shader, skybox_cube);
     }
 
     void MainController::draw_stones() const {
-        const engine::resources::Model *grave               = resources->model("grave");
-        const engine::resources::Shader *stone_shader = resources->shader("basic");
+        const engine::resources::Model *grave               = m_resources->model("grave");
+        const engine::resources::Shader *stone_shader = m_resources->shader("basic");
 
-        set_common_shader_variables(stone_shader, camera, graphics);
+        set_common_shader_variables(stone_shader);
 
         auto model = glm::mat4(1.0f);
         model      = rotate(model, glm::radians(-90.0f), X_AXIS);
@@ -457,21 +446,20 @@ namespace app {
         grave->draw(stone_shader);
     }
 
-    void MainController::draw_fire() {
-        const engine::resources::Model *fire               = resources->model("fire");
-        const engine::resources::Shader *fire_shader = resources->shader("fire_shader");
+    void MainController::draw_fire() const {
+        const engine::resources::Model *fire               = m_resources->model("fire");
+        const engine::resources::Shader *fire_shader = m_resources->shader("fire_shader");
         fire_shader->use();
-        fire_shader->set_vec3("viewPos", camera->Position);
-        fire_shader->set_mat4("projection", graphics->projection_matrix());
-        fire_shader->set_mat4("view", camera->view_matrix());
+        fire_shader->set_vec3("viewPos", m_camera->Position);
+        fire_shader->set_mat4("projection", m_graphics->projection_matrix());
+        fire_shader->set_mat4("view", m_camera->view_matrix());
 
         auto model = glm::mat4(1.0f);
         model      = translate(model, glm::vec3(12, 20.5, 6.5));
         model      = scale(model, glm::vec3(3.1));
         fire_shader->set_mat4("model", model);
 
-        static double start_time  = engine::platform::PlatformController::get_time();
-        const double current_time = engine::platform::PlatformController::get_time() - start_time;
+        const double current_time = engine::platform::PlatformController::get_time() - m_fire_start_time;
 
         fire_shader->set_float("time", static_cast<float>(current_time));
         fire_shader->set_vec3("fireColor", glm::vec3(1.0f, 0.6f, 0.2f));
@@ -505,12 +493,14 @@ namespace app {
                 m_is_day = !m_is_day;
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 m_day_change_requested = false;
-                } else {
-                    const float start_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
-                    const float target_exposure = m_is_day ? NIGHT_EXPOSURE : DAY_EXPOSURE;
-                    m_current_exposure = start_exposure + (target_exposure - start_exposure) * transition_progress;
-                }
-            bloom_controller->exposure = m_current_exposure;
+                if (!m_is_day)
+                    m_fire_start_time = engine::platform::PlatformController::get_time();
+            } else {
+                const float start_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
+                const float target_exposure = m_is_day ? NIGHT_EXPOSURE : DAY_EXPOSURE;
+                m_current_exposure = start_exposure + (target_exposure - start_exposure) * transition_progress;
+            }
+            m_bloom->exposure = m_current_exposure;
         }
     }
 
@@ -520,46 +510,43 @@ namespace app {
 
         const auto platform = get<engine::platform::PlatformController>();
         const float dt      = platform->dt();
+        m_camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
         if (platform->key(engine::platform::KeyId::KEY_W).is_down() ||
             platform->key(engine::platform::KeyId::KEY_UP).is_down()) {
-            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
-            camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
+            m_camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_S).is_down() ||
             platform->key(engine::platform::KeyId::KEY_DOWN).is_down()) {
-            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
-            camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, dt);
+            m_camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_A).is_down() || platform->key(engine::platform::KeyId::KEY_LEFT).is_down()) {
-            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
-            camera->move_camera(engine::graphics::Camera::Movement::LEFT, dt);
+            m_camera->move_camera(engine::graphics::Camera::Movement::LEFT, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_D).is_down()
             || platform->key(engine::platform::KeyId::KEY_RIGHT).is_down()) {
-            camera->MovementSpeed = platform->key(engine::platform::KEY_LEFT_SHIFT).is_down() ? 20 : 7;
-            camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
+            m_camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_SPACE).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
+            m_camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
         }
         if (platform->key(engine::platform::KeyId::KEY_P).state() == engine::platform::Key::State::JustPressed) {
             platform->set_enable_cursor(!platform->is_cursor_enabled());
         }
         if (platform->key(engine::platform::KeyId::KEY_Q).is_down()) {
-            camera->rotate_camera(-10, 0);
+            m_camera->rotate_camera(-10, 0);
         }
         if (platform->key(engine::platform::KeyId::KEY_E).is_down()) {
-            camera->rotate_camera(10, 0);
+            m_camera->rotate_camera(10, 0);
         }
         if (platform->key(engine::platform::KeyId::KEY_ESCAPE).state() == engine::platform::Key::State::JustPressed) {
-            gui.set_enable(false);
+            get<GUIController>()->set_enable(false);
         }
     }
 
     void MainController::set_skybox(const std::string &new_skybox, const bool is_daytime_skybox) {
-        if (m_is_day && is_daytime_skybox) {
+        if (is_daytime_skybox) {
             m_active_daytime_skybox = new_skybox;
-        } else if (!m_is_day && !is_daytime_skybox) {
+        } else {
             m_active_nighttime_skybox = new_skybox;
         }
     }
