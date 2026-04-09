@@ -110,15 +110,7 @@ namespace app {
     }
 
 void MainController::draw_forest() const {
-        const auto yellow_tree  = m_resources->model("yellow_tree");
-        const auto green_tree   = m_resources->model("green_tree");
-        const auto tall_tree    = m_resources->model("beech_tree");
-        const auto oak_tree     = m_resources->model("oak_tree");
-        const auto pine_tree    = m_resources->model("pine_tree");
-        const auto old_tree     = m_resources->model("old_tree");
-
         set_common_shader_variables(m_basic_shader);
-
         auto draw_tree = [&](auto *tree_model, const float x, const float y, const float z, const float scale,
                              const float rotation_angle = 0.0f, const vec3 &rotation_axis = CENTER) {
             const auto model = create_model_matrix(vec3(x, y, z), vec3(scale), rotation_axis, rotation_angle);
@@ -127,42 +119,30 @@ void MainController::draw_forest() const {
         };
 
         using TreeData = std::array<float, 4>;
-
         constexpr std::array<TreeData, 18> yellow_trees = {{
             #include <yellow_trees.include>
         }};
-
         constexpr std::array<TreeData, 15> green_trees = {{
             #include <green_trees.include>
         }};
-
         constexpr std::array<TreeData, 3> tall_trees = {{
             #include <tall_trees.include>
         }};
-
         constexpr std::array<vec3, 26> pine_trees = {{
             #include <pine_trees.include>
         }};
 
-        for (const auto &[x, y, z, scale] : yellow_trees) {
-            draw_tree(yellow_tree, x, y, z, scale);
-        }
+        auto *yellow = m_resources->model("yellow_tree");
+        auto *green  = m_resources->model("green_tree");
+        auto *tall   = m_resources->model("beech_tree");
+        auto *pine   = m_resources->model("pine_tree");
 
-        for (const auto &[x, y, z, scale] : green_trees) {
-            draw_tree(green_tree, x, y, z, scale, -90.0f, vec3(1.0f, 0.0f, 0.0f));
-        }
-
-        for (const auto &[x, y, z, scale] : tall_trees) {
-            draw_tree(tall_tree, x, y, z, scale);
-        }
-
-        draw_tree(oak_tree, -17.0f, 28.0f, -17.0f, 0.210f, 90.0f, X_AXIS);
-
-        for (const auto &pos : pine_trees) {
-            draw_tree(pine_tree, pos.x, pos.y, pos.z, 11.0f, -90.0f, X_AXIS);
-        }
-
-        draw_tree(old_tree, 65.0f, 40.0f, -39.0f, 0.04f, 3.0f, Z_AXIS);
+        for (const auto &[x, y, z, s] : yellow_trees) draw_tree(yellow, x, y, z, s);
+        for (const auto &[x, y, z, s] : green_trees) draw_tree(green,  x, y, z, s, -90.0f, X_AXIS);
+        for (const auto &[x, y, z, s] : tall_trees) draw_tree(tall,   x, y, z, s);
+        for (const auto &pos : pine_trees) draw_tree(pine, pos.x, pos.y, pos.z, 11.0f, -90.0f, X_AXIS);
+        draw_tree(m_resources->model("oak_tree"), -17.0f, 28.0f, -17.0f, 0.210f,  90.0f, X_AXIS);
+        draw_tree(m_resources->model("old_tree"),  65.0f, 40.0f, -39.0f, 0.04f,    3.0f, Z_AXIS);
     }
 
     void MainController::draw_campfire() const {
@@ -259,7 +239,7 @@ void MainController::draw_forest() const {
             const float x = row == 0 ? 40.0f : 44.0f;
 
             for (uint8_t col = 0; col < col_count; col++) {
-                mat4 model = create_model_matrix(vec3(x, 4.0f * static_cast<float>(col) - 16.0f, -17.4f), vec3(0.12f),                                            X_AXIS,                                                      90.0f                                                        );
+                mat4 model = create_model_matrix(vec3(x, 4.0f * static_cast<float>(col) - 16.0f, -17.4f), vec3(0.12f), X_AXIS, 90.0f);
                 model_matrices.emplace_back(model);
             }
         }
