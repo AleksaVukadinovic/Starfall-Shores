@@ -551,6 +551,9 @@ namespace app {
         if (platform->key(engine::platform::KeyId::KEY_ESCAPE).state() == engine::platform::Key::State::JustPressed) {
             get<GUIController>()->set_enable(false);
         }
+        if (platform->key(engine::platform::KeyId::KEY_F).state() == engine::platform::Key::State::JustPressed) {
+            get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
+        }
     }
 
     void MainController::set_skybox(const std::string &new_skybox, const bool is_daytime_skybox) {
