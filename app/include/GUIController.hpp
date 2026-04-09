@@ -2,6 +2,7 @@
 #include "MainController.hpp"
 #include "engine/graphics/GraphicsController.hpp"
 #include <engine/core/Engine.hpp>
+#include <engine/graphics/FogController.hpp>
 
 namespace app {
     class GUIController final : public engine::core::Controller {
@@ -15,6 +16,7 @@ namespace app {
         engine::graphics::Camera *m_camera = nullptr;
         engine::graphics::BloomController *m_bloom = nullptr;
         engine::platform::PlatformController *m_platform = nullptr;
+        FogController *m_fog = nullptr;
         MainController* m_main_controller = nullptr;
 
         void initialize() override;
@@ -22,6 +24,7 @@ namespace app {
         void draw() override;
 
         void draw_bloom_controls() const;
+        void draw_fog_controls() const;
         void draw_skybox_controls() const;
         void draw_camera_info() const;
         void draw_fps_counter();
