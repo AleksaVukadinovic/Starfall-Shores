@@ -14,6 +14,7 @@ void GUIController::initialize() {
     m_bloom = get<engine::graphics::BloomController>();
     m_platform = get<engine::platform::PlatformController>();
     m_main_controller = get<MainController>();
+    m_current_time = m_platform->get_time();
 }
 
 void GUIController::poll_events() {
@@ -28,6 +29,7 @@ void GUIController::draw() {
     draw_bloom_controls();
     draw_skybox_controls();
     draw_camera_info();
+    draw_tickrate_slider();
     draw_fps_counter();
     m_graphics->end_gui();
 }
@@ -83,9 +85,22 @@ void GUIController::draw_camera_info() const {
     ImGui::End();
 }
 
-void GUIController::draw_fps_counter() const {
+void GUIController::draw_fps_counter() {
     ImGui::Begin("FPS");
-    ImGui::Text("%.0f", 1.0f/m_platform->dt());
+    m_current_time = m_platform->get_time();
+    if (m_last_update_time + 1/m_tickrate >= m_current_time) {
+        ImGui::Text("%.0f", m_last_recorded_fps);
+    } else {
+        m_last_update_time = m_current_time;
+        m_last_recorded_fps = 1.0f/m_platform->dt();
+        ImGui::Text("%.0f", m_last_recorded_fps);
+    }
+    ImGui::End();
+}
+
+void GUIController::draw_tickrate_slider() {
+    ImGui::Begin("Select tickrate");
+    ImGui::SliderFloat("Select tickrate", &m_tickrate, 0.0f, 10.0f);
     ImGui::End();
 }
 

@@ -24,6 +24,13 @@ namespace app {
         void draw_bloom_controls() const;
         void draw_skybox_controls() const;
         void draw_camera_info() const;
-        void draw_fps_counter() const;
+        void draw_fps_counter();
+        void draw_tickrate_slider();
+
+        float m_current_time = 0.0f;
+        float m_last_update_time = 0.0f;
+        float m_last_recorded_fps = 0.0f;
+
+        float m_tickrate = 1.0f;
     };
 }
