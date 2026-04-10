@@ -1,9 +1,11 @@
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/BloomController.hpp>
 #include <engine/graphics/FogController.hpp>
+#include <engine/graphics/GreyscaleController.hpp>
 #include <imgui.h>
 #include <GUIController.hpp>
 #include <MainController.hpp>
+#include <TestController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 
 namespace app {
@@ -15,7 +17,9 @@ void GUIController::initialize() {
     m_bloom = get<engine::graphics::BloomController>();
     m_platform = get<engine::platform::PlatformController>();
     m_fog = get<FogController>();
+    m_greyscale = get<GreyscaleController>();
     m_main_controller = get<MainController>();
+    m_test_controller = get<TestController>();
     m_current_time = m_platform->get_time();
     m_fov = m_graphics->perspective_params().FOV;
 }
@@ -31,7 +35,9 @@ void GUIController::draw() {
     m_graphics->begin_gui();
     draw_bloom_controls();
     draw_fog_controls();
+    draw_greyscale_controls();
     draw_skybox_controls();
+    draw_test_controls();
     draw_camera_info();
     draw_fov_slider();
     draw_tickrate_slider();
@@ -119,6 +125,25 @@ void GUIController::draw_fov_slider() {
     ImGui::Begin("Select FOV");
     ImGui::SliderFloat("Select FOV", &m_fov, 1.0f, 50.0f);
     m_graphics->perspective_params().FOV = m_fov;
+    ImGui::End();
+}
+
+void GUIController::draw_greyscale_controls() const {
+    ImGui::Begin("Greyscale");
+    ImGui::Checkbox("Enable Greyscale", &m_greyscale->greyscale_enabled);
+    ImGui::SliderFloat("Greyscale Strength", &m_greyscale->greyscale_strength, 0.0f, 1.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_test_controls() const {
+    ImGui::Begin("Model Test");
+    ImGui::SliderFloat("Translate X", &m_test_controller->translation.x, -100.0f, 100.0f);
+    ImGui::SliderFloat("Translate Y", &m_test_controller->translation.y, -100.0f, 100.0f);
+    ImGui::SliderFloat("Translate Z", &m_test_controller->translation.z, -100.0f, 100.0f);
+    ImGui::SliderFloat("Rotate X", &m_test_controller->rotation.x, -180.0f, 180.0f);
+    ImGui::SliderFloat("Rotate Y", &m_test_controller->rotation.y, -180.0f, 180.0f);
+    ImGui::SliderFloat("Rotate Z", &m_test_controller->rotation.z, -180.0f, 180.0f);
+    ImGui::SliderFloat("Scale", &m_test_controller->scale_factor, 0.001f, 10.0f);
     ImGui::End();
 }
 

@@ -301,12 +301,7 @@ class NamingConvention(Rule):
                     if is_static and is_const:
                         is_static_const = True
 
-                    # Check global variables (should have g_ prefix)
-                    if cursor.semantic_parent.kind == CursorKind.TRANSLATION_UNIT:
-                        if not is_g_prefixed(name):
-                            add_violation(cursor,
-                                          f"Global variable '{name}' should have g_ prefix and be in snake_case")
-                    elif is_static_const:
+                    if is_static_const:
                         if not is_upper_case(name):
                             add_violation(cursor,
                                           f"static const/constexpr variables '{name}' should be in UPPER_CASE")

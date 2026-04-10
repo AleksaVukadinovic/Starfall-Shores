@@ -24,6 +24,9 @@ uniform bool bloom;
 uniform float exposure;
 uniform float bloomStrength;
 
+uniform bool greyscaleEnabled;
+uniform float greyscaleStrength;
+
 void main() {
     const float gamma = 1.3;
     vec3 hdrColor = texture(scene, TexCoords).rgb;
@@ -35,5 +38,11 @@ void main() {
     vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
 
     result = pow(result, vec3(1.0 / gamma));
+
+    if (greyscaleEnabled) {
+        float grey = dot(result, vec3(0.2126, 0.7152, 0.0722));
+        result = mix(result, vec3(grey), greyscaleStrength);
+    }
+
     FragColor = vec4(result, 1.0);
 }

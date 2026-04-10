@@ -2,6 +2,7 @@
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/graphics/BloomController.hpp>
+#include <engine/graphics/GreyscaleController.hpp>
 
 namespace engine::graphics {
 
@@ -128,6 +129,11 @@ namespace engine::graphics {
         bloom_final->set_bool("bloom", bloom);
         bloom_final->set_float("exposure", exposure);
         bloom_final->set_float("bloomStrength", bloom_strength);
+
+        const auto greyscale = get<GreyscaleController>();
+        bloom_final->set_bool("greyscaleEnabled", greyscale->greyscale_enabled);
+        bloom_final->set_float("greyscaleStrength", greyscale->greyscale_strength);
+
         this->render_quad();
     }
 
