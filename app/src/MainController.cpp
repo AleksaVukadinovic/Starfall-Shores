@@ -107,6 +107,7 @@ namespace app {
         draw_path();
         draw_mushrooms();
         draw_stones();
+        draw_test_model();
         if (!m_is_day)
             draw_fire();
         draw_skybox();
@@ -327,6 +328,9 @@ void MainController::draw_forest() const {
         set_common_shader_variables(m_basic_shader);
         m_basic_shader->set_mat4("model", mat4(1.0f));
         terrain->draw(m_basic_shader);
+        set_common_shader_variables(m_basic_shader);
+        m_basic_shader->set_mat4("model", create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
+        terrain->draw(m_basic_shader);
     }
 
     void MainController::draw_water() const {
@@ -453,6 +457,18 @@ void MainController::draw_forest() const {
         if (platform->key(KEY_F).state() == Key::State::JustPressed)
             get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
         
+    }
+
+    void MainController::draw_test_model() const {
+        set_common_shader_variables(m_basic_shader);
+        auto model = mat4(1.0f);
+        model = glm::rotate(model, glm::radians(test_rotation.x), vec3(1, 0, 0));
+        model = glm::rotate(model, glm::radians(test_rotation.y), vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(test_rotation.z), vec3(0, 0, 1));
+        model = glm::translate(model, test_translation);
+        model = glm::scale(model, vec3(test_scale));
+        m_basic_shader->set_mat4("model", model);
+        m_resources->model("terrain")->draw(m_basic_shader);
     }
 
     void MainController::set_skybox(const std::string &new_skybox, const bool is_daytime_skybox) {

@@ -16,6 +16,9 @@ namespace app {
         }
 
         void set_skybox(const std::string &new_skybox, bool is_daytime_skybox);
+        glm::vec3 test_translation{0.0f, 0.0f, 0.0f};
+        glm::vec3 test_rotation{0.0f, 0.0f, 0.0f};
+        float test_scale = 1.0f;
 
     private:
         void initialize() override;
@@ -38,6 +41,7 @@ namespace app {
         void draw_mushrooms() const;
         void draw_stones() const;
         void draw_fire() const;
+        void draw_test_model() const;
 
         void update() override;
         void update_day_night_transition();

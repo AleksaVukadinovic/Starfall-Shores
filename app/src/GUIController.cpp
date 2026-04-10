@@ -5,7 +5,6 @@
 #include <imgui.h>
 #include <GUIController.hpp>
 #include <MainController.hpp>
-#include <TestController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 
 namespace app {
@@ -19,8 +18,7 @@ void GUIController::initialize() {
     m_fog = get<FogController>();
     m_greyscale = get<GreyscaleController>();
     m_main_controller = get<MainController>();
-    m_test_controller = get<TestController>();
-    m_current_time = m_platform->get_time();
+    m_current_time = static_cast<float>(engine::platform::PlatformController::get_time());
     m_fov = m_graphics->perspective_params().FOV;
 }
 
@@ -137,13 +135,13 @@ void GUIController::draw_greyscale_controls() const {
 
 void GUIController::draw_test_controls() const {
     ImGui::Begin("Model Test");
-    ImGui::SliderFloat("Translate X", &m_test_controller->translation.x, -100.0f, 100.0f);
-    ImGui::SliderFloat("Translate Y", &m_test_controller->translation.y, -100.0f, 100.0f);
-    ImGui::SliderFloat("Translate Z", &m_test_controller->translation.z, -100.0f, 100.0f);
-    ImGui::SliderFloat("Rotate X", &m_test_controller->rotation.x, -180.0f, 180.0f);
-    ImGui::SliderFloat("Rotate Y", &m_test_controller->rotation.y, -180.0f, 180.0f);
-    ImGui::SliderFloat("Rotate Z", &m_test_controller->rotation.z, -180.0f, 180.0f);
-    ImGui::SliderFloat("Scale", &m_test_controller->scale_factor, 0.001f, 10.0f);
+    ImGui::SliderFloat("Translate X", &m_main_controller->test_translation.x, -100.0f, 100.0f);
+    ImGui::SliderFloat("Translate Y", &m_main_controller->test_translation.y, -100.0f, 100.0f);
+    ImGui::SliderFloat("Translate Z", &m_main_controller->test_translation.z, -100.0f, 100.0f);
+    ImGui::SliderFloat("Rotate X", &m_main_controller->test_rotation.x, -180.0f, 180.0f);
+    ImGui::SliderFloat("Rotate Y", &m_main_controller->test_rotation.y, -180.0f, 180.0f);
+    ImGui::SliderFloat("Rotate Z", &m_main_controller->test_rotation.z, -180.0f, 180.0f);
+    ImGui::SliderFloat("Scale", &m_main_controller->test_scale, 0.001f, 150.0f);
     ImGui::End();
 }
 

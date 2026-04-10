@@ -1,6 +1,5 @@
 #pragma once
 #include "MainController.hpp"
-#include "TestController.hpp"
 #include "engine/graphics/GraphicsController.hpp"
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/FogController.hpp>
@@ -21,7 +20,6 @@ namespace app {
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;
         MainController* m_main_controller = nullptr;
-        TestController* m_test_controller = nullptr;
 
         void initialize() override;
         void poll_events() override;
