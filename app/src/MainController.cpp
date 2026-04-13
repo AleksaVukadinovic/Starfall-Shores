@@ -115,13 +115,8 @@ namespace app {
     }
 
 void MainController::draw_forest() const {
-        set_common_shader_variables(m_basic_shader);
-        auto draw_tree = [&](auto *tree_model, const float x, const float y, const float z, const float scale,
-                             const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
-            const auto model = create_model_matrix(vec3(x, y, z), vec3(scale), rotation_axis, rotation_angle);
-            m_basic_shader->set_mat4("model", model);
-            tree_model->draw(m_basic_shader);
-        };
+        const auto *shader = m_resources->shader("flower_shader");
+        set_common_shader_variables(shader);
 
         using TreeData = std::array<float, 4>;
         constexpr std::array<TreeData, 22> yellow_trees = {{
@@ -133,31 +128,54 @@ void MainController::draw_forest() const {
         constexpr std::array<TreeData, 5> tall_trees = {{
             #include <tall_trees.include>
         }};
-        constexpr std::array<vec3, 27> pine_trees = {{
+        constexpr std::array<TreeData, 71> pine_trees = {{
             #include <pine_trees.include>
         }};
         constexpr std::array<TreeData, 1> oak_trees = {{
             #include <oak_trees.include>
         }};
-
         struct OldTreeData { float x, y, z, scale, rotation_angle, rx, ry, rz; };
         constexpr std::array<OldTreeData, 2> old_trees = {{
             #include <old_trees.include>
         }};
 
-        auto *yellow = m_resources->model("yellow_tree");
-        auto *green  = m_resources->model("green_tree");
-        auto *tall   = m_resources->model("beech_tree");
-        auto *pine   = m_resources->model("pine_tree");
-        auto *oak    = m_resources->model("oak_tree");
-        auto *old    = m_resources->model("old_tree");
+        auto build_matrices = [](const auto &data, auto transform_fn) {
+            std::vector<mat4> matrices;
+            matrices.reserve(data.size());
+            for (const auto &entry : data)
+                matrices.push_back(transform_fn(entry));
+            return matrices;
+        };
 
-        for (const auto &[x, y, z, s] : yellow_trees) draw_tree(yellow, x, y, z, s);
-        for (const auto &[x, y, z, s] : green_trees) draw_tree(green, x, y, z, s, -90.0f, X_AXIS);
-        for (const auto &[x, y, z, s] : tall_trees) draw_tree(tall, x, y, z, s);
-        for (const auto &pos : pine_trees) draw_tree(pine, pos.x, pos.y, pos.z, 11.0f, -90.0f, X_AXIS);
-        for (const auto &[x, y, z, s] : oak_trees) draw_tree(oak, x, y, z, s, 90.0f, X_AXIS);
-        for (const auto &[x, y, z, s, angle, rx, ry, rz] : old_trees) draw_tree(old, x, y, z, s, angle, vec3(rx, ry, rz));
+        auto yellow_m = build_matrices(yellow_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
+        });
+        m_resources->model("yellow_tree")->draw_instanced(shader, yellow_m);
+
+        auto green_m = build_matrices(green_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
+        });
+        m_resources->model("green_tree")->draw_instanced(shader, green_m);
+
+        auto tall_m = build_matrices(tall_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
+        });
+        m_resources->model("beech_tree")->draw_instanced(shader, tall_m);
+
+        auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
+        });
+        m_resources->model("pine_tree")->draw_instanced(shader, pine_m);
+
+        auto oak_m = build_matrices(oak_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, 90.0f);
+        });
+        m_resources->model("oak_tree")->draw_instanced(shader, oak_m);
+
+        auto old_m = build_matrices(old_trees, [](const OldTreeData &t) {
+            return create_model_matrix(vec3(t.x, t.y, t.z), vec3(t.scale), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
+        });
+        m_resources->model("old_tree")->draw_instanced(shader, old_m);
     }
 
     void MainController::draw_campfire() const {
@@ -202,10 +220,8 @@ void MainController::draw_forest() const {
 
     void MainController::draw_bushes() const {
         set_common_shader_variables(m_basic_shader);
-
         using BushData = std::array<float, 4>;
-
-        auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle, const vec3 &rotation_axis) {
+        auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
             const auto model = create_model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle);
             m_basic_shader->set_mat4("model", model);
             bush_model->draw_blended(m_basic_shader);
@@ -226,8 +242,8 @@ void MainController::draw_forest() const {
         const auto *laurel = m_resources->model("laurel_bush");
 
         for (const auto &b : bush1_positions) draw_bush(bush1, b, -90.0f, X_AXIS);
-        for (const auto &b : bush2_positions) draw_bush(bush2, b, 0.0f, Y_AXIS);
-        for (const auto &b : laurel_positions) draw_bush(laurel, b, 0.0f, Y_AXIS);
+        for (const auto &b : bush2_positions) draw_bush(bush2, b);
+        for (const auto &b : laurel_positions) draw_bush(laurel, b);
     }
 
     void MainController::draw_flowers() const {
@@ -240,7 +256,7 @@ void MainController::draw_forest() const {
         std::vector<mat4> white_matrices;
         white_matrices.reserve(white_translations.size());
         for (const auto &t : white_translations) {
-            white_matrices.push_back(create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f));
+            white_matrices.emplace_back(create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f));
         }
         m_resources->model("white_flowers")->draw_instanced(flower_shader, white_matrices);
 
@@ -250,30 +266,32 @@ void MainController::draw_forest() const {
         std::vector<mat4> red_matrices;
         red_matrices.reserve(red_translations.size());
         for (const auto &t : red_translations) {
-            red_matrices.push_back(create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f));
+            red_matrices.emplace_back(create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f));
         }
         m_resources->model("red_flowers")->draw_instanced(flower_shader, red_matrices);
     }
 
     void MainController::draw_path() const {
-        const auto path= m_resources->model("path");
-        set_common_shader_variables(m_basic_shader);
+        const auto *shader = m_resources->shader("flower_shader");
+        set_common_shader_variables(shader);
 
         struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
-        constexpr std::array<PathData, 11> path_segments = {{
+        constexpr std::array<PathData, 19> path_segments = {{
             #include <path_segments.include>
         }};
 
+        std::vector<mat4> matrices;
+        matrices.reserve(path_segments.size());
         for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments) {
-            auto model = mat4(1.0f);
-            model = rotate(model, glm::radians(rx), X_AXIS);
-            model = rotate(model, glm::radians(ry), Y_AXIS);
-            model = rotate(model, glm::radians(rz), Z_AXIS);
-            model = translate(model, vec3(tx, ty, tz));
-            model = glm::scale(model, vec3(s));
-            m_basic_shader->set_mat4("model", model);
-            path->draw(m_basic_shader);
+            auto m = mat4(1.0f);
+            m = rotate(m, glm::radians(rx), X_AXIS);
+            m = rotate(m, glm::radians(ry), Y_AXIS);
+            m = rotate(m, glm::radians(rz), Z_AXIS);
+            m = translate(m, vec3(tx, ty, tz));
+            m = glm::scale(m, vec3(s));
+            matrices.push_back(m);
         }
+        m_resources->model("path")->draw_instanced(shader, matrices);
     }
 
     void MainController::draw_mushrooms() const {
@@ -466,7 +484,7 @@ void MainController::draw_forest() const {
 
     void MainController::terminate() {
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
-            spdlog::debug("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
+            spdlog::info("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
                 model_name, rotation.x, rotation.y, rotation.z,
                 translation.x, translation.y, translation.z, scale);
 

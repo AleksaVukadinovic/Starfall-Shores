@@ -143,12 +143,12 @@ void GUIController::draw_test_controls() const {
     }
 
     ImGui::Separator();
-    ImGui::SliderFloat("Translate X", &m_main_controller->test_translation.x, -100.0f, 100.0f);
-    ImGui::SliderFloat("Translate Y", &m_main_controller->test_translation.y, -100.0f, 100.0f);
-    ImGui::SliderFloat("Translate Z", &m_main_controller->test_translation.z, -100.0f, 100.0f);
-    ImGui::SliderFloat("Rotate X", &m_main_controller->test_rotation.x, -180.0f, 180.0f);
-    ImGui::SliderFloat("Rotate Y", &m_main_controller->test_rotation.y, -180.0f, 180.0f);
-    ImGui::SliderFloat("Rotate Z", &m_main_controller->test_rotation.z, -180.0f, 180.0f);
+    ImGui::SliderFloat("Translate X", &m_main_controller->test_translation.x, -200.0f, 200.0f);
+    ImGui::SliderFloat("Translate Y", &m_main_controller->test_translation.y, -200.0f, 200.0f);
+    ImGui::SliderFloat("Translate Z", &m_main_controller->test_translation.z, -200.0f, 200.0f);
+    ImGui::InputFloat("Rotate X", &m_main_controller->test_rotation.x, -1.0f, 5.0f);
+    ImGui::InputFloat("Rotate Y", &m_main_controller->test_rotation.y, -1.0f, 5.0f);
+    ImGui::InputFloat("Rotate Z", &m_main_controller->test_rotation.z, -1.0f, 5.0f);
     ImGui::InputFloat("Scale", &m_main_controller->test_scale, 0.001f, 50.0f);
 
     ImGui::Separator();
