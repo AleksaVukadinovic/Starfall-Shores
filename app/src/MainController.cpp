@@ -124,37 +124,47 @@ void MainController::draw_forest() const {
         };
 
         using TreeData = std::array<float, 4>;
-        constexpr std::array<TreeData, 18> yellow_trees = {{
+        constexpr std::array<TreeData, 22> yellow_trees = {{
             #include <yellow_trees.include>
         }};
-        constexpr std::array<TreeData, 15> green_trees = {{
+        constexpr std::array<TreeData, 16> green_trees = {{
             #include <green_trees.include>
         }};
-        constexpr std::array<TreeData, 3> tall_trees = {{
+        constexpr std::array<TreeData, 5> tall_trees = {{
             #include <tall_trees.include>
         }};
-        constexpr std::array<vec3, 26> pine_trees = {{
+        constexpr std::array<vec3, 27> pine_trees = {{
             #include <pine_trees.include>
+        }};
+        constexpr std::array<TreeData, 1> oak_trees = {{
+            #include <oak_trees.include>
+        }};
+
+        struct OldTreeData { float x, y, z, scale, rotation_angle, rx, ry, rz; };
+        constexpr std::array<OldTreeData, 2> old_trees = {{
+            #include <old_trees.include>
         }};
 
         auto *yellow = m_resources->model("yellow_tree");
         auto *green  = m_resources->model("green_tree");
         auto *tall   = m_resources->model("beech_tree");
         auto *pine   = m_resources->model("pine_tree");
+        auto *oak    = m_resources->model("oak_tree");
+        auto *old    = m_resources->model("old_tree");
 
         for (const auto &[x, y, z, s] : yellow_trees) draw_tree(yellow, x, y, z, s);
-        for (const auto &[x, y, z, s] : green_trees) draw_tree(green,  x, y, z, s, -90.0f, X_AXIS);
-        for (const auto &[x, y, z, s] : tall_trees) draw_tree(tall,   x, y, z, s);
+        for (const auto &[x, y, z, s] : green_trees) draw_tree(green, x, y, z, s, -90.0f, X_AXIS);
+        for (const auto &[x, y, z, s] : tall_trees) draw_tree(tall, x, y, z, s);
         for (const auto &pos : pine_trees) draw_tree(pine, pos.x, pos.y, pos.z, 11.0f, -90.0f, X_AXIS);
-        draw_tree(m_resources->model("oak_tree"), -17.0f, 28.0f, -17.0f, 0.210f,  90.0f, X_AXIS);
-        draw_tree(m_resources->model("old_tree"),  65.0f, 40.0f, -39.0f, 0.04f,    3.0f, Z_AXIS);
+        for (const auto &[x, y, z, s] : oak_trees) draw_tree(oak, x, y, z, s, 90.0f, X_AXIS);
+        for (const auto &[x, y, z, s, angle, rx, ry, rz] : old_trees) draw_tree(old, x, y, z, s, angle, vec3(rx, ry, rz));
     }
 
     void MainController::draw_campfire() const {
         const engine::resources::Model *campfire = m_resources->model("campfire");
         set_common_shader_variables(m_basic_shader);
         m_basic_shader->set_vec3("light.diffuse", m_is_day ? vec3(0.5f) : vec3(5.0f));
-        const mat4 model = translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f));
+        const mat4 model = translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)); // NOLINT
         m_basic_shader->set_mat4("model", model);
         campfire->draw(m_basic_shader);
     }
@@ -461,14 +471,46 @@ void MainController::draw_forest() const {
 
     void MainController::draw_test_model() const {
         set_common_shader_variables(m_basic_shader);
-        auto model = mat4(1.0f);
-        model = glm::rotate(model, glm::radians(test_rotation.x), vec3(1, 0, 0));
-        model = glm::rotate(model, glm::radians(test_rotation.y), vec3(0, 1, 0));
-        model = glm::rotate(model, glm::radians(test_rotation.z), vec3(0, 0, 1));
-        model = glm::translate(model, test_translation);
-        model = glm::scale(model, vec3(test_scale));
-        m_basic_shader->set_mat4("model", model);
-        m_resources->model("terrain")->draw(m_basic_shader);
+
+        auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
+            auto m = mat4(1.0f);
+            m = glm::rotate(m, glm::radians(rotation.x), vec3(1, 0, 0));
+            m = glm::rotate(m, glm::radians(rotation.y), vec3(0, 1, 0));
+            m = glm::rotate(m, glm::radians(rotation.z), vec3(0, 0, 1));
+            m = glm::translate(m, translation);
+            m = glm::scale(m, vec3(scale));
+            m_basic_shader->set_mat4("model", m);
+            m_resources->model(model_name)->draw(m_basic_shader);
+        };
+
+        for (const auto &[model_name, translation, rotation, scale] : placed_models) {
+            draw_with_transform(model_name, translation, rotation, scale);
+        }
+
+        const auto &current_name = TEST_MODEL_NAMES[selected_model_index];
+        draw_with_transform(current_name, test_translation, test_rotation, test_scale);
+    }
+
+    void MainController::place_test_model() {
+        placed_models.push_back({
+            TEST_MODEL_NAMES[selected_model_index],
+            test_translation,
+            test_rotation,
+            test_scale
+        });
+    }
+
+    void MainController::clear_placed_models() {
+        placed_models.clear();
+    }
+
+    void MainController::terminate() {
+        for (const auto &[model_name, translation, rotation, scale] : placed_models) {
+            spdlog::info("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
+                model_name, rotation.x, rotation.y, rotation.z,
+                translation.x, translation.y, translation.z, scale);
+
+        }
     }
 
     void MainController::set_skybox(const std::string &new_skybox, const bool is_daytime_skybox) {

@@ -72,7 +72,6 @@ void GUIController::draw_skybox_controls() const {
             case 2: skybox_name = "skybox_default"; break;
             default: skybox_name = "skybox_day"; break;
         }
-        spdlog::info("{}", skybox_name);
         m_main_controller->set_skybox(skybox_name, true);
     }
 
@@ -135,13 +134,30 @@ void GUIController::draw_greyscale_controls() const {
 
 void GUIController::draw_test_controls() const {
     ImGui::Begin("Model Test");
+
+    ImGui::Text("Select Model:");
+    for (uint8_t i = 0; i < static_cast<uint8_t>(MainController::TEST_MODEL_NAMES.size()); ++i) {
+        ImGui::RadioButton(MainController::TEST_MODEL_NAMES[i], &m_main_controller->selected_model_index, i);
+        if (i % 3 != 2 && i + 1 < static_cast<uint8_t>(MainController::TEST_MODEL_NAMES.size()))
+            ImGui::SameLine();
+    }
+
+    ImGui::Separator();
     ImGui::SliderFloat("Translate X", &m_main_controller->test_translation.x, -100.0f, 100.0f);
     ImGui::SliderFloat("Translate Y", &m_main_controller->test_translation.y, -100.0f, 100.0f);
     ImGui::SliderFloat("Translate Z", &m_main_controller->test_translation.z, -100.0f, 100.0f);
     ImGui::SliderFloat("Rotate X", &m_main_controller->test_rotation.x, -180.0f, 180.0f);
     ImGui::SliderFloat("Rotate Y", &m_main_controller->test_rotation.y, -180.0f, 180.0f);
     ImGui::SliderFloat("Rotate Z", &m_main_controller->test_rotation.z, -180.0f, 180.0f);
-    ImGui::SliderFloat("Scale", &m_main_controller->test_scale, 0.001f, 150.0f);
+    ImGui::InputFloat("Scale", &m_main_controller->test_scale, 0.001f, 50.0f);
+
+    ImGui::Separator();
+    if (ImGui::Button("Place Model"))
+        m_main_controller->place_test_model();
+    ImGui::SameLine();
+    if (ImGui::Button("Clear All Placed"))
+        m_main_controller->clear_placed_models();
+    ImGui::Text("Placed models: %zu", m_main_controller->placed_models.size());
     ImGui::End();
 }
 

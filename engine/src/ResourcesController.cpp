@@ -47,7 +47,7 @@ void ResourcesController::load_models() {
 
 void ResourcesController::load_textures() {
     if (!exists(m_textures_path)) {
-        spdlog::error("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
+        spdlog::warn("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
         return;
     }
     for (const auto &texture_entry: std::filesystem::directory_iterator(m_textures_path)) {

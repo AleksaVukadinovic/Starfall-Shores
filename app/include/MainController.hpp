@@ -3,12 +3,22 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/BloomController.hpp>
+#include <vector>
+#include <string>
+#include <array>
 
 namespace engine::resources {
     class ResourcesController;
 }
 
 namespace app {
+    struct PlacedModel {
+        std::string model_name;
+        glm::vec3 translation;
+        glm::vec3 rotation;
+        float scale;
+    };
+
     class MainController final : public engine::core::Controller {
     public:
         [[nodiscard]] std::string_view name() const override {
@@ -16,9 +26,23 @@ namespace app {
         }
 
         void set_skybox(const std::string &new_skybox, bool is_daytime_skybox);
+
+        static constexpr std::array TEST_MODEL_NAMES = {
+            "terrain", "campfire", "log_seat", "viking_tent", "stylized_tent",
+            "yellow_tree", "green_tree", "beech_tree", "pine_tree", "oak_tree", "old_tree",
+            "bush1", "bush2", "laurel_bush", "flowers2", "roses",
+            "path", "shrooms", "grave", "fire", "water"
+        };
+
+        int selected_model_index = 0;
         glm::vec3 test_translation{0.0f, 0.0f, 0.0f};
         glm::vec3 test_rotation{0.0f, 0.0f, 0.0f};
         float test_scale = 1.0f;
+        std::vector<PlacedModel> placed_models;
+
+        void place_test_model();
+        void clear_placed_models();
+        void terminate() override;
 
     private:
         void initialize() override;
