@@ -44,6 +44,9 @@ namespace app {
         void clear_placed_models();
         void terminate() override;
 
+        bool wind_enabled = false;
+        float wind_intensity = 0.8f;
+
     private:
         void initialize() override;
         bool loop() override;
@@ -68,7 +71,7 @@ namespace app {
 
         void update() override;
         void update_day_night_transition();
-        void update_camera() const;
+        void update_camera();
 
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::resources::Shader *m_basic_shader           = nullptr;

@@ -361,8 +361,11 @@ void MainController::draw_forest() const {
     }
 
     void MainController::draw_grass() const {
-        const auto *shader = m_resources->shader("flower_shader");
+        const auto *shader = m_resources->shader("grass_shader");
         set_common_shader_variables(shader);
+        shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
+        shader->set_bool("windEnabled", wind_enabled);
+        shader->set_float("windIntensity", wind_intensity);
 
         constexpr std::array grass_positions = {
             #include <grass.include>
@@ -424,7 +427,7 @@ void MainController::draw_forest() const {
         }
     }
 
-    void MainController::update_camera() const {
+    void MainController::update_camera() {
         using namespace engine::platform;
         if (const auto gui = get<GUIController>(); gui->is_enabled())
             return;
@@ -461,6 +464,8 @@ void MainController::draw_forest() const {
         }
         if (platform->key(KEY_F).state() == Key::State::JustPressed)
             get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
+        if (platform->key(KEY_V).state() == Key::State::JustPressed)
+            wind_enabled = !wind_enabled;
         
     }
 

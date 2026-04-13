@@ -28,6 +28,7 @@ namespace app {
         void draw_bloom_controls() const;
         void draw_fog_controls() const;
         void draw_greyscale_controls() const;
+        void draw_wind_controls() const;
         void draw_skybox_controls() const;
         void draw_test_controls() const;
         void draw_camera_info() const;

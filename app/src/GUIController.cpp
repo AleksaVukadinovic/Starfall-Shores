@@ -34,6 +34,7 @@ void GUIController::draw() {
     draw_bloom_controls();
     draw_fog_controls();
     draw_greyscale_controls();
+    draw_wind_controls();
     draw_skybox_controls();
     draw_test_controls();
     draw_camera_info();
@@ -129,6 +130,13 @@ void GUIController::draw_greyscale_controls() const {
     ImGui::Begin("Greyscale");
     ImGui::Checkbox("Enable Greyscale", &m_greyscale->greyscale_enabled);
     ImGui::SliderFloat("Greyscale Strength", &m_greyscale->greyscale_strength, 0.0f, 1.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_wind_controls() const {
+    ImGui::Begin("Wind");
+    ImGui::Checkbox("Enable Wind (V)", &m_main_controller->wind_enabled);
+    ImGui::SliderFloat("Wind Intensity", &m_main_controller->wind_intensity, 0.0f, 1.0f);
     ImGui::End();
 }
 
