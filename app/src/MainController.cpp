@@ -117,7 +117,7 @@ namespace app {
 void MainController::draw_forest() const {
         set_common_shader_variables(m_basic_shader);
         auto draw_tree = [&](auto *tree_model, const float x, const float y, const float z, const float scale,
-                             const float rotation_angle = 0.0f, const vec3 &rotation_axis = CENTER) {
+                             const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
             const auto model = create_model_matrix(vec3(x, y, z), vec3(scale), rotation_axis, rotation_angle);
             m_basic_shader->set_mat4("model", model);
             tree_model->draw(m_basic_shader);
@@ -277,21 +277,21 @@ void MainController::draw_forest() const {
         const auto path= m_resources->model("path");
         set_common_shader_variables(m_basic_shader);
 
-        auto draw_path_segment = [&](const vec3 &translation, const float y_rotation, const float scale) {
+        struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
+        constexpr std::array<PathData, 11> path_segments = {{
+            #include <path_segments.include>
+        }};
+
+        for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments) {
             auto model = mat4(1.0f);
-            model = rotate(model, glm::radians(90.0f), X_AXIS);
-            model = rotate(model, glm::radians(y_rotation), Y_AXIS);
-            model = rotate(model, glm::radians(15.0f), Z_AXIS);
-            model = translate(model, translation);
-            model = glm::scale(model, vec3(scale));
+            model = rotate(model, glm::radians(rx), X_AXIS);
+            model = rotate(model, glm::radians(ry), Y_AXIS);
+            model = rotate(model, glm::radians(rz), Z_AXIS);
+            model = translate(model, vec3(tx, ty, tz));
+            model = glm::scale(model, vec3(s));
             m_basic_shader->set_mat4("model", model);
             path->draw(m_basic_shader);
-        };
-
-        draw_path_segment(vec3(-13, 22, -20), 10.0f, 0.19f);
-        draw_path_segment(vec3(-11, 19, -17), -1.0f, 0.19f);
-        draw_path_segment(vec3(-6.5, 15, -17.5), 0.0f, 0.19f);
-        draw_path_segment(vec3(-1, 12, -17.5), 0.0f, 0.19f);
+        }
     }
 
     void MainController::draw_mushrooms() const {
@@ -506,7 +506,7 @@ void MainController::draw_forest() const {
 
     void MainController::terminate() {
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
-            spdlog::info("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
+            spdlog::debug("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
                 model_name, rotation.x, rotation.y, rotation.z,
                 translation.x, translation.y, translation.z, scale);
 
