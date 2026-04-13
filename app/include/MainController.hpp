@@ -30,7 +30,7 @@ namespace app {
         static constexpr std::array TEST_MODEL_NAMES = {
             "terrain", "campfire", "log_seat", "viking_tent", "stylized_tent",
             "yellow_tree", "green_tree", "beech_tree", "pine_tree", "oak_tree", "old_tree",
-            "bush1", "bush2", "laurel_bush", "flowers2", "roses",
+            "bush1", "bush2", "laurel_bush", "flowers2", "red_flowers",
             "path", "shrooms", "grave", "fire", "water"
         };
 
@@ -58,8 +58,6 @@ namespace app {
         void draw_logs() const;
         void draw_tents() const;
         void draw_bushes() const;
-        void draw_white_flowers() const;
-        void draw_red_flowers() const;
         void draw_flowers() const;
         void draw_path() const;
         void draw_mushrooms() const;

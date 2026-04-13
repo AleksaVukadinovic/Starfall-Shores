@@ -174,8 +174,8 @@ void MainController::draw_forest() const {
         set_common_shader_variables(m_basic_shader);
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
-            {42.0f,   vec3(6, 17.5, 2)},
-            {155.0f,  vec3(-16, 17.5, -9)},
+            {42.0f, vec3(6, 17.5, 2)},
+            {155.0f, vec3(-16, 17.5, -9)},
             {-100.0f, vec3(1, 17.5, -26)}
         }};
 
@@ -201,76 +201,58 @@ void MainController::draw_forest() const {
     }
 
     void MainController::draw_bushes() const {
-        const auto bush1 = m_resources->model("bush1");
-        const auto bush2 = m_resources->model("bush2");
-        const auto laurel_bush = m_resources->model("laurel_bush");
-        auto bush_shader = m_resources->shader("basic");
-        set_common_shader_variables(bush_shader);
+        set_common_shader_variables(m_basic_shader);
 
-        auto draw_model = [bush_shader](const engine::resources::Model *model, const mat4 &transform) {
-            bush_shader->set_mat4("model", transform);
-            model->draw_blended(bush_shader);
+        using BushData = std::array<float, 4>;
+
+        auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle, const vec3 &rotation_axis) {
+            const auto model = create_model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle);
+            m_basic_shader->set_mat4("model", model);
+            bush_model->draw_blended(m_basic_shader);
         };
 
-        auto draw_bush1 = [&](const vec3 &translation, const float scale) {
-            const auto model = create_model_matrix(translation, vec3(scale), X_AXIS, -90.0f);
-            draw_model(bush1, model);
-        };
+        constexpr std::array<BushData, 5> bush1_positions = {{
+            #include <bush1.include>
+        }};
+        constexpr std::array<BushData, 3> bush2_positions = {{
+            #include <bush2.include>
+        }};
+        constexpr std::array<BushData, 6> laurel_positions = {{
+            #include <laurel_bushes.include>
+        }};
 
-        auto draw_simple = [&](const engine::resources::Model *model, const vec3 &translation, const float scale) {
-            const auto m = create_model_matrix(translation, vec3(scale), Y_AXIS, 0.0f);
-            draw_model(model, m);
-        };
+        const auto *bush1 = m_resources->model("bush1");
+        const auto *bush2 = m_resources->model("bush2");
+        const auto *laurel = m_resources->model("laurel_bush");
 
-        draw_bush1(vec3(-19, -3, 16), 5.0f);
-        draw_bush1(vec3(15, 25, 16), 5.0f);
-        draw_bush1(vec3(52, -19, 17), 5.0f);
-        draw_bush1(vec3(31, -32, 17), 5.0f);
-        draw_bush1(vec3(12, -24, 17), 5.0f);
-        draw_simple(bush2, vec3(4, 20, -13), 0.3f);
-        draw_simple(bush2, vec3(32, 20, 4), 0.3f);
-        draw_simple(bush2, vec3(30, 20, 12), 0.3f);
-        draw_simple(laurel_bush, vec3(-25, 16, 0), 0.68f);
-        draw_simple(laurel_bush, vec3(-25, 16, 12), 0.68f);
-        draw_simple(laurel_bush, vec3(-20, 16, 23), 0.68f);
-        draw_simple(laurel_bush, vec3(-5, 16, 23), 0.68f);
-        draw_simple(laurel_bush, vec3(6, 17, 20), 0.68f);
-        draw_simple(laurel_bush, vec3(33, 17, -6), 0.68f);
-    }
-
-    void MainController::draw_white_flowers() const {
-        const engine::resources::Model *white_flowers  = m_resources->model("flowers2");
-        const engine::resources::Shader *flower_shader = m_resources->shader("flower_shader");
-
-        constexpr std::array translations = {
-            #include <white_flowers.include>
-        };
-
-        constexpr unsigned int row_count = 2;
-        constexpr unsigned int col_count = 10;
-        std::vector<mat4> model_matrices(row_count * col_count + translations.size());
-
-        for (uint8_t row = 0; row < row_count; row++) {
-            const float x = row == 0 ? 40.0f : 44.0f;
-
-            for (uint8_t col = 0; col < col_count; col++) {
-                mat4 model = create_model_matrix(vec3(x, 4.0f * static_cast<float>(col) - 16.0f, -17.4f), vec3(0.12f), X_AXIS, 90.0f);
-                model_matrices.emplace_back(model);
-            }
-        }
-
-        for (const auto &translation: translations) {
-            auto model = create_model_matrix(translation, vec3(0.12f), X_AXIS, 90.0f);
-            model_matrices.push_back(model);
-        }
-
-        set_common_shader_variables(flower_shader);
-        white_flowers->draw_instanced(flower_shader, model_matrices);
+        for (const auto &b : bush1_positions) draw_bush(bush1, b, -90.0f, X_AXIS);
+        for (const auto &b : bush2_positions) draw_bush(bush2, b, 0.0f, Y_AXIS);
+        for (const auto &b : laurel_positions) draw_bush(laurel, b, 0.0f, Y_AXIS);
     }
 
     void MainController::draw_flowers() const {
-        draw_white_flowers();
-        draw_red_flowers();
+        const auto *flower_shader = m_resources->shader("flower_shader");
+        set_common_shader_variables(flower_shader);
+
+        constexpr std::array white_translations = {
+            #include <white_flowers.include>
+        };
+        std::vector<mat4> white_matrices;
+        white_matrices.reserve(white_translations.size());
+        for (const auto &t : white_translations) {
+            white_matrices.push_back(create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f));
+        }
+        m_resources->model("white_flowers")->draw_instanced(flower_shader, white_matrices);
+
+        constexpr std::array red_translations = {
+            #include <red_flowers.include>
+        };
+        std::vector<mat4> red_matrices;
+        red_matrices.reserve(red_translations.size());
+        for (const auto &t : red_translations) {
+            red_matrices.push_back(create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f));
+        }
+        m_resources->model("red_flowers")->draw_instanced(flower_shader, red_matrices);
     }
 
     void MainController::draw_path() const {
@@ -298,39 +280,17 @@ void MainController::draw_forest() const {
         const auto mushroom = m_resources->model("shrooms");
         set_common_shader_variables(m_basic_shader);
 
-        auto draw_mushroom = [&](const vec3 &translation, const float scale, const float y_rotation = 0.0f) {
-            auto model = mat4(1.0f);
-            model      = rotate(model, glm::radians(-90.0f), X_AXIS);
-            model      = rotate(model, glm::radians(y_rotation), Y_AXIS);
-            model      = translate(model, translation);
-            model      = glm::scale(model, vec3(scale));
+        auto draw_mushroom = [&](const vec3 &translation) {
+            const auto model = create_model_matrix(translation, vec3(0.19f), X_AXIS, -90.0f);
             m_basic_shader->set_mat4("model", model);
             mushroom->draw(m_basic_shader);
         };
 
-        draw_mushroom(vec3(6, 0, 16), 0.19f, -19.0f);
-        draw_mushroom(vec3(3, 8, 17), 0.19f);
-        draw_mushroom(vec3(12, 19, 17), 0.19f);
-        draw_mushroom(vec3(30, 1, 17), 0.19f);
-        draw_mushroom(vec3(30, -10, 17), 0.19f);
-    }
-
-    void MainController::draw_red_flowers() const {
-        const engine::resources::Model *roses = m_resources->model("roses");
-        const engine::resources::Shader *shader = m_resources->shader("flower_shader");
-
-        constexpr std::array translations = {
-            #include <red_flowers.include>
-        };
-
-        std::vector<mat4> model_matrices(translations.size());
-        for (const auto &translation: translations) {
-            auto model = create_model_matrix(translation, vec3(0.04f), X_AXIS, -90.0f);
-            model_matrices.emplace_back(model);
-        }
-
-        set_common_shader_variables(shader);
-        roses->draw_instanced(shader, model_matrices);
+        draw_mushroom(vec3(6, 0, 16));
+        draw_mushroom(vec3(3, 8, 17));
+        draw_mushroom(vec3(12, 19, 17));
+        draw_mushroom(vec3(30, 1, 17));
+        draw_mushroom(vec3(30, -10, 17));
     }
 
     void MainController::draw_terrain() const {
@@ -474,9 +434,9 @@ void MainController::draw_forest() const {
 
         auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
             auto m = mat4(1.0f);
-            m = glm::rotate(m, glm::radians(rotation.x), vec3(1, 0, 0));
-            m = glm::rotate(m, glm::radians(rotation.y), vec3(0, 1, 0));
-            m = glm::rotate(m, glm::radians(rotation.z), vec3(0, 0, 1));
+            m = glm::rotate(m, glm::radians(rotation.x), X_AXIS);
+            m = glm::rotate(m, glm::radians(rotation.y), Y_AXIS);
+            m = glm::rotate(m, glm::radians(rotation.z), Z_AXIS);
             m = glm::translate(m, translation);
             m = glm::scale(m, vec3(scale));
             m_basic_shader->set_mat4("model", m);

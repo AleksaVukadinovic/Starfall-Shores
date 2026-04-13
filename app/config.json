@@ -40,11 +40,11 @@
       "oak_tree" : {
         "path" : "mighty_oak_trees/scene.gltf"
       },
-      "flowers2" : {
-        "path" : "flowers/scene.gltf"
+      "white_flowers" : {
+        "path" : "white_flowers/scene.gltf"
       },
-      "roses" : {
-        "path" : "roses/scene.gltf"
+      "red_flowers" : {
+        "path" : "red_flowers/scene.gltf"
       },
       "pine_tree" : {
         "path" : "pine_tree/scene.gltf"
