@@ -107,6 +107,7 @@ namespace app {
         draw_path();
         draw_mushrooms();
         draw_stones();
+        draw_grass();
         draw_test_model();
         if (!m_is_day)
             draw_fire();
@@ -357,6 +358,22 @@ void MainController::draw_forest() const {
         model = scale(model, vec3(1.35));
         m_basic_shader->set_mat4("model", model);
         grave->draw(m_basic_shader);
+    }
+
+    void MainController::draw_grass() const {
+        const auto *shader = m_resources->shader("flower_shader");
+        set_common_shader_variables(shader);
+
+        constexpr std::array grass_positions = {
+            #include <grass.include>
+        };
+
+        std::vector<mat4> matrices;
+        matrices.reserve(grass_positions.size());
+        for (const auto &pos : grass_positions) {
+            matrices.push_back(create_model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f));
+        }
+        m_resources->model("grass")->draw_instanced(shader, matrices);
     }
 
     void MainController::draw_fire() const {

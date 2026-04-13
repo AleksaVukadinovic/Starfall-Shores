@@ -1,6 +1,9 @@
 {
   "resources": {
     "models": {
+      "grass" : {
+        "path" : "grass/grass.glb"
+      },
       "log_seat" : {
         "path" : "log_seat/scene.gltf"
       },

@@ -153,6 +153,17 @@ Shader *ResourcesController::shader(const std::string &name, const std::filesyst
     return result.get();
 }
 
+Texture *ResourcesController::texture_from_memory(const std::string &name, const uint8_t *data, const int32_t length,
+                                                   const TextureType texture_type, const bool flip_uvs) {
+    auto &result = m_textures[name];
+    if (!result) {
+        spdlog::info("load_texture_from_memory(name={})", name);
+        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture_from_memory(data, length, flip_uvs),
+                                                   texture_type, "", name));
+    }
+    return result.get();
+}
+
 std::vector<Mesh> AssimpSceneProcessor::process_meshes() {
     m_meshes.clear();
     process_node(m_scene->mRootNode);
@@ -220,6 +231,8 @@ std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial 
             aiTextureType_SPECULAR,
             aiTextureType_NORMALS,
             aiTextureType_HEIGHT,
+            aiTextureType_BASE_COLOR,
+            aiTextureType_METALNESS,
     };
 
     for (const auto ai_texture_type: ai_texture_types) {
@@ -234,10 +247,31 @@ void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &texture
     for (uint32_t i = 0; i < material_count; ++i) {
         aiString ai_texture_path_string;
         material->GetTexture(type, i, &ai_texture_path_string);
-        std::filesystem::path texture_path = m_model_path.parent_path() / ai_texture_path_string.C_Str();
-        Texture *texture = m_resources_controller->texture(texture_path.string(), texture_path,
-                                                           assimp_texture_type_to_engine(type));
-        textures.emplace_back(texture);
+        const std::string tex_path_str = ai_texture_path_string.C_Str();
+
+        if (const auto *embedded = m_scene->GetEmbeddedTexture(tex_path_str.c_str())) {
+            const std::string embedded_name = m_model_path.string() + "_embedded_" + tex_path_str;
+            Texture *texture;
+            if (embedded->mHeight == 0) {
+                texture = m_resources_controller->texture_from_memory(
+                    embedded_name,
+                    reinterpret_cast<const uint8_t *>(embedded->pcData),
+                    static_cast<int32_t>(embedded->mWidth),
+                    assimp_texture_type_to_engine(type));
+            } else {
+                texture = m_resources_controller->texture_from_memory(
+                    embedded_name,
+                    reinterpret_cast<const uint8_t *>(embedded->pcData),
+                    static_cast<int32_t>(embedded->mWidth * embedded->mHeight * 4),
+                    assimp_texture_type_to_engine(type));
+            }
+            textures.emplace_back(texture);
+        } else {
+            std::filesystem::path texture_path = m_model_path.parent_path() / ai_texture_path_string.C_Str();
+            Texture *texture = m_resources_controller->texture(texture_path.string(), texture_path,
+                                                               assimp_texture_type_to_engine(type));
+            textures.emplace_back(texture);
+        }
     }
 }
 
@@ -247,6 +281,8 @@ TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(const aiTextureT
         case aiTextureType_SPECULAR: return TextureType::Specular;
         case aiTextureType_HEIGHT: return TextureType::Height;
         case aiTextureType_NORMALS: return TextureType::Normal;
+        case aiTextureType_BASE_COLOR: return TextureType::Diffuse;
+        case aiTextureType_METALNESS: return TextureType::Specular;
         default: RG_SHOULD_NOT_REACH_HERE("Engine currently doesn't support the aiTextureType: {}", static_cast<int>(type));
     }
 }

@@ -46,6 +46,34 @@ uint32_t OpenGL::generate_texture(const std::filesystem::path &path, const bool 
     return texture_id;
 }
 
+uint32_t OpenGL::generate_texture_from_memory(const uint8_t *data, const int32_t length, const bool flip_uvs) {
+    uint32_t texture_id = 0;
+    CHECKED_GL_CALL(glGenTextures, 1, &texture_id);
+
+    int32_t width, height, nr_components;
+    stbi_set_flip_vertically_on_load(flip_uvs);
+    uint8_t *pixels = stbi_load_from_memory(data, length, &width, &height, &nr_components, 0);
+    defer {
+        stbi_image_free(pixels);
+    };
+    if (pixels) {
+        const int32_t format = texture_format(nr_components);
+
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, pixels);
+        CHECKED_GL_CALL(glGenerateMipmap, GL_TEXTURE_2D);
+
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    } else {
+        throw util::EngineError(util::EngineError::Type::AssetLoadingError,
+                                "Failed to load embedded texture from memory");
+    }
+    return texture_id;
+}
+
 int32_t OpenGL::texture_format(int32_t number_of_channels) {
     switch (number_of_channels) {
         case 1: return GL_RED;

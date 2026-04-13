@@ -31,7 +31,7 @@ namespace app {
             "terrain", "campfire", "log_seat", "viking_tent", "stylized_tent",
             "yellow_tree", "green_tree", "beech_tree", "pine_tree", "oak_tree", "old_tree",
             "bush1", "bush2", "laurel_bush", "flowers2", "red_flowers",
-            "path", "shrooms", "grave", "fire", "water"
+            "path", "shrooms", "grave", "fire", "water", "grass", "grass"
         };
 
         int selected_model_index = 0;
@@ -62,6 +62,7 @@ namespace app {
         void draw_path() const;
         void draw_mushrooms() const;
         void draw_stones() const;
+        void draw_grass() const;
         void draw_fire() const;
         void draw_test_model() const;
 

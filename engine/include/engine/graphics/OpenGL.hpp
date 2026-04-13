@@ -77,6 +77,8 @@ public:
     */
     static uint32_t generate_texture(const std::filesystem::path &path, bool flip_uvs);
 
+    static uint32_t generate_texture_from_memory(const uint8_t *data, int32_t length, bool flip_uvs);
+
     /**
     * @brief Get texture format for a `number_of_channels`.
     * @param number_of_channels that the texture has.

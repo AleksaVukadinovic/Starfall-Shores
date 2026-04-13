@@ -68,6 +68,9 @@ public:
     */
     Shader *shader(const std::string &name, const std::filesystem::path &path = "");
 
+    Texture *texture_from_memory(const std::string &name, const uint8_t *data, int32_t length,
+                                 TextureType texture_type = TextureType::Regular, bool flip_uvs = false);
+
 private:
     /**
     * @brief Loads all the resources from the "resources/" directory.
