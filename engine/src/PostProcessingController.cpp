@@ -1,12 +1,12 @@
-#include <glad/glad.h>
-#include <engine/graphics/OpenGL.hpp>
-#include <engine/resources/ResourcesController.hpp>
-#include <engine/graphics/BloomController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
+#include <engine/graphics/OpenGL.hpp>
+#include <engine/graphics/PostProcessingController.hpp>
+#include <engine/resources/ResourcesController.hpp>
+#include <glad/glad.h>
 
 namespace engine::graphics {
 
-    void BloomController::render_quad() {
+    void PostProcessingController::render_quad() {
         if (m_quad_vao == 0) {
             float quadVertices[] = {
                     -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
@@ -27,7 +27,7 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glBindVertexArray, 0);
     }
 
-    void BloomController::update_screen_size() {
+    void PostProcessingController::update_screen_size() {
         const auto platform = get<platform::PlatformController>();
         m_scr_width = platform->window()->width();
         m_scr_height = platform->window()->height();
@@ -37,7 +37,7 @@ namespace engine::graphics {
             m_scr_height = 1000;
     }
 
-    void BloomController::bloom_setup() {
+    void PostProcessingController::bloom_setup() {
         CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_fbo);
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_color_buffers);
@@ -96,7 +96,7 @@ namespace engine::graphics {
         bloom_final->set_int("bloomBlur", 1);
     }
 
-    void BloomController::render_bloom() {
+    void PostProcessingController::render_bloom() {
         const auto resources = get<resources::ResourcesController>();
 
         const resources::Shader *blur_shader = resources->shader("blur");
@@ -134,10 +134,14 @@ namespace engine::graphics {
         bloom_final->set_bool("greyscaleEnabled", greyscale->greyscale_enabled);
         bloom_final->set_float("greyscaleStrength", greyscale->greyscale_strength);
 
+        bloom_final->set_bool("underwaterEnabled", underwater);
+        bloom_final->set_vec3("underwaterColor", underwater_color);
+        bloom_final->set_float("underwaterIntensity", underwater_intensity);
+
         this->render_quad();
     }
 
-    void BloomController::prepare_hdr() {
+    void PostProcessingController::prepare_hdr() {
         update_screen_size();
 
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
@@ -145,13 +149,13 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void BloomController::finalize_bloom() {
+    void PostProcessingController::finalize_bloom() {
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
         CHECKED_GL_CALL(glViewport, 0, 0, m_scr_width, m_scr_height);
         render_bloom();
     }
 
-    void BloomController::terminate() {
+    void PostProcessingController::terminate() {
         CHECKED_GL_CALL(glDeleteFramebuffers, 1, &m_hdr_fbo);
         CHECKED_GL_CALL(glDeleteFramebuffers, 2, m_pingpong_fbo);
 

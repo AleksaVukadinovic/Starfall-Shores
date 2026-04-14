@@ -1,11 +1,11 @@
 #pragma once
-#include <spdlog/spdlog.h>
-#include <engine/graphics/GraphicsController.hpp>
-#include <engine/graphics/FogController.hpp>
-#include <engine/graphics/BloomController.hpp>
-#include <vector>
-#include <string>
 #include <array>
+#include <engine/graphics/FogController.hpp>
+#include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/PostProcessingController.hpp>
+#include <spdlog/spdlog.h>
+#include <string>
+#include <vector>
 
 namespace engine::resources {
     class ResourcesController;
@@ -76,7 +76,7 @@ namespace app {
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::resources::Shader *m_basic_shader           = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
-        engine::graphics::BloomController *m_bloom          = nullptr;
+        engine::graphics::PostProcessingController *m_bloom          = nullptr;
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
 

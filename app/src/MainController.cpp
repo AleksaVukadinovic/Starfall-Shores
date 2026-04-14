@@ -1,14 +1,14 @@
+#include <Constants.hpp>
+#include <GUIController.hpp>
+#include <MainController.hpp>
 #include <engine/core/Controller.hpp>
-#include <engine/graphics/BloomController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
+#include <engine/graphics/PostProcessingController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
-#include <MainController.hpp>
-#include <Constants.hpp>
-#include <GUIController.hpp>
 
 namespace app {
     class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
@@ -30,7 +30,7 @@ namespace app {
         platform->set_enable_cursor(false);
         m_graphics = get<engine::graphics::GraphicsController>();
         m_graphics->perspective_params().Far = FAR_PLANE;
-        m_bloom = get<engine::graphics::BloomController>();
+        m_bloom = get<engine::graphics::PostProcessingController>();
         m_bloom->bloom_setup();
         m_fog               = get<FogController>();
         m_resources         = get<engine::resources::ResourcesController>();
@@ -95,6 +95,7 @@ namespace app {
     }
 
     void MainController::draw() {
+        m_bloom->underwater = m_camera->Position.y < 7.0f;
         m_bloom->prepare_hdr();
         draw_water();
         draw_terrain();

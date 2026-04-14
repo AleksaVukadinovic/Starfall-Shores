@@ -27,6 +27,10 @@ uniform float bloomStrength;
 uniform bool greyscaleEnabled;
 uniform float greyscaleStrength;
 
+uniform bool underwaterEnabled;
+uniform vec3 underwaterColor;
+uniform float underwaterIntensity;
+
 void main() {
     const float gamma = 1.3;
     vec3 hdrColor = texture(scene, TexCoords).rgb;
@@ -42,6 +46,10 @@ void main() {
     if (greyscaleEnabled) {
         float grey = dot(result, vec3(0.2126, 0.7152, 0.0722));
         result = mix(result, vec3(grey), greyscaleStrength);
+    }
+
+    if (underwaterEnabled) {
+        result = mix(result, result * underwaterColor, underwaterIntensity);
     }
 
     FragColor = vec4(result, 1.0);

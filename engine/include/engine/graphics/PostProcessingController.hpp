@@ -1,14 +1,19 @@
 #pragma once
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformController.hpp>
+#include <glm/glm.hpp>
 
 namespace engine::graphics {
-    class BloomController final : public core::Controller {
+    class PostProcessingController final : public core::Controller {
     public:
         unsigned int bloom_passes = 10;
         float exposure            = 1.3f;
         bool bloom                = true;
         float bloom_strength      = 1.0f;
+
+        bool underwater              = false;
+        glm::vec3 underwater_color   = glm::vec3(0.0f, 0.3f, 0.5f);
+        float underwater_intensity   = 0.4f;
 
         void prepare_hdr();
 

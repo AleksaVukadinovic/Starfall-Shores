@@ -15,7 +15,7 @@ namespace app {
     private:
         engine::graphics::GraphicsController *m_graphics = nullptr;
         engine::graphics::Camera *m_camera = nullptr;
-        engine::graphics::BloomController *m_bloom = nullptr;
+        engine::graphics::PostProcessingController *m_bloom = nullptr;
         engine::platform::PlatformController *m_platform = nullptr;
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;

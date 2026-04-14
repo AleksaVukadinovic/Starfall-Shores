@@ -1,11 +1,11 @@
-#include <engine/core/Engine.hpp>
-#include <engine/graphics/BloomController.hpp>
-#include <engine/graphics/FogController.hpp>
-#include <engine/graphics/GreyscaleController.hpp>
-#include <imgui.h>
 #include <GUIController.hpp>
 #include <MainController.hpp>
+#include <engine/core/Engine.hpp>
+#include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/GreyscaleController.hpp>
+#include <engine/graphics/PostProcessingController.hpp>
+#include <imgui.h>
 
 namespace app {
 
@@ -13,7 +13,7 @@ void GUIController::initialize() {
     set_enable(false);
     m_graphics = get<engine::graphics::GraphicsController>();
     m_camera = get<engine::graphics::GraphicsController>()->camera();
-    m_bloom = get<engine::graphics::BloomController>();
+    m_bloom = get<engine::graphics::PostProcessingController>();
     m_platform = get<engine::platform::PlatformController>();
     m_fog = get<FogController>();
     m_greyscale = get<GreyscaleController>();
