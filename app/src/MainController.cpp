@@ -11,6 +11,8 @@
 #include <engine/resources/ResourcesController.hpp>
 
 namespace app {
+    using vec3 = glm::vec3;
+    using mat4 = glm::mat4;
     class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
     public:
         void on_mouse_move(engine::platform::MousePosition position) override;
@@ -149,32 +151,32 @@ void MainController::draw_forest() const {
             return matrices;
         };
 
-        auto yellow_m = build_matrices(yellow_trees, [](const TreeData &t) {
+        const auto yellow_m = build_matrices(yellow_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
         });
         m_resources->model("yellow_tree")->draw_instanced(shader, yellow_m);
 
-        auto green_m = build_matrices(green_trees, [](const TreeData &t) {
+        const auto green_m = build_matrices(green_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
         m_resources->model("green_tree")->draw_instanced(shader, green_m);
 
-        auto tall_m = build_matrices(tall_trees, [](const TreeData &t) {
+        const auto tall_m = build_matrices(tall_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
         });
         m_resources->model("beech_tree")->draw_instanced(shader, tall_m);
 
-        auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
+        const auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
         m_resources->model("pine_tree")->draw_instanced(shader, pine_m);
 
-        auto oak_m = build_matrices(oak_trees, [](const TreeData &t) {
+        const auto oak_m = build_matrices(oak_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, 90.0f);
         });
         m_resources->model("oak_tree")->draw_instanced(shader, oak_m);
 
-        auto old_m = build_matrices(old_trees, [](const OldTreeData &t) {
+        const auto old_m = build_matrices(old_trees, [](const OldTreeData &t) {
             return create_model_matrix(vec3(t.x, t.y, t.z), vec3(t.scale), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
         });
         m_resources->model("old_tree")->draw_instanced(shader, old_m);
