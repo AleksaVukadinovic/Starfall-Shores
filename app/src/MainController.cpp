@@ -31,10 +31,10 @@ namespace app {
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         platform->set_enable_cursor(false);
         m_graphics = get<engine::graphics::GraphicsController>();
-        m_graphics->perspective_params().Far = FAR_PLANE;
         m_bloom = get<engine::graphics::PostProcessingController>();
         m_bloom->bloom_setup();
         m_fog               = get<FogController>();
+        m_graphics->perspective_params().Far = m_fog->far_plane();
         m_resources         = get<engine::resources::ResourcesController>();
         m_basic_shader      = m_resources->shader("basic");
         m_camera            = m_graphics->camera();
@@ -77,15 +77,7 @@ namespace app {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
-        set_fog_shader_properties(shader);
-    }
-
-    void MainController::set_fog_shader_properties(const engine::resources::Shader* shader) const {
-        shader->set_bool("fogEnabled", m_fog->fog_enabled);
-        shader->set_float("fogIntensity", m_fog->fog_intensity);
-        shader->set_float("fogStart", m_fog->fog_start);
-        shader->set_float("fogEnd", m_fog->fog_end);
-        shader->set_vec3("fogColor", m_fog->fog_color);
+        m_fog->apply_to_shader(shader);
     }
 
     mat4 create_model_matrix(const vec3 &position, const vec3 &scale, const vec3 &rotation_axis, const float rotation_angle) {
@@ -336,7 +328,7 @@ void MainController::draw_forest() const {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
-        set_fog_shader_properties(shader);
+        m_fog->apply_to_shader(shader);
 
         const auto model = create_model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
         shader->set_mat4("model", model);
@@ -346,7 +338,7 @@ void MainController::draw_forest() const {
     void MainController::draw_skybox() const {
         const auto shader = m_resources->shader("skybox");
         shader->use();
-        set_fog_shader_properties(shader);
+        m_fog->apply_to_shader(shader);
         const engine::resources::Skybox *skybox_cube = m_resources->skybox(m_is_day ? m_active_daytime_skybox : m_active_nighttime_skybox);
         m_graphics->draw_skybox(shader, skybox_cube);
     }
@@ -418,6 +410,7 @@ void MainController::draw_forest() const {
             if (const auto transition_progress = static_cast<float>(elapsed_time / DAY_CHANGE_DELAY); transition_progress >= 1.0f) {
                 m_is_day = !m_is_day;
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
+                m_fog->set_day(m_is_day);
                 m_day_change_requested = false;
                 if (!m_is_day)
                     m_fire_start_time = PlatformController::get_time();
@@ -425,6 +418,7 @@ void MainController::draw_forest() const {
                 const float start_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 const float target_exposure = m_is_day ? NIGHT_EXPOSURE : DAY_EXPOSURE;
                 m_current_exposure = start_exposure + (target_exposure - start_exposure) * transition_progress;
+                m_fog->transition(transition_progress, m_is_day);
             }
             m_bloom->exposure = m_current_exposure;
         }

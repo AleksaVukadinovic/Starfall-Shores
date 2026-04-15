@@ -76,13 +76,14 @@ void GUIController::draw_skybox_controls() const {
         m_main_controller->set_skybox(skybox_name, true);
     }
 
-    const char* nighttime_skyboxes[] = { "Night Canyon", "Night Stars" };
+    const char* nighttime_skyboxes[] = { "Night Canyon", "Night Stars", "Night Dark" };
     static int current_nighttime_skybox = 0;
     if (ImGui::Combo("Nighttime Skybox", &current_nighttime_skybox, nighttime_skyboxes, IM_ARRAYSIZE(nighttime_skyboxes))) {
         std::string skybox_name;
         switch (current_nighttime_skybox) {
             case 0: skybox_name = "skybox_night"; break;
             case 1: skybox_name = "skybox_night_stars"; break;
+            case 2: skybox_name = "skybox_night_dark"; break;
             default: skybox_name = "skybox_night"; break;
         }
         spdlog::info("{}", skybox_name);
