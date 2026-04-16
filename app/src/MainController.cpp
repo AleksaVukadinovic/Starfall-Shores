@@ -503,9 +503,9 @@ void MainController::draw_forest() const {
 
     void MainController::terminate() {
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
-            spdlog::info("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
+            spdlog::info(std::format("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
                 model_name, rotation.x, rotation.y, rotation.z,
-                translation.x, translation.y, translation.z, scale);
+                translation.x, translation.y, translation.z, scale));
 
         }
     }

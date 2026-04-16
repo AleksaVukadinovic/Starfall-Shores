@@ -44,7 +44,7 @@ OpenGL::ShaderProgramId ShaderCompiler::compile(const ShaderParsingResult &shade
     return shader_program_id;
 }
 
-uint32_t ShaderCompiler::compile(const std::string &shader_source, ShaderType type) {
+uint32_t ShaderCompiler::compile(const std::string &shader_source, const ShaderType type) {
     const uint32_t shader_id = OpenGL::compile_shader(shader_source, type);
     if (!OpenGL::shader_compiled_successfully(shader_id)) {
         throw util::EngineError(util::EngineError::Type::ShaderCompilationError, std::format(
@@ -105,7 +105,7 @@ std::string *ShaderCompiler::now_parsing(ShaderParsingResult &result, const std:
                              to_string(ShaderType::Geometry));
 }
 
-std::string_view to_string(ShaderType type) {
+std::string_view to_string(const ShaderType type) {
     switch (type) {
         case ShaderType::Vertex: return "vertex";
         case ShaderType::Fragment: return "fragment";

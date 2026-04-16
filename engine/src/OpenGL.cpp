@@ -220,11 +220,9 @@ uint32_t face_index(std::string_view name) {
         return 4;
     } else if (name == "back") {
         return 5;
-    } else {
-        RG_SHOULD_NOT_REACH_HERE(
-                "Unknown face name: {}. The cubemap textures should be named: right, left, top, bottom, front, back; by their respective faces in the cubemap. The extension of the image file is ignored.",
-                name);
     }
+    RG_SHOULD_NOT_REACH_HERE(
+        "Unknown face name: {}. The cubemap textures should be named: right, left, top, bottom, front, back; by their respective faces in the cubemap. The extension of the image file is ignored.", name);
 }
 
 int32_t stbi_number_of_channels_to_gl_format(int32_t number_of_channels) {

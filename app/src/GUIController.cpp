@@ -86,7 +86,7 @@ void GUIController::draw_skybox_controls() const {
             case 2: skybox_name = "skybox_night_dark"; break;
             default: skybox_name = "skybox_night"; break;
         }
-        spdlog::info("{}", skybox_name);
+        spdlog::info(std::format("{}", skybox_name));
         m_main_controller->set_skybox(skybox_name, false);
     }
     ImGui::End();
@@ -103,7 +103,7 @@ void GUIController::draw_camera_info() const {
 
 void GUIController::draw_fps_counter() {
     ImGui::Begin("FPS");
-    m_current_time = m_platform->get_time();
+    m_current_time = m_platform->get_time(); //NOLINT
     if (m_tickrate > 0.0f && m_last_update_time + 1.0f/m_tickrate >= m_current_time) {
         ImGui::Text("%.0f", m_last_recorded_fps);
     } else {

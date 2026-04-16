@@ -21,7 +21,7 @@ void ResourcesController::initialize() {
 
 void ResourcesController::load_shaders() {
     if (!exists(m_shaders_path)) {
-        spdlog::error("[ResourcesController]: no {} found to load the shaders from", m_shaders_path.string());
+        spdlog::error(std::format("[{}]: no {} found to load the shaders from", this->name(), m_shaders_path.string()));
         return;
     }
     for (const auto &shader_path: std::filesystem::directory_iterator(m_shaders_path)) {
@@ -109,7 +109,7 @@ Model *ResourcesController::model(const std::string &name) {
             flags |= aiProcess_FlipUVs;
         }
 
-        spdlog::info("load_model(name={}, path={})", name, model_path.string());
+        spdlog::info(std::format("load_model(name={}, path={})", name, model_path.string()));
         const aiScene *scene = importer.ReadFile(model_path, flags);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -157,7 +157,7 @@ Texture *ResourcesController::texture_from_memory(const std::string &name, const
                                                    const TextureType texture_type, const bool flip_uvs) {
     auto &result = m_textures[name];
     if (!result) {
-        spdlog::info("load_texture_from_memory(name={})", name);
+        spdlog::info(std::format("load_texture_from_memory(name={})", name));
         result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture_from_memory(data, length, flip_uvs),
                                                    texture_type, "", name));
     }

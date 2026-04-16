@@ -8,6 +8,7 @@
 #include <engine/util/Configuration.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/util/Utils.hpp>
+#include <ranges>
 
 namespace engine::core {
 int App::run(const int argc, char **argv) {
@@ -55,7 +56,7 @@ void App::initialize() {
         util::alg::topological_sort(range(m_controllers), adjacent_controllers);
     }
     for (const auto controller: m_controllers) {
-        spdlog::info("{}::initialize", controller->name());
+        spdlog::info(std::format("{}::initialize", controller->name()));
         controller->initialize();
     }
 }
@@ -105,10 +106,9 @@ void App::draw() const {
 
 void App::terminate() {
     // We terminate controllers in reverse order of their registration to ensure that controllers that depend on other controllers are terminated last.
-    for (auto it = m_controllers.rbegin(); it != m_controllers.rend(); ++it) {
-        const auto controller = *it;
+    for (const auto controller : std::views::reverse(m_controllers)) {
         controller->terminate();
-        spdlog::info("{}::terminate", controller->name());
+        spdlog::info(std::format("{}::terminate", controller->name()));
     }
 }
 

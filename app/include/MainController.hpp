@@ -42,7 +42,6 @@ namespace app {
 
         void place_test_model();
         void clear_placed_models();
-        void terminate() override;
 
         bool wind_enabled = false;
         float wind_intensity = 0.8f;
@@ -70,13 +69,14 @@ namespace app {
         void draw_test_model() const;
 
         void update() override;
+        void terminate() override;
         void update_day_night_transition();
         void update_camera();
 
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::resources::Shader *m_basic_shader           = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
-        engine::graphics::PostProcessingController *m_bloom          = nullptr;
+        engine::graphics::PostProcessingController *m_bloom = nullptr;
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
 
@@ -88,8 +88,8 @@ namespace app {
         static constexpr double DAY_CHANGE_DELAY = 5.0;
         static constexpr float DAY_EXPOSURE      = 1.3f;
         static constexpr float NIGHT_EXPOSURE    = 0.4f;
-        std::string m_active_daytime_skybox        = "skybox_day";
-        std::string m_active_nighttime_skybox      = "skybox_night";
+        std::string m_active_daytime_skybox      = "skybox_day";
+        std::string m_active_nighttime_skybox    = "skybox_night";
 
         static constexpr auto LIGHT_POS_DAY = glm::vec3(0.0f, 60.0f, 0.0f);
         static constexpr auto LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);

@@ -19,7 +19,7 @@ void tracing_off() {
 
 void trace(const std::source_location location) {
     if (g_tracing) {
-        spdlog::info("{}, in {}:{}", location.function_name(), location.file_name(), location.line());
+        spdlog::info(std::format("{}, in {}:{}", location.function_name(), location.file_name(), location.line()));
     }
 }
 
@@ -62,7 +62,7 @@ nlohmann::json Configuration::create_default() {
     json default_config;
     default_config["window"]["width"] = 1400;
     default_config["window"]["height"] = 1000;
-    default_config["window"]["title"] = "Hello, window!";
+    default_config["window"]["title"] = "Starfall shores";
     return default_config;
 }
 
@@ -80,7 +80,7 @@ ArgParser *ArgParser::instance() {
     return &arg_parser;
 }
 
-void ArgParser::initialize(int argc, char **argv) {
+void ArgParser::initialize(const int argc, char **argv) {
     m_argc = argc;
     m_argv = argv;
     spdlog::info("ArgParser initialized.");
