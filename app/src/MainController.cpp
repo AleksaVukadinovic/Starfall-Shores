@@ -6,6 +6,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
+#include <engine/graphics/RainController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
@@ -463,6 +464,8 @@ void MainController::draw_forest() const {
             get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
         if (platform->key(KEY_V).state() == Key::State::JustPressed)
             wind_enabled = !wind_enabled;
+        if (platform->key(KEY_R).state() == Key::State::JustPressed)
+            get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
         
     }
 

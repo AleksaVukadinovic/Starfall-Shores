@@ -4,6 +4,7 @@
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
+#include <engine/graphics/RainController.hpp>
 
 namespace app {
     class GUIController final : public engine::core::Controller {
@@ -19,6 +20,7 @@ namespace app {
         engine::platform::PlatformController *m_platform = nullptr;
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;
+        RainController *m_rain = nullptr;
         MainController* m_main_controller = nullptr;
 
         void initialize() override;
@@ -28,6 +30,7 @@ namespace app {
         void draw_bloom_controls() const;
         void draw_fog_controls() const;
         void draw_greyscale_controls() const;
+        void draw_rain_controls() const;
         void draw_wind_controls() const;
         void draw_skybox_controls() const;
         void draw_test_controls() const;

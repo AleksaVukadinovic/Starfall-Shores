@@ -1,6 +1,7 @@
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
+#include <engine/graphics/RainController.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <glad/glad.h>
 
@@ -137,6 +138,14 @@ namespace engine::graphics {
         bloom_final->set_bool("underwaterEnabled", underwater);
         bloom_final->set_vec3("underwaterColor", underwater_color);
         bloom_final->set_float("underwaterIntensity", underwater_intensity);
+
+        const auto rain = get<RainController>();
+        bloom_final->set_bool("rainEnabled", rain->rain_enabled);
+        bloom_final->set_float("rainIntensity", rain->rain_intensity);
+        bloom_final->set_float("rainSpeed", rain->rain_speed);
+        bloom_final->set_float("rainOpacity", rain->rain_opacity);
+        bloom_final->set_float("rainStreakLength", rain->rain_streak_length);
+        bloom_final->set_float("rainTime", static_cast<float>(platform::PlatformController::get_time()));
 
         this->render_quad();
     }

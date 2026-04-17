@@ -5,6 +5,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
+#include <engine/graphics/RainController.hpp>
 #include <imgui.h>
 
 namespace app {
@@ -17,6 +18,7 @@ void GUIController::initialize() {
     m_platform = get<engine::platform::PlatformController>();
     m_fog = get<FogController>();
     m_greyscale = get<GreyscaleController>();
+    m_rain = get<RainController>();
     m_main_controller = get<MainController>();
     m_current_time = static_cast<float>(engine::platform::PlatformController::get_time());
     m_fov = m_graphics->perspective_params().FOV;
@@ -34,6 +36,7 @@ void GUIController::draw() {
     draw_bloom_controls();
     draw_fog_controls();
     draw_greyscale_controls();
+    draw_rain_controls();
     draw_wind_controls();
     draw_skybox_controls();
     draw_test_controls();
@@ -131,6 +134,16 @@ void GUIController::draw_greyscale_controls() const {
     ImGui::Begin("Greyscale");
     ImGui::Checkbox("Enable Greyscale", &m_greyscale->greyscale_enabled);
     ImGui::SliderFloat("Greyscale Strength", &m_greyscale->greyscale_strength, 0.0f, 1.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_rain_controls() const {
+    ImGui::Begin("Rain");
+    ImGui::Checkbox("Enable Rain (R)", &m_rain->rain_enabled);
+    ImGui::SliderFloat("Rain Intensity", &m_rain->rain_intensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Rain Speed", &m_rain->rain_speed, 0.1f, 5.0f);
+    ImGui::SliderFloat("Rain Opacity", &m_rain->rain_opacity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Streak Length", &m_rain->rain_streak_length, 0.02f, 0.5f);
     ImGui::End();
 }
 
