@@ -49,9 +49,12 @@ namespace engine::resources {
         std::unordered_map<std::string_view, uint32_t> counts;
         std::string uniform_name;
         uniform_name.reserve(32);
+        bool has_normal_map = false;
         for (int i = 0; i < m_textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             const auto &texture_type = Texture::uniform_name_convention(m_textures[i]->type());
+            if (m_textures[i]->type() == TextureType::Normal)
+                has_normal_map = true;
             uniform_name.append(texture_type);
             const auto count = (counts[texture_type] += 1);
             uniform_name.append(std::to_string(count));
@@ -59,6 +62,7 @@ namespace engine::resources {
             glBindTexture(GL_TEXTURE_2D, m_textures[i]->id());
             uniform_name.clear();
         }
+        shader->set_bool("hasNormalMap", has_normal_map);
         glBindVertexArray(m_vao);
         glDrawElements(GL_TRIANGLES, m_num_indices, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
