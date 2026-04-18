@@ -47,7 +47,7 @@ void ResourcesController::load_shaders() {
 
 void ResourcesController::load_models() {
     if (!exists(m_models_path)) {
-        spdlog::error("[ResourcesController]: no {} found to load the models from", m_models_path.string());
+        spdlog::error(std::format("[ResourcesController]: no {} found to load the models from", m_models_path.string()));
         return;
     }
     const auto &config = util::Configuration::config();
@@ -198,7 +198,7 @@ void AssimpSceneProcessor::process_node(const aiNode *node) {
 void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
     std::vector<Vertex> vertices;
     vertices.reserve(mesh->mNumVertices);
-    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex{};
         vertex.Position.x = mesh->mVertices[i].x;
         vertex.Position.y = mesh->mVertices[i].y;

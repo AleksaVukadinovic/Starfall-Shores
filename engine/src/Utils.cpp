@@ -48,8 +48,7 @@ std::filesystem::path Configuration::get_config_path() {
     if (!config_arg.has_value() || !exists(std::filesystem::path(config_arg.value()))) {
         std::ofstream f(CONFIG_FILE_NAME.data());
         if (!f.is_open()) {
-            throw EngineError(EngineError::Type::ConfigurationError,
-                              std::format("Failed to open configuration file."));
+            throw EngineError(EngineError::Type::ConfigurationError, std::format("Failed to open configuration file."));
         }
         const auto config = create_default();
         f << config.dump(4);

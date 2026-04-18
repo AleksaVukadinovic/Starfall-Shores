@@ -64,7 +64,7 @@ namespace app {
         void draw_flowers() const;
         void draw_path() const;
         void draw_mushrooms() const;
-        void draw_stones() const;
+        void draw_grave() const;
         void draw_grass() const;
         void draw_fire() const;
         void draw_test_model() const;

@@ -10,6 +10,7 @@
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
+#include <future>
 
 namespace app {
     using vec3 = glm::vec3;
@@ -92,9 +93,9 @@ namespace app {
 
     mat4 create_model_matrix(const vec3 &position, const vec3 &scale, const vec3 &rotation_axis, const float rotation_angle) {
         auto model = mat4(1.0f);
-        model      = rotate(model, glm::radians(rotation_angle), rotation_axis);
-        model      = translate(model, position);
-        model      = glm::scale(model, scale);
+        model = rotate(model, glm::radians(rotation_angle), rotation_axis);
+        model = translate(model, position);
+        model = glm::scale(model, scale);
         return model;
     }
 
@@ -113,7 +114,7 @@ namespace app {
         draw_flowers();
         draw_path();
         draw_mushrooms();
-        draw_stones();
+        draw_grave();
         draw_grass();
         draw_test_model();
         if (!m_is_day)
@@ -155,35 +156,35 @@ void MainController::draw_forest() const {
             return matrices;
         };
 
-        const auto yellow_m = build_matrices(yellow_trees, [](const TreeData &t) {
+        auto yellow_f = std::async(std::launch::async, build_matrices, yellow_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
         });
-        m_resources->model("yellow_tree")->draw_instanced(shader, yellow_m);
+        m_resources->model("yellow_tree")->draw_instanced(shader, yellow_f.get());
 
-        const auto green_m = build_matrices(green_trees, [](const TreeData &t) {
+        auto green_f = std::async(std::launch::async, build_matrices, green_trees, [&](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
-        m_resources->model("green_tree")->draw_instanced(shader, green_m);
+        m_resources->model("green_tree")->draw_instanced(shader, green_f.get());
 
-        const auto tall_m = build_matrices(tall_trees, [](const TreeData &t) {
+        auto tall_f = std::async(std::launch::async, build_matrices, tall_trees, [&](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
         });
-        m_resources->model("beech_tree")->draw_instanced(shader, tall_m);
+        m_resources->model("beech_tree")->draw_instanced(shader, tall_f.get());
 
-        const auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
+        auto pine_f = std::async(std::launch::async, build_matrices, pine_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
-        m_resources->model("pine_tree")->draw_instanced(shader, pine_m);
+        m_resources->model("pine_tree")->draw_instanced(shader, pine_f.get());
 
-        const auto oak_m = build_matrices(oak_trees, [](const TreeData &t) {
+        auto oak_f = std::async(std::launch::async, build_matrices, oak_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, 90.0f);
         });
-        m_resources->model("oak_tree")->draw_instanced(shader, oak_m);
+        m_resources->model("oak_tree")->draw_instanced(shader, oak_f.get());
 
-        const auto old_m = build_matrices(old_trees, [](const OldTreeData &t) {
+        auto old_f = std::async(std::launch::async, build_matrices, old_trees, [](const OldTreeData &t) {
             return create_model_matrix(vec3(t.x, t.y, t.z), vec3(t.scale), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
         });
-        m_resources->model("old_tree")->draw_instanced(shader, old_m);
+        m_resources->model("old_tree")->draw_instanced(shader, old_f.get());
     }
 
     void MainController::draw_campfire() const {
@@ -259,22 +260,25 @@ void MainController::draw_forest() const {
         constexpr std::array white_translations = {
             #include <coordinates/white_flowers.include>
         };
-        std::vector<mat4> white_matrices;
-        white_matrices.reserve(white_translations.size());
-        for (const auto &t : white_translations) {
-            white_matrices.emplace_back(create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f));
-        }
-        m_resources->model("white_flowers")->draw_instanced(flower_shader, white_matrices);
-
         constexpr std::array red_translations = {
             #include <coordinates/red_flowers.include>
         };
-        std::vector<mat4> red_matrices;
-        red_matrices.reserve(red_translations.size());
-        for (const auto &t : red_translations) {
-            red_matrices.emplace_back(create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f));
-        }
-        m_resources->model("red_flowers")->draw_instanced(flower_shader, red_matrices);
+        auto white_matrices_f = std::async(std::launch::async, [&]() {
+            std::vector<mat4> white_matrices(white_translations.size());
+            for (const auto &t : white_translations)
+                white_matrices.emplace_back(create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f));
+            return white_matrices;
+        });
+        auto red_matrices_f = std::async(std::launch::async, [&]() {
+            std::vector<mat4> red_matrices(red_translations.size());
+            for (const auto &t : red_translations) {
+                red_matrices.emplace_back(create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f));
+            }
+            return red_matrices;
+        });
+
+        m_resources->model("white_flowers")->draw_instanced(flower_shader, white_matrices_f.get());
+        m_resources->model("red_flowers")->draw_instanced(flower_shader, red_matrices_f.get());
     }
 
     void MainController::draw_path() const {
@@ -310,11 +314,12 @@ void MainController::draw_forest() const {
             mushroom->draw(m_basic_shader);
         };
 
-        draw_mushroom(vec3(6, 0, 16));
-        draw_mushroom(vec3(3, 8, 17));
-        draw_mushroom(vec3(12, 19, 17));
-        draw_mushroom(vec3(30, 1, 17));
-        draw_mushroom(vec3(30, -10, 17));
+        constexpr std::array shroom_positions = {
+            #include <coordinates/shrooms.include>
+        };
+        for (const auto &shroom : shroom_positions) {
+            draw_mushroom(shroom);
+        }
     }
 
     void MainController::draw_terrain() const {
@@ -359,7 +364,7 @@ void MainController::draw_forest() const {
         m_graphics->draw_skybox(shader, skybox_cube);
     }
 
-    void MainController::draw_stones() const {
+    void MainController::draw_grave() const {
         const engine::resources::Model *grave = m_resources->model("grave");
         set_common_shader_variables(m_basic_shader);
         auto model = mat4(1.0f);
@@ -572,7 +577,6 @@ void MainController::draw_forest() const {
 
         draw_depth("terrain", mat4(1.0f));
         draw_depth("terrain", create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-
         draw_depth("campfire", translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)));
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
@@ -587,11 +591,11 @@ void MainController::draw_forest() const {
         auto draw_mushroom_depth = [&](const vec3 &t) {
             draw_depth("shrooms", create_model_matrix(t, vec3(0.19f), X_AXIS, -90.0f));
         };
-        draw_mushroom_depth(vec3(6, 0, 16));
-        draw_mushroom_depth(vec3(3, 8, 17));
-        draw_mushroom_depth(vec3(12, 19, 17));
-        draw_mushroom_depth(vec3(30, 1, 17));
-        draw_mushroom_depth(vec3(30, -10, 17));
+        constexpr std::array shroom_positions = {
+            #include <coordinates/shrooms.include>
+        };
+        for (const auto &shroom : shroom_positions)
+            draw_mushroom_depth(shroom);
 
         {
             auto model = mat4(1.0f);
@@ -627,37 +631,36 @@ void MainController::draw_forest() const {
         }};
 
         auto build_matrices = [](const auto &data, auto transform_fn) {
-            std::vector<mat4> matrices;
-            matrices.reserve(data.size());
+            std::vector<mat4> matrices(data.size());
             for (const auto &entry : data)
-                matrices.push_back(transform_fn(entry));
+                matrices.emplace_back(transform_fn(entry));
             return matrices;
         };
 
-        const auto yellow_m = build_matrices(yellow_trees, [](const TreeData &t) {
+        auto yellow_f = std::async(std::launch::async, build_matrices, yellow_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
         });
-        m_resources->model("yellow_tree")->draw_instanced(m_depth_instanced_shader, yellow_m);
+        m_resources->model("yellow_tree")->draw_instanced(m_depth_instanced_shader, yellow_f.get());
 
-        const auto green_m = build_matrices(green_trees, [](const TreeData &t) {
+        auto green_f = std::async(std::launch::async, build_matrices, green_trees, [&](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
-        m_resources->model("green_tree")->draw_instanced(m_depth_instanced_shader, green_m);
+        m_resources->model("green_tree")->draw_instanced(m_depth_instanced_shader, green_f.get());
 
-        const auto tall_m = build_matrices(tall_trees, [](const TreeData &t) {
+        auto tall_f = std::async(std::launch::async, build_matrices, tall_trees, [&](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
         });
-        m_resources->model("beech_tree")->draw_instanced(m_depth_instanced_shader, tall_m);
+        m_resources->model("beech_tree")->draw_instanced(m_depth_instanced_shader, tall_f.get());
 
-        const auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
+        auto pine_f = std::async(std::launch::async, build_matrices, pine_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
-        m_resources->model("pine_tree")->draw_instanced(m_depth_instanced_shader, pine_m);
+        m_resources->model("pine_tree")->draw_instanced(m_depth_instanced_shader, pine_f.get());
 
-        const auto oak_m = build_matrices(oak_trees, [](const TreeData &t) {
+        auto oak_f = std::async(std::launch::async, build_matrices, oak_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, 90.0f);
         });
-        m_resources->model("oak_tree")->draw_instanced(m_depth_instanced_shader, oak_m);
+        m_resources->model("oak_tree")->draw_instanced(m_depth_instanced_shader, oak_f.get());
 
         const auto old_m = build_matrices(old_trees, [](const OldTreeData &t) {
             return create_model_matrix(vec3(t.x, t.y, t.z), vec3(t.s), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
