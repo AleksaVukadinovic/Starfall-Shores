@@ -104,6 +104,14 @@ namespace engine::platform {
 
         [[nodiscard]] static double get_time();
 
+        [[nodiscard]] float target_fps() const {
+            return m_target_fps;
+        }
+
+        void set_target_fps(const float fps) {
+            m_target_fps = fps;
+        }
+
         /**
         * @brief Swaps the current draw buffer for the main window. Should be called at the end of the frame.
         */
@@ -164,5 +172,6 @@ namespace engine::platform {
         * @brief Tracks whether the cursor is currently enabled/visible
         */
         bool m_cursor_enabled = true;
+        float m_target_fps = 0.0f;
     };
 } // namespace engine

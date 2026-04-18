@@ -1,3 +1,4 @@
+#include <thread>
 #include <imgui_impl_glfw.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -97,6 +98,13 @@ namespace engine::platform {
     }
 
     bool PlatformController::loop() {
+        if (m_target_fps > 0.0f) {
+            const double target_frame_time = 1.0 / static_cast<double>(m_target_fps);
+            while (glfwGetTime() - static_cast<double>(m_frame_time.current) < target_frame_time) {
+                std::this_thread::sleep_for(std::chrono::microseconds(100));
+            }
+        }
+
         m_frame_time.previous = m_frame_time.current;
         m_frame_time.current  = static_cast<float>(glfwGetTime());
         m_frame_time.dt       = m_frame_time.current - m_frame_time.previous;

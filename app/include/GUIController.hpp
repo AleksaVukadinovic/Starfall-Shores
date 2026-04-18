@@ -36,10 +36,12 @@ namespace app {
         void draw_test_controls() const;
         void draw_camera_info() const;
         void draw_fps_counter();
+        void draw_fps_limit_slider() const;
         void draw_tickrate_slider();
         void draw_fov_slider();
 
-        float m_current_time = 0.0f;
+        float m_fps_accumulator = 0.0f;
+        int m_fps_frame_count = 0;
         float m_last_update_time = 0.0f;
         float m_last_recorded_fps = 0.0f;
 

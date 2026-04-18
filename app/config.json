@@ -24,55 +24,72 @@
         "flip_uvs" : true
       },
       "old_tree" : {
-        "path" : "old_tree/scene.gltf"
+        "path" : "old_tree/scene.gltf",
+        "flip_uvs" : true
       },
       "yellow_tree" : {
-        "path" : "platano_tree/scene.gltf"
+        "path" : "platano_tree/scene.gltf",
+        "flip_uvs" : true
       },
       "urban_tree" : {
-        "path" : "urban_tree/scene.gltf"
+        "path" : "urban_tree/scene.gltf",
+        "flip_uvs" : true
       },
       "green_tree" : {
-        "path" : "bodhi_tree/scene.gltf"
+        "path" : "bodhi_tree/scene.gltf",
+        "flip_uvs" : true
       },
       "bush1" : {
-        "path" : "stylized_bush/scene.gltf"
+        "path" : "stylized_bush/scene.gltf",
+        "flip_uvs" : true
       },
       "bush2" : {
-        "path" : "photorealistic_bush/scene.gltf"
+        "path" : "photorealistic_bush/scene.gltf",
+        "flip_uvs" : true
       },
       "beech_tree" : {
-        "path" : "beech_tree/scene.gltf"
+        "path" : "beech_tree/scene.gltf",
+        "flip_uvs" : true
       },
       "oak_tree" : {
-        "path" : "mighty_oak_trees/scene.gltf"
+        "path" : "mighty_oak_trees/scene.gltf",
+        "flip_uvs" : true
       },
       "white_flowers" : {
-        "path" : "white_flowers/scene.gltf"
+        "path" : "white_flowers/scene.gltf",
+        "flip_uvs" : true
       },
       "red_flowers" : {
-        "path" : "red_flowers/scene.gltf"
+        "path" : "red_flowers/scene.gltf",
+        "flip_uvs" : true
       },
       "pine_tree" : {
-        "path" : "pine_tree/scene.gltf"
+        "path" : "pine_tree/scene.gltf",
+        "flip_uvs" : true
       },
       "path" : {
-        "path" : "way_path_blocks/scene.gltf"
+        "path" : "way_path_blocks/scene.gltf",
+        "flip_uvs" : true
       },
       "shrooms" : {
-        "path" : "mushrooms/scene.gltf"
+        "path" : "mushrooms/scene.gltf",
+        "flip_uvs" : true
       },
       "laurel_bush" : {
-        "path" : "laurel_bush/scene.gltf"
+        "path" : "laurel_bush/scene.gltf",
+        "flip_uvs" : true
       },
       "grave" : {
-        "path" : "grave/scene.gltf"
+        "path" : "grave/scene.gltf",
+        "flip_uvs" : true
       },
       "fire" : {
-        "path" : "fire/scene.gltf"
+        "path" : "fire/scene.gltf",
+        "flip_uvs" : true
       },
       "water" : {
-        "path" : "water/scene.gltf"
+        "path" : "water/scene.gltf",
+        "flip_uvs" : true
       }
     }
   },

@@ -20,7 +20,7 @@ void GUIController::initialize() {
     m_greyscale = get<GreyscaleController>();
     m_rain = get<RainController>();
     m_main_controller = get<MainController>();
-    m_current_time = static_cast<float>(engine::platform::PlatformController::get_time());
+    m_last_update_time = static_cast<float>(engine::platform::PlatformController::get_time());
     m_fov = m_graphics->perspective_params().FOV;
 }
 
@@ -106,14 +106,24 @@ void GUIController::draw_camera_info() const {
 
 void GUIController::draw_fps_counter() {
     ImGui::Begin("FPS");
-    m_current_time = m_platform->get_time(); //NOLINT
-    if (m_tickrate > 0.0f && m_last_update_time + 1.0f/m_tickrate >= m_current_time) {
-        ImGui::Text("%.0f", m_last_recorded_fps);
-    } else {
-        m_last_update_time = m_current_time;
-        m_last_recorded_fps = 1.0f/m_platform->dt();
-        ImGui::Text("%.0f", m_last_recorded_fps);
+    m_fps_accumulator += m_platform->dt();
+    m_fps_frame_count++;
+    if (const float update_interval = m_tickrate > 0.0f ? 1.0f / m_tickrate : 0.5f; m_fps_accumulator >= update_interval) {
+        m_last_recorded_fps = static_cast<float>(m_fps_frame_count) / m_fps_accumulator;
+        m_fps_accumulator = 0.0f;
+        m_fps_frame_count = 0;
     }
+    static const char* fps_options[] = { "Unlimited", "30", "60", "120", "144", "240" };
+    static constexpr float fps_values[] = { 0.0f, 30.0f, 60.0f, 120.0f, 144.0f, 240.0f };
+    int current = 0;
+    const float target = m_platform->target_fps();
+    for (int i = 0; i < sizeof(fps_values)/sizeof(int); ++i) {
+        if (fps_values[i] == target) { current = i; break; }
+    }
+    if (ImGui::Combo("FPS Limit", &current, fps_options, 6)) {
+        m_platform->set_target_fps(fps_values[current]);
+    }
+    ImGui::Text("%.0f", m_last_recorded_fps);
     ImGui::End();
 }
 
