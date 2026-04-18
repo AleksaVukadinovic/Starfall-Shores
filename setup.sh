@@ -15,7 +15,8 @@ if [ "$OS" = "Darwin" ]; then
     source "venv/bin/activate" && pip3 install libclang
 
 elif [ "$OS" = "Linux" ]; then
-    sudo add-apt-repository universe ppa:ubuntu-toolchain-r/test
+    sudo add-apt-repository universe
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt update
     sudo apt install pkg-config g++-13 clang-format clang-tidy cmake git build-essential libwayland-dev libxkbcommon-dev xorg-dev libgl1-mesa-dev mesa-common-dev mesa-utils doxygen graphviz
 

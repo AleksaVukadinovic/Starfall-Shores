@@ -88,7 +88,7 @@ You can add glm to your CMake project to be built together.
 
 Add to the `CMakeLists.txt` file:
 ```cmake
-cmake_minimum_required(VERSION 3.11) # FetchContent is new in version 3.11.
+cmake_minimum_required(VERSION 3.21) # FetchContent is new in VERSION 3.21.
 
 include(FetchContent)
 
