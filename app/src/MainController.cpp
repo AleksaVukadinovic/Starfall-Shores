@@ -38,12 +38,15 @@ namespace app {
         m_graphics->perspective_params().Far = m_fog->far_plane();
         m_resources         = get<engine::resources::ResourcesController>();
         m_basic_shader      = m_resources->shader("basic");
+        m_depth_shader      = m_resources->shader("depth_shader");
+        m_depth_instanced_shader = m_resources->shader("depth_instanced_shader");
         m_camera            = m_graphics->camera();
         m_is_day           = true;
         m_camera->Position = vec3(5, 27, 17);
         m_camera->Yaw      = -38;
         m_camera->Pitch    = -5;
         m_camera->rotate_camera(0, 0);
+        setup_shadow_map();
     }
 
     bool MainController::loop() {
@@ -78,6 +81,12 @@ namespace app {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
+        shader->set_bool("shadowsEnabled", shadows_enabled);
+        if (shadows_enabled) {
+            shader->set_mat4("lightSpaceMatrix", light_space_matrix());
+            shader->set_int("shadowMap", 7);
+            engine::graphics::OpenGL::bind_texture_to_unit(m_shadow_map_texture, 7);
+        }
         m_fog->apply_to_shader(shader);
     }
 
@@ -90,6 +99,8 @@ namespace app {
     }
 
     void MainController::draw() {
+        if (shadows_enabled)
+            render_shadow_map();
         m_bloom->underwater = m_camera->Position.y < 7.0f;
         m_bloom->prepare_hdr();
         draw_water();
@@ -329,6 +340,12 @@ void MainController::draw_forest() const {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
+        shader->set_bool("shadowsEnabled", shadows_enabled);
+        if (shadows_enabled) {
+            shader->set_mat4("lightSpaceMatrix", light_space_matrix());
+            shader->set_int("shadowMap", 7);
+            engine::graphics::OpenGL::bind_texture_to_unit(m_shadow_map_texture, 7);
+        }
         m_fog->apply_to_shader(shader);
 
         const auto model = create_model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
@@ -505,6 +522,9 @@ void MainController::draw_forest() const {
     }
 
     void MainController::terminate() {
+        if (m_shadow_map_fbo) {
+            engine::graphics::OpenGL::destroy_shadow_map({m_shadow_map_fbo, m_shadow_map_texture});
+        }
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
             spdlog::info(std::format("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
                 model_name, rotation.x, rotation.y, rotation.z,
@@ -519,5 +539,142 @@ void MainController::draw_forest() const {
         } else {
             m_active_nighttime_skybox = new_skybox;
         }
+    }
+
+    void MainController::setup_shadow_map() {
+        auto [fbo, texture] = engine::graphics::OpenGL::create_shadow_map(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+        m_shadow_map_fbo = fbo;
+        m_shadow_map_texture = texture;
+    }
+
+    glm::mat4 MainController::light_space_matrix() const {
+        const auto light_pos = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
+        const auto light_projection = glm::ortho(-SHADOW_ORTHO_SIZE, SHADOW_ORTHO_SIZE, -SHADOW_ORTHO_SIZE, SHADOW_ORTHO_SIZE, SHADOW_NEAR, SHADOW_FAR);
+        const auto light_view = glm::lookAt(light_pos, vec3(0.0f, 15.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
+        return light_projection * light_view;
+    }
+
+    void MainController::render_shadow_map() const {
+        engine::graphics::OpenGL::begin_shadow_pass(m_shadow_map_fbo, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+        render_depth_scene();
+        const auto platform = get<engine::platform::PlatformController>();
+        engine::graphics::OpenGL::end_shadow_pass(platform->window()->width(), platform->window()->height());
+    }
+
+    void MainController::render_depth_scene() const {
+        const auto lsm = light_space_matrix();
+
+        m_depth_shader->use();
+        m_depth_shader->set_mat4("lightSpaceMatrix", lsm);
+
+        auto draw_depth = [&](const std::string &model_name, const mat4 &model_mat) {
+            m_depth_shader->set_mat4("model", model_mat);
+            m_resources->model(model_name)->draw(m_depth_shader);
+        };
+
+        draw_depth("terrain", mat4(1.0f));
+        draw_depth("terrain", create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
+
+        draw_depth("campfire", translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)));
+
+        constexpr std::array<std::pair<float, vec3>, 3> logs = {{
+            {42.0f, vec3(6, 17.5, 2)},
+            {155.0f, vec3(-16, 17.5, -9)},
+            {-100.0f, vec3(1, 17.5, -26)}
+        }};
+        for (const auto &[angle, pos] : logs)
+            draw_depth("log_seat", create_model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
+
+        draw_depth("viking_tent", create_model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
+        draw_depth("stylized_tent", create_model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
+
+        auto draw_mushroom_depth = [&](const vec3 &t) {
+            draw_depth("shrooms", create_model_matrix(t, vec3(0.19f), X_AXIS, -90.0f));
+        };
+        draw_mushroom_depth(vec3(6, 0, 16));
+        draw_mushroom_depth(vec3(3, 8, 17));
+        draw_mushroom_depth(vec3(12, 19, 17));
+        draw_mushroom_depth(vec3(30, 1, 17));
+        draw_mushroom_depth(vec3(30, -10, 17));
+
+        {
+            auto model = mat4(1.0f);
+            model = rotate(model, glm::radians(-90.0f), X_AXIS);
+            model = rotate(model, glm::radians(-48.0f), Z_AXIS);
+            model = translate(model, vec3(29, 71, 12));
+            model = scale(model, vec3(1.35));
+            draw_depth("grave", model);
+        }
+
+        m_depth_instanced_shader->use();
+        m_depth_instanced_shader->set_mat4("lightSpaceMatrix", lsm);
+
+        using TreeData = std::array<float, 4>;
+        constexpr std::array<TreeData, 22> yellow_trees = {{
+            #include <coordinates/yellow_trees.include>
+        }};
+        constexpr std::array<TreeData, 16> green_trees = {{
+            #include <coordinates/green_trees.include>
+        }};
+        constexpr std::array<TreeData, 5> tall_trees = {{
+            #include <coordinates/tall_trees.include>
+        }};
+        constexpr std::array<TreeData, 75> pine_trees = {{
+            #include <coordinates/pine_trees.include>
+        }};
+        constexpr std::array<TreeData, 1> oak_trees = {{
+            #include <coordinates/oak_trees.include>
+        }};
+        struct OldTreeData { float x, y, z, s, rotation_angle, rx, ry, rz; };
+        constexpr std::array<OldTreeData, 2> old_trees = {{
+            #include <coordinates/old_trees.include>
+        }};
+
+        auto build_matrices = [](const auto &data, auto transform_fn) {
+            std::vector<mat4> matrices;
+            matrices.reserve(data.size());
+            for (const auto &entry : data)
+                matrices.push_back(transform_fn(entry));
+            return matrices;
+        };
+
+        const auto yellow_m = build_matrices(yellow_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
+        });
+        m_resources->model("yellow_tree")->draw_instanced(m_depth_instanced_shader, yellow_m);
+
+        const auto green_m = build_matrices(green_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
+        });
+        m_resources->model("green_tree")->draw_instanced(m_depth_instanced_shader, green_m);
+
+        const auto tall_m = build_matrices(tall_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), Y_AXIS, 0.0f);
+        });
+        m_resources->model("beech_tree")->draw_instanced(m_depth_instanced_shader, tall_m);
+
+        auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
+        });
+        m_resources->model("pine_tree")->draw_instanced(m_depth_instanced_shader, pine_m);
+
+        const auto oak_m = build_matrices(oak_trees, [](const TreeData &t) {
+            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, 90.0f);
+        });
+        m_resources->model("oak_tree")->draw_instanced(m_depth_instanced_shader, oak_m);
+
+        const auto old_m = build_matrices(old_trees, [](const OldTreeData &t) {
+            return create_model_matrix(vec3(t.x, t.y, t.z), vec3(t.s), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
+        });
+        m_resources->model("old_tree")->draw_instanced(m_depth_instanced_shader, old_m);
+
+        constexpr std::array grass_positions = {
+            #include <coordinates/grass.include>
+        };
+        std::vector<mat4> grass_matrices;
+        grass_matrices.reserve(grass_positions.size());
+        for (const auto &pos : grass_positions)
+            grass_matrices.push_back(create_model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f));
+        m_resources->model("grass")->draw_instanced(m_depth_instanced_shader, grass_matrices);
     }
 }

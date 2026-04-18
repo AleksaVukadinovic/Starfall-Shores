@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cstdint>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
@@ -68,6 +69,11 @@ namespace app {
         void draw_fire() const;
         void draw_test_model() const;
 
+        void setup_shadow_map();
+        void render_shadow_map() const;
+        void render_depth_scene() const;
+        [[nodiscard]] glm::mat4 light_space_matrix() const;
+
         void update() override;
         void terminate() override;
         void update_day_night_transition();
@@ -99,5 +105,17 @@ namespace app {
         static constexpr auto LIGHT_COLOR_NIGHT = glm::vec3(1.0f, 0.7f, 0.1f);
 
         void set_common_shader_variables(const engine::resources::Shader *shader) const;
+
+        engine::resources::Shader *m_depth_shader           = nullptr;
+        engine::resources::Shader *m_depth_instanced_shader = nullptr;
+        uint32_t m_shadow_map_fbo                           = 0;
+        uint32_t m_shadow_map_texture                       = 0;
+        static constexpr uint32_t SHADOW_MAP_SIZE           = 4096;
+        static constexpr float SHADOW_ORTHO_SIZE            = 120.0f;
+        static constexpr float SHADOW_NEAR                  = 0.1f;
+        static constexpr float SHADOW_FAR                   = 200.0f;
+
+    public:
+        bool shadows_enabled = true;
     };
 }

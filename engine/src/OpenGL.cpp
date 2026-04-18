@@ -207,6 +207,49 @@ void OpenGL::clear_buffers() {
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
+OpenGL::ShadowMap OpenGL::create_shadow_map(const uint32_t width, const uint32_t height) {
+    uint32_t fbo, texture;
+    CHECKED_GL_CALL(glGenFramebuffers, 1, &fbo);
+    CHECKED_GL_CALL(glGenTextures, 1, &texture);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture);
+    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float border_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    CHECKED_GL_CALL(glTexParameterfv, GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, fbo);
+    CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+    CHECKED_GL_CALL(glDrawBuffer, GL_NONE);
+    CHECKED_GL_CALL(glReadBuffer, GL_NONE);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+    return {fbo, texture};
+}
+
+void OpenGL::begin_shadow_pass(const uint32_t fbo, const uint32_t width, const uint32_t height) {
+    CHECKED_GL_CALL(glViewport, 0, 0, static_cast<int>(width), static_cast<int>(height));
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, fbo);
+    CHECKED_GL_CALL(glClear, GL_DEPTH_BUFFER_BIT);
+    CHECKED_GL_CALL(glCullFace, GL_FRONT);
+}
+
+void OpenGL::end_shadow_pass(const uint32_t screen_width, const uint32_t screen_height) {
+    CHECKED_GL_CALL(glCullFace, GL_BACK);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+    CHECKED_GL_CALL(glViewport, 0, 0, static_cast<int>(screen_width), static_cast<int>(screen_height));
+}
+
+void OpenGL::bind_texture_to_unit(const uint32_t texture_id, const uint32_t unit) {
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0 + unit);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
+}
+
+void OpenGL::destroy_shadow_map(const ShadowMap &shadow_map) {
+    CHECKED_GL_CALL(glDeleteFramebuffers, 1, &shadow_map.fbo);
+    CHECKED_GL_CALL(glDeleteTextures, 1, &shadow_map.texture);
+}
+
 uint32_t face_index(std::string_view name) {
     if (name == "right") {
         return 0;

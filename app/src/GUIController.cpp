@@ -38,6 +38,7 @@ void GUIController::draw() {
     draw_greyscale_controls();
     draw_rain_controls();
     draw_wind_controls();
+    draw_shadow_controls();
     draw_skybox_controls();
     draw_test_controls();
     draw_camera_info();
@@ -161,6 +162,12 @@ void GUIController::draw_wind_controls() const {
     ImGui::Begin("Wind");
     ImGui::Checkbox("Enable Wind (V)", &m_main_controller->wind_enabled);
     ImGui::SliderFloat("Wind Intensity", &m_main_controller->wind_intensity, 0.0f, 1.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_shadow_controls() const {
+    ImGui::Begin("Shadows");
+    ImGui::Checkbox("Enable Shadows", &m_main_controller->shadows_enabled);
     ImGui::End();
 }
 

@@ -32,11 +32,11 @@ namespace app {
         void draw_greyscale_controls() const;
         void draw_rain_controls() const;
         void draw_wind_controls() const;
+        void draw_shadow_controls() const;
         void draw_skybox_controls() const;
         void draw_test_controls() const;
         void draw_camera_info() const;
         void draw_fps_counter();
-        void draw_fps_limit_slider() const;
         void draw_tickrate_slider();
         void draw_fov_slider();
 

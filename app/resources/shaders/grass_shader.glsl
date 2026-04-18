@@ -11,9 +11,11 @@ out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
 out mat3 TBN;
+out vec4 FragPosLightSpace;
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMatrix;
 uniform float time;
 uniform bool windEnabled;
 uniform float windIntensity;
@@ -42,6 +44,7 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
 
+    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }
 
@@ -65,10 +68,13 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 in mat3 TBN;
+in vec4 FragPosLightSpace;
 
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_normal1;
+uniform sampler2D shadowMap;
 uniform bool hasNormalMap;
+uniform bool shadowsEnabled;
 uniform vec3 viewPos;
 uniform Material material;
 uniform Light light;
@@ -78,6 +84,26 @@ uniform float fogIntensity;
 uniform float fogStart;
 uniform float fogEnd;
 uniform vec3 fogColor;
+
+float calculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    if (projCoords.z > 1.0)
+        return 0.0;
+    float currentDepth = projCoords.z;
+    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for (int x = -2; x <= 2; ++x) {
+        for (int y = -2; y <= 2; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 25.0;
+    return shadow;
+}
 
 void main()
 {
@@ -109,7 +135,11 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * material.specular;
 
-    vec3 result = ambient + diffuse + specular;
+    float shadow = 0.0;
+    if (shadowsEnabled)
+        shadow = calculateShadow(FragPosLightSpace, norm, lightDir);
+
+    vec3 result = ambient + (1.0 - shadow) * (diffuse + specular);
 
     if (fogEnabled) {
         float dist = length(viewPos - FragPos);

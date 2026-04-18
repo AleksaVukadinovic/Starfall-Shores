@@ -140,6 +140,17 @@ public:
     */
     static std::string get_compilation_error_message(uint32_t shader_id);
 
+    struct ShadowMap {
+        uint32_t fbo;
+        uint32_t texture;
+    };
+
+    static ShadowMap create_shadow_map(uint32_t width, uint32_t height);
+    static void begin_shadow_pass(uint32_t fbo, uint32_t width, uint32_t height);
+    static void end_shadow_pass(uint32_t screen_width, uint32_t screen_height);
+    static void bind_texture_to_unit(uint32_t texture_id, uint32_t unit);
+    static void destroy_shadow_map(const ShadowMap &shadow_map);
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.
