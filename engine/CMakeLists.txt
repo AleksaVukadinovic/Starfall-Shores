@@ -31,5 +31,3 @@ add_library(${PROJECT_NAME} ${engine-sources} ${engine-headers})
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw ${ASSIMP_LIBRARIES} stb
         PUBLIC glm::glm-header-only spdlog::spdlog imgui json)
-
-prebuild_check(${PROJECT_NAME})
