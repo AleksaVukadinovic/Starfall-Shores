@@ -30,19 +30,19 @@ namespace engine::resources {
             glBindVertexArray(VAO);
 
             constexpr std::size_t size = sizeof(glm::vec4);
-            glEnableVertexAttribArray(3);
-            glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) 0);
-            glEnableVertexAttribArray(4);
-            glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) (size));
             glEnableVertexAttribArray(5);
-            glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) (2 * size));
+            glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) 0);
             glEnableVertexAttribArray(6);
-            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) (3 * size));
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) (size));
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) (2 * size));
+            glEnableVertexAttribArray(8);
+            glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * size, (void *) (3 * size));
 
-            glVertexAttribDivisor(3, 1);
-            glVertexAttribDivisor(4, 1);
             glVertexAttribDivisor(5, 1);
             glVertexAttribDivisor(6, 1);
+            glVertexAttribDivisor(7, 1);
+            glVertexAttribDivisor(8, 1);
 
             glBindVertexArray(0);
         }
