@@ -97,7 +97,7 @@ void App::draw() const {
             controller->draw();
         }
     }
-    for (const auto controller: m_controllers) {
+    for (const auto controller : std::views::reverse(m_controllers)) {
         if (controller->is_enabled()) {
             controller->end_draw();
         }
