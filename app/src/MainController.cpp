@@ -200,9 +200,7 @@ void MainController::draw_forest() const {
         set_common_shader_variables(m_basic_shader);
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
-            {42.0f, vec3(6, 17.5, 2)},
-            {155.0f, vec3(-16, 17.5, -9)},
-            {-100.0f, vec3(1, 17.5, -26)}
+            #include <coordinates/logs.include>
         }};
 
         for (const auto &[rotation_angle, position] : logs) {
@@ -578,9 +576,7 @@ void MainController::draw_forest() const {
         draw_depth("campfire", translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)));
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
-            {42.0f, vec3(6, 17.5, 2)},
-            {155.0f, vec3(-16, 17.5, -9)},
-            {-100.0f, vec3(1, 17.5, -26)}
+            #include <coordinates/logs.include>
         }};
         for (const auto &[angle, pos] : logs)
             draw_depth("log_seat", create_model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
@@ -653,7 +649,7 @@ void MainController::draw_forest() const {
         });
         m_resources->model("beech_tree")->draw_instanced(m_depth_instanced_shader, tall_m);
 
-        auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
+        const auto pine_m = build_matrices(pine_trees, [](const TreeData &t) {
             return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), X_AXIS, -90.0f);
         });
         m_resources->model("pine_tree")->draw_instanced(m_depth_instanced_shader, pine_m);

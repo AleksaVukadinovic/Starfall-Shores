@@ -110,10 +110,6 @@ namespace app {
         engine::resources::Shader *m_depth_instanced_shader = nullptr;
         uint32_t m_shadow_map_fbo                           = 0;
         uint32_t m_shadow_map_texture                       = 0;
-        static constexpr uint32_t SHADOW_MAP_SIZE           = 4096;
-        static constexpr float SHADOW_ORTHO_SIZE            = 120.0f;
-        static constexpr float SHADOW_NEAR                  = 0.1f;
-        static constexpr float SHADOW_FAR                   = 200.0f;
 
     public:
         bool shadows_enabled = true;
