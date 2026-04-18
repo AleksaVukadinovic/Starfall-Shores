@@ -264,13 +264,15 @@ void MainController::draw_forest() const {
             #include <coordinates/red_flowers.include>
         };
         auto white_matrices_f = std::async(std::launch::async, [&]() {
-            std::vector<mat4> white_matrices(white_translations.size());
+            std::vector<mat4> white_matrices;
+            white_matrices.reserve(white_translations.size());
             for (const auto &t : white_translations)
                 white_matrices.emplace_back(create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f));
             return white_matrices;
         });
         auto red_matrices_f = std::async(std::launch::async, [&]() {
-            std::vector<mat4> red_matrices(red_translations.size());
+            std::vector<mat4> red_matrices;
+            red_matrices.reserve(red_translations.size());
             for (const auto &t : red_translations) {
                 red_matrices.emplace_back(create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f));
             }
@@ -480,13 +482,15 @@ void MainController::draw_forest() const {
         if (platform->key(KEY_ESCAPE).state() == Key::State::JustPressed) {
             get<GUIController>()->set_enable(false);
         }
-        if (platform->key(KEY_F).state() == Key::State::JustPressed)
+        if (platform->key(KEY_F).state() == Key::State::JustPressed) {
             get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
-        if (platform->key(KEY_V).state() == Key::State::JustPressed)
+        }
+        if (platform->key(KEY_V).state() == Key::State::JustPressed) {
             wind_enabled = !wind_enabled;
-        if (platform->key(KEY_R).state() == Key::State::JustPressed)
+        }
+        if (platform->key(KEY_R).state() == Key::State::JustPressed) {
             get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
-        
+        }
     }
 
     void MainController::draw_test_model() const {
@@ -631,7 +635,8 @@ void MainController::draw_forest() const {
         }};
 
         auto build_matrices = [](const auto &data, auto transform_fn) {
-            std::vector<mat4> matrices(data.size());
+            std::vector<mat4> matrices;
+            matrices.reserve(data.size());
             for (const auto &entry : data)
                 matrices.emplace_back(transform_fn(entry));
             return matrices;
