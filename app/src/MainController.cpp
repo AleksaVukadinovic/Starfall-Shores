@@ -117,23 +117,23 @@ void MainController::draw_forest() const {
 
         using TreeData = std::array<float, 4>;
         constexpr std::array<TreeData, 22> yellow_trees = {{
-            #include <yellow_trees.include>
+            #include <coordinates/yellow_trees.include>
         }};
         constexpr std::array<TreeData, 16> green_trees = {{
-            #include <green_trees.include>
+            #include <coordinates/green_trees.include>
         }};
         constexpr std::array<TreeData, 5> tall_trees = {{
-            #include <tall_trees.include>
+            #include <coordinates/tall_trees.include>
         }};
-        constexpr std::array<TreeData, 71> pine_trees = {{
-            #include <pine_trees.include>
+        constexpr std::array<TreeData, 75> pine_trees = {{
+            #include <coordinates/pine_trees.include>
         }};
         constexpr std::array<TreeData, 1> oak_trees = {{
-            #include <oak_trees.include>
+            #include <coordinates/oak_trees.include>
         }};
         struct OldTreeData { float x, y, z, scale, rotation_angle, rx, ry, rz; };
         constexpr std::array<OldTreeData, 2> old_trees = {{
-            #include <old_trees.include>
+            #include <coordinates/old_trees.include>
         }};
 
         auto build_matrices = [](const auto &data, auto transform_fn) {
@@ -225,13 +225,13 @@ void MainController::draw_forest() const {
         };
 
         constexpr std::array<BushData, 5> bush1_positions = {{
-            #include <bush1.include>
+            #include <coordinates/bush1.include>
         }};
         constexpr std::array<BushData, 3> bush2_positions = {{
-            #include <bush2.include>
+            #include <coordinates/bush2.include>
         }};
         constexpr std::array<BushData, 6> laurel_positions = {{
-            #include <laurel_bushes.include>
+            #include <coordinates/laurel_bushes.include>
         }};
 
         const auto *bush1 = m_resources->model("bush1");
@@ -248,7 +248,7 @@ void MainController::draw_forest() const {
         set_common_shader_variables(flower_shader);
 
         constexpr std::array white_translations = {
-            #include <white_flowers.include>
+            #include <coordinates/white_flowers.include>
         };
         std::vector<mat4> white_matrices;
         white_matrices.reserve(white_translations.size());
@@ -258,7 +258,7 @@ void MainController::draw_forest() const {
         m_resources->model("white_flowers")->draw_instanced(flower_shader, white_matrices);
 
         constexpr std::array red_translations = {
-            #include <red_flowers.include>
+            #include <coordinates/red_flowers.include>
         };
         std::vector<mat4> red_matrices;
         red_matrices.reserve(red_translations.size());
@@ -274,7 +274,7 @@ void MainController::draw_forest() const {
 
         struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
         constexpr std::array<PathData, 19> path_segments = {{
-            #include <path_segments.include>
+            #include <coordinates/path_segments.include>
         }};
 
         std::vector<mat4> matrices;
@@ -364,7 +364,7 @@ void MainController::draw_forest() const {
         shader->set_float("windIntensity", wind_intensity);
 
         constexpr std::array grass_positions = {
-            #include <grass.include>
+            #include <coordinates/grass.include>
         };
 
         std::vector<mat4> matrices;
