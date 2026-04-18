@@ -125,7 +125,7 @@ void GUIController::draw_tickrate_slider() {
 
 void GUIController::draw_fov_slider() {
     ImGui::Begin("Select FOV");
-    ImGui::SliderFloat("Select FOV", &m_fov, 1.0f, 50.0f);
+    ImGui::SliderFloat("Select FOV", &m_fov, 0.1f, 2.0f);
     m_graphics->perspective_params().FOV = m_fov;
     ImGui::End();
 }

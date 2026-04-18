@@ -5,19 +5,23 @@
         "path" : "grass/grass.glb"
       },
       "log_seat" : {
-        "path" : "log_seat/scene.gltf"
+        "path" : "log_seat/scene.gltf",
+        "flip_uvs" : true
       },
       "campfire" : {
         "path" : "campfire/en_campfire_01.obj"
       },
       "stylized_tent" : {
-        "path" : "stylized_tent/scene.gltf"
+        "path" : "stylized_tent/scene.gltf",
+        "flip_uvs" : true
       },
       "terrain" : {
-        "path" : "terrain/scene.gltf"
+        "path" : "terrain/scene.gltf",
+        "flip_uvs" : true
       },
       "viking_tent" : {
-        "path" : "viking_tent/scene.gltf"
+        "path" : "viking_tent/scene.gltf",
+        "flip_uvs" : true
       },
       "old_tree" : {
         "path" : "old_tree/scene.gltf"
