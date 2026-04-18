@@ -109,6 +109,11 @@ public:
     */
     void set_mat4(const std::string &name, const glm::mat4 &mat) const;
 
+    /**
+    * @brief Destroys the shader program in the OpenGL context.
+    */
+    void destroy() const;
+    
 private:
     /**
     * @brief Constructs a Shader object.
@@ -119,11 +124,6 @@ private:
     */
     Shader(unsigned shader_id, std::string name, std::string source,
            std::filesystem::path source_path = "");
-
-    /**
-    * @brief Destroys the shader program in the OpenGL context.
-    */
-    void destroy() const;
 
     /**
     * @brief The OpenGL ID of the shader program.

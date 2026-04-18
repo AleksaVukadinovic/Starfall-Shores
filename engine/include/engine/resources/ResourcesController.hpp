@@ -77,6 +77,8 @@ private:
     */
     void initialize() override;
 
+    void terminate() override;
+
     /**
     * @brief Loads all the models from the "resources/models" directory based on the provided configuration. Called during @ref ResourcesController::initialize.
     */

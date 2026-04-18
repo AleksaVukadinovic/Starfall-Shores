@@ -81,7 +81,7 @@ namespace engine::platform {
 
         int major, minor, revision;
         glfwGetVersion(&major, &minor, &revision);
-        spdlog::info("Platform[GLFW {}.{}.{}]", major, minor, revision);
+        spdlog::info(std::format("Platform[GLFW {}.{}.{}]", major, minor, revision));
         initialize_key_maps();
         m_keys.resize(KEY_COUNT);
         for (int key = 0; key < m_keys.size(); ++key) {
@@ -276,8 +276,8 @@ namespace engine::platform {
     }
 
     void initialize_key_maps() {
-#include "glfw_key_mapping.include"
-#include "engine_key_to_string.include"
+        #include "glfw_key_mapping.include"
+        #include "engine_key_to_string.include"
     }
 
     static void glfw_mouse_callback(GLFWwindow *window, const double x, const double y) {
@@ -298,7 +298,6 @@ namespace engine::platform {
     }
 
     static void glfw_framebuffer_size_callback(GLFWwindow *window, const int width, const int height) {
-        glViewport(0, 0, width, height);
         core::Controller::get<PlatformController>()->_platform_on_framebuffer_resize(width, height);
     }
 
