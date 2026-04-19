@@ -159,6 +159,10 @@ private:
 
     void terminate() override;
 
+    void begin_draw() override;
+
+    void end_draw() override;
+
     PerspectiveMatrixParams m_perspective_params{};
     OrthographicMatrixParams m_ortho_params{};
 

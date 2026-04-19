@@ -15,22 +15,10 @@
 namespace app {
     using vec3 = glm::vec3;
     using mat4 = glm::mat4;
-    class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
-    public:
-        void on_mouse_move(engine::platform::MousePosition position) override;
-    };
-
-    void MainPlatformEventObserver::on_mouse_move(const engine::platform::MousePosition position) {
-        if (const auto gui = engine::core::Controller::get<GUIController>(); gui->is_enabled())
-            return;
-        const auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
-        camera->rotate_camera(position.dx, position.dy);
-    }
 
     void MainController::initialize() {
         engine::graphics::OpenGL::enable_depth_testing();
         const auto platform = get<engine::platform::PlatformController>();
-        platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         platform->set_enable_cursor(false);
         m_graphics = get<engine::graphics::GraphicsController>();
         m_bloom = get<engine::graphics::PostProcessingController>();
@@ -55,14 +43,6 @@ namespace app {
                 engine::platform::KeyId::KEY_ESCAPE).is_down() && !get<GUIController>()->is_enabled())
             return false;
         return true;
-    }
-
-    void MainController::begin_draw() {
-        engine::graphics::OpenGL::clear_buffers();
-    }
-
-    void MainController::end_draw() {
-        get<engine::platform::PlatformController>()->swap_buffers();
     }
 
     void MainController::set_common_shader_variables(const engine::resources::Shader *shader) const {
@@ -404,8 +384,8 @@ namespace app {
     }
 
     void MainController::update() {
-        update_camera();
         update_day_night_transition();
+        update_toggles();
     }
 
     void MainController::update_day_night_transition() {
@@ -436,50 +416,15 @@ namespace app {
         }
     }
 
-    void MainController::update_camera() {
+    void MainController::update_toggles() {
         using namespace engine::platform;
-        if (const auto gui = get<GUIController>(); gui->is_enabled())
-            return;
-
         const auto platform = get<PlatformController>();
-        const float dt      = platform->dt();
-        m_camera->MovementSpeed = platform->key(KEY_LEFT_SHIFT).is_down() ? 20 : 7;
-        if (platform->key(KEY_W).is_down() || platform->key(KEY_UP).is_down()) {
-            m_camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
-        }
-        if (platform->key(KEY_S).is_down() || platform->key(KEY_DOWN).is_down()) {
-            m_camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, dt);
-        }
-        if (platform->key(KEY_A).is_down() || platform->key(KEY_LEFT).is_down()) {
-            m_camera->move_camera(engine::graphics::Camera::Movement::LEFT, dt);
-        }
-        if (platform->key(KEY_D).is_down() || platform->key(KEY_RIGHT).is_down()) {
-            m_camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
-        }
-        if (platform->key(KEY_SPACE).is_down()) {
-            m_camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
-        }
-        if (platform->key(KEY_P).state() == Key::State::JustPressed) {
-            platform->set_enable_cursor(!platform->is_cursor_enabled());
-        }
-        if (platform->key(KEY_Q).is_down()) {
-            m_camera->rotate_camera(-10, 0);
-        }
-        if (platform->key(KEY_E).is_down()) {
-            m_camera->rotate_camera(10, 0);
-        }
-        if (platform->key(KEY_ESCAPE).state() == Key::State::JustPressed) {
-            get<GUIController>()->set_enable(false);
-        }
-        if (platform->key(KEY_F).state() == Key::State::JustPressed) {
+        if (platform->key(KEY_F).state() == Key::State::JustPressed)
             get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
-        }
-        if (platform->key(KEY_V).state() == Key::State::JustPressed) {
+        if (platform->key(KEY_V).state() == Key::State::JustPressed)
             wind_enabled = !wind_enabled;
-        }
-        if (platform->key(KEY_R).state() == Key::State::JustPressed) {
+        if (platform->key(KEY_R).state() == Key::State::JustPressed)
             get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
-        }
     }
 
     void MainController::draw_test_model() const {

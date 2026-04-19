@@ -62,8 +62,6 @@ namespace app {
     private:
         void initialize() override;
         bool loop() override;
-        void begin_draw() override;
-        void end_draw() override;
         void draw() override;
         void draw_skybox() const;
         void draw_terrain() const;
@@ -90,7 +88,7 @@ namespace app {
         void update() override;
         void terminate() override;
         void update_day_night_transition();
-        void update_camera();
+        void update_toggles();
 
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::resources::Shader *m_basic_shader           = nullptr;

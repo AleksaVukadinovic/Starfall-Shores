@@ -1,7 +1,8 @@
 #pragma once
-#include "MainController.hpp"
+#include <MainController.hpp>
 #include "engine/graphics/GraphicsController.hpp"
 #include <engine/core/Engine.hpp>
+#include <engine/graphics/FPSCameraController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/RainController.hpp>
@@ -17,6 +18,7 @@ namespace app {
         engine::graphics::GraphicsController *m_graphics = nullptr;
         engine::graphics::Camera *m_camera = nullptr;
         engine::graphics::PostProcessingController *m_bloom = nullptr;
+        engine::graphics::FPSCameraController *m_fps_camera = nullptr;
         engine::platform::PlatformController *m_platform = nullptr;
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;

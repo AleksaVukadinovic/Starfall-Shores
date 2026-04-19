@@ -54,6 +54,14 @@ namespace engine::graphics {
         }
     }
 
+    void GraphicsController::begin_draw() {
+        OpenGL::clear_buffers();
+    }
+
+    void GraphicsController::end_draw() {
+        get<platform::PlatformController>()->swap_buffers();
+    }
+
     void GraphicsPlatformEventObserver::on_window_resize(const int width, const int height) {
         m_graphics->perspective_params().Width  = static_cast<float>(width);
         m_graphics->perspective_params().Height = static_cast<float>(height);

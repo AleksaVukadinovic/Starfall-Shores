@@ -20,14 +20,17 @@ void GUIController::initialize() {
     m_greyscale = get<GreyscaleController>();
     m_rain = get<RainController>();
     m_main_controller = get<MainController>();
+    m_fps_camera = get<engine::graphics::FPSCameraController>();
     m_last_update_time = static_cast<float>(engine::platform::PlatformController::get_time());
     m_fov = m_graphics->perspective_params().FOV;
 }
 
 void GUIController::poll_events() {
     if (const auto platform = get<engine::platform::PlatformController>(); platform->key(engine::platform::KeyId::KEY_G).state() == engine::platform::Key::State::JustPressed) {
-        set_enable(!is_enabled());
-        platform->set_enable_cursor(!platform->is_cursor_enabled());
+        const bool opening = !is_enabled();
+        set_enable(opening);
+        platform->set_enable_cursor(opening);
+        m_fps_camera->set_enable(!opening);
     }
 }
 
