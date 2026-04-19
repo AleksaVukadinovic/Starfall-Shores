@@ -23,6 +23,7 @@
 #include <engine/graphics/Renderer.hpp>
 
 #include <engine/util/Utils.hpp>
+#include <engine/util/Transform.hpp>
 #include <engine/util/Configuration.hpp>
 #include <engine/util/ArgParser.hpp>
 #include <engine/util/Errors.hpp>

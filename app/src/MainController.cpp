@@ -13,6 +13,7 @@
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
+#include <engine/util/Transform.hpp>
 #include <future>
 
 namespace app {
@@ -51,13 +52,7 @@ namespace app {
         return true;
     }
 
-    mat4 create_model_matrix(const vec3 &position, const vec3 &scale, const vec3 &rotation_axis, const float rotation_angle) {
-        auto model = mat4(1.0f);
-        model = rotate(model, glm::radians(rotation_angle), rotation_axis);
-        model = translate(model, position);
-        model = glm::scale(model, scale);
-        return model;
-    }
+    using engine::util::model_matrix;
 
     void MainController::draw() {
         draw_water();
@@ -102,7 +97,7 @@ namespace app {
         }};
 
         auto tree_transform = [](const TreeData &t, const vec3 &axis, float angle) {
-            return create_model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), axis, angle);
+            return model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), axis, angle);
         };
 
         auto yellow_f = std::async(std::launch::async, [&] {
@@ -122,7 +117,7 @@ namespace app {
         });
         auto old_f = std::async(std::launch::async, [&] {
             return build_instanced_matrices(old_trees, [](const OldTreeData &t) {
-                return create_model_matrix(vec3(t.x, t.y, t.z), vec3(t.scale), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
+                return model_matrix(vec3(t.x, t.y, t.z), vec3(t.scale), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
             });
         });
 
@@ -138,7 +133,7 @@ namespace app {
         const engine::resources::Model *campfire = m_resources->model("campfire");
         m_lighting->apply_to_shader(m_basic_shader);
         m_basic_shader->set_vec3("light.diffuse", m_is_day ? vec3(0.5f) : vec3(5.0f));
-        const mat4 model = translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)); // NOLINT
+        const mat4 model = model_matrix(vec3(12.0f, 17.3f, 6.0f));
         m_basic_shader->set_mat4("model", model);
         campfire->draw(m_basic_shader);
     }
@@ -151,7 +146,7 @@ namespace app {
         }};
 
         for (const auto &[rotation_angle, position] : logs) {
-            m_renderer->draw(log_seat, m_basic_shader, create_model_matrix(position, vec3(0.04f), Y_AXIS, rotation_angle));
+            m_renderer->draw(log_seat, m_basic_shader, model_matrix(position, vec3(0.04f), Y_AXIS, rotation_angle));
         }
     }
 
@@ -159,14 +154,14 @@ namespace app {
         const engine::resources::Model *viking_tent   = m_resources->model("viking_tent");
         const engine::resources::Model *stylized_tent = m_resources->model("stylized_tent");
 
-        m_renderer->draw(viking_tent, m_basic_shader, create_model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
-        m_renderer->draw(stylized_tent, m_basic_shader, create_model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
+        m_renderer->draw(viking_tent, m_basic_shader, model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
+        m_renderer->draw(stylized_tent, m_basic_shader, model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
     }
 
     void MainController::draw_bushes() const {
         using BushData = std::array<float, 4>;
         auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
-            m_renderer->draw_blended(bush_model, m_basic_shader, create_model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle));
+            m_renderer->draw_blended(bush_model, m_basic_shader, model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle));
         };
 
         constexpr std::array<BushData, 5> bush1_positions = {{
@@ -203,12 +198,12 @@ namespace app {
         };
         auto white_matrices_f = std::async(std::launch::async, [&] {
             return build_instanced_matrices(white_translations, [](const vec3 &t) {
-                return create_model_matrix(t, vec3(0.12f), X_AXIS, 90.0f);
+                return model_matrix(t, vec3(0.12f), X_AXIS, 90.0f);
             });
         });
         auto red_matrices_f = std::async(std::launch::async, [&] {
             return build_instanced_matrices(red_translations, [](const vec3 &t) {
-                return create_model_matrix(t, vec3(0.04f), X_AXIS, -90.0f);
+                return model_matrix(t, vec3(0.04f), X_AXIS, -90.0f);
             });
         });
 
@@ -227,13 +222,7 @@ namespace app {
         std::vector<mat4> matrices;
         matrices.reserve(path_segments.size());
         for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments) {
-            auto m = mat4(1.0f);
-            m = rotate(m, glm::radians(rx), X_AXIS);
-            m = rotate(m, glm::radians(ry), Y_AXIS);
-            m = rotate(m, glm::radians(rz), Z_AXIS);
-            m = translate(m, vec3(tx, ty, tz));
-            m = glm::scale(m, vec3(s));
-            matrices.push_back(m);
+            matrices.push_back(model_matrix(vec3(tx, ty, tz), vec3(rx, ry, rz), vec3(s)));
         }
         m_renderer->draw_instanced(m_resources->model("path"), shader, matrices);
     }
@@ -245,14 +234,14 @@ namespace app {
             #include <coordinates/shrooms.include>
         };
         for (const auto &shroom : shroom_positions) {
-            m_renderer->draw(mushroom, m_basic_shader, create_model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
+            m_renderer->draw(mushroom, m_basic_shader, model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
         }
     }
 
     void MainController::draw_terrain() const {
         const engine::resources::Model *terrain = m_resources->model("terrain");
         m_renderer->draw(terrain, m_basic_shader, mat4(1.0f));
-        m_renderer->draw(terrain, m_basic_shader, create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
+        m_renderer->draw(terrain, m_basic_shader, model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
     }
 
     void MainController::draw_water() const {
@@ -264,7 +253,7 @@ namespace app {
         shader->set_vec3("waterColor", m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT);
         shader->set_vec3("lightPos", m_lighting->light.position);
 
-        const auto model = create_model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
+        const auto model = model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
         shader->set_mat4("model", model);
         water->draw_blended(shader);
     }
@@ -279,12 +268,7 @@ namespace app {
 
     void MainController::draw_grave() const {
         const engine::resources::Model *grave = m_resources->model("grave");
-        auto model = mat4(1.0f);
-        model = rotate(model, glm::radians(-90.0f), X_AXIS);
-        model = rotate(model, glm::radians(-48.0f), Z_AXIS);
-        model = translate(model, vec3(29, 71, 12));
-        model = scale(model, vec3(1.35));
-        m_renderer->draw(grave, m_basic_shader, model);
+        m_renderer->draw(grave, m_basic_shader, model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
     }
 
     void MainController::draw_grass() const {
@@ -299,7 +283,7 @@ namespace app {
         };
 
         const auto matrices = build_instanced_matrices(grass_positions, [](const vec3 &pos) {
-            return create_model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
+            return model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
         });
         m_resources->model("grass")->draw_instanced(shader, matrices);
     }
@@ -311,7 +295,7 @@ namespace app {
         shader->set_vec3("viewPos", m_camera->Position);
         shader->set_mat4("projection", m_graphics->projection_matrix());
         shader->set_mat4("view", m_camera->view_matrix());
-        shader->set_mat4("model", create_model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f));
+        shader->set_mat4("model", model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f));
         shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time() - m_fire_start_time));
         shader->set_vec3("fireColor", vec3(1.0f, 0.6f, 0.2f));
         shader->set_vec3("glowColor", vec3(1.0f, 0.3f, 0.0f));
@@ -380,13 +364,7 @@ namespace app {
 
     void MainController::draw_test_model() const {
         auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
-            auto m = mat4(1.0f);
-            m = glm::rotate(m, glm::radians(rotation.x), X_AXIS);
-            m = glm::rotate(m, glm::radians(rotation.y), Y_AXIS);
-            m = glm::rotate(m, glm::radians(rotation.z), Z_AXIS);
-            m = glm::translate(m, translation);
-            m = glm::scale(m, vec3(scale));
-            m_renderer->draw(m_resources->model(model_name), m_basic_shader, m);
+            m_renderer->draw(m_resources->model(model_name), m_basic_shader, model_matrix(translation, rotation, vec3(scale)));
         };
 
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
@@ -435,20 +413,20 @@ namespace app {
         };
 
         draw_depth("terrain", mat4(1.0f));
-        draw_depth("terrain", create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-        draw_depth("campfire", translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)));
+        draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
+        draw_depth("campfire", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
             #include <coordinates/logs.include>
         }};
         for (const auto &[angle, pos] : logs)
-            draw_depth("log_seat", create_model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
+            draw_depth("log_seat", model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
 
-        draw_depth("viking_tent", create_model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
-        draw_depth("stylized_tent", create_model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
+        draw_depth("viking_tent", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
+        draw_depth("stylized_tent", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
 
         auto draw_mushroom_depth = [&](const vec3 &t) {
-            draw_depth("shrooms", create_model_matrix(t, vec3(0.19f), X_AXIS, -90.0f));
+            draw_depth("shrooms", model_matrix(t, vec3(0.19f), X_AXIS, -90.0f));
         };
         constexpr std::array shroom_positions = {
             #include <coordinates/shrooms.include>
@@ -457,12 +435,7 @@ namespace app {
             draw_mushroom_depth(shroom);
 
         {
-            auto model = mat4(1.0f);
-            model = rotate(model, glm::radians(-90.0f), X_AXIS);
-            model = rotate(model, glm::radians(-48.0f), Z_AXIS);
-            model = translate(model, vec3(29, 71, 12));
-            model = scale(model, vec3(1.35));
-            draw_depth("grave", model);
+            draw_depth("grave", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
         }
 
         m_shadow->setup_depth_instanced_shader(m_depth_instanced_shader);
@@ -473,7 +446,7 @@ namespace app {
             #include <coordinates/grass.include>
         };
         const auto grass_matrices = build_instanced_matrices(grass_positions, [](const vec3 &pos) {
-            return create_model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
+            return model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
         });
         m_resources->model("grass")->draw_instanced(m_depth_instanced_shader, grass_matrices);
     }
