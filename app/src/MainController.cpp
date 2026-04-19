@@ -8,6 +8,7 @@
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
@@ -28,6 +29,7 @@ namespace app {
         m_fog               = get<FogController>();
         m_shadow            = get<engine::graphics::ShadowController>();
         m_lighting          = get<engine::graphics::LightingController>();
+        m_renderer          = get<engine::graphics::Renderer>();
         m_graphics->perspective_params().Far = m_fog->far_plane();
         m_resources         = get<engine::resources::ResourcesController>();
         m_basic_shader      = m_resources->shader("basic");
@@ -69,7 +71,6 @@ namespace app {
         draw_tents();
         {
             const auto *shader = m_resources->shader("flower_shader");
-            m_lighting->apply_to_shader(shader);
             draw_trees(shader);
         }
         draw_bushes();
@@ -130,12 +131,12 @@ namespace app {
             });
         });
 
-        m_resources->model("yellow_tree")->draw_instanced(shader, yellow_f.get());
-        m_resources->model("green_tree")->draw_instanced(shader, green_f.get());
-        m_resources->model("beech_tree")->draw_instanced(shader, tall_f.get());
-        m_resources->model("pine_tree")->draw_instanced(shader, pine_f.get());
-        m_resources->model("oak_tree")->draw_instanced(shader, oak_f.get());
-        m_resources->model("old_tree")->draw_instanced(shader, old_f.get());
+        m_renderer->draw_instanced(m_resources->model("yellow_tree"), shader, yellow_f.get());
+        m_renderer->draw_instanced(m_resources->model("green_tree"), shader, green_f.get());
+        m_renderer->draw_instanced(m_resources->model("beech_tree"), shader, tall_f.get());
+        m_renderer->draw_instanced(m_resources->model("pine_tree"), shader, pine_f.get());
+        m_renderer->draw_instanced(m_resources->model("oak_tree"), shader, oak_f.get());
+        m_renderer->draw_instanced(m_resources->model("old_tree"), shader, old_f.get());
     }
 
     void MainController::draw_campfire() const {
@@ -149,40 +150,28 @@ namespace app {
 
     void MainController::draw_logs() const {
         const engine::resources::Model *log_seat = m_resources->model("log_seat");
-        m_lighting->apply_to_shader(m_basic_shader);
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
             #include <coordinates/logs.include>
         }};
 
         for (const auto &[rotation_angle, position] : logs) {
-            auto model = create_model_matrix(position, vec3(0.04f), Y_AXIS, rotation_angle);
-            m_basic_shader->set_mat4("model", model);
-            log_seat->draw(m_basic_shader);
+            m_renderer->draw(log_seat, m_basic_shader, create_model_matrix(position, vec3(0.04f), Y_AXIS, rotation_angle));
         }
     }
 
     void MainController::draw_tents() const {
         const engine::resources::Model *viking_tent   = m_resources->model("viking_tent");
         const engine::resources::Model *stylized_tent = m_resources->model("stylized_tent");
-        m_lighting->apply_to_shader(m_basic_shader);
 
-        auto model = create_model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f);
-        m_basic_shader->set_mat4("model", model);
-        viking_tent->draw(m_basic_shader);
-
-        model = create_model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f);
-        m_basic_shader->set_mat4("model", model);
-        stylized_tent->draw(m_basic_shader);
+        m_renderer->draw(viking_tent, m_basic_shader, create_model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
+        m_renderer->draw(stylized_tent, m_basic_shader, create_model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
     }
 
     void MainController::draw_bushes() const {
-        m_lighting->apply_to_shader(m_basic_shader);
         using BushData = std::array<float, 4>;
         auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
-            const auto model = create_model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle);
-            m_basic_shader->set_mat4("model", model);
-            bush_model->draw_blended(m_basic_shader);
+            m_renderer->draw_blended(bush_model, m_basic_shader, create_model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle));
         };
 
         constexpr std::array<BushData, 5> bush1_positions = {{
@@ -234,7 +223,6 @@ namespace app {
 
     void MainController::draw_path() const {
         const auto *shader = m_resources->shader("flower_shader");
-        m_lighting->apply_to_shader(shader);
 
         struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
         constexpr std::array<PathData, 19> path_segments = {{
@@ -252,35 +240,24 @@ namespace app {
             m = glm::scale(m, vec3(s));
             matrices.push_back(m);
         }
-        m_resources->model("path")->draw_instanced(shader, matrices);
+        m_renderer->draw_instanced(m_resources->model("path"), shader, matrices);
     }
 
     void MainController::draw_mushrooms() const {
         const auto mushroom = m_resources->model("shrooms");
-        m_lighting->apply_to_shader(m_basic_shader);
-
-        auto draw_mushroom = [&](const vec3 &translation) {
-            const auto model = create_model_matrix(translation, vec3(0.19f), X_AXIS, -90.0f);
-            m_basic_shader->set_mat4("model", model);
-            mushroom->draw(m_basic_shader);
-        };
 
         constexpr std::array shroom_positions = {
             #include <coordinates/shrooms.include>
         };
         for (const auto &shroom : shroom_positions) {
-            draw_mushroom(shroom);
+            m_renderer->draw(mushroom, m_basic_shader, create_model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
         }
     }
 
     void MainController::draw_terrain() const {
         const engine::resources::Model *terrain = m_resources->model("terrain");
-        m_lighting->apply_to_shader(m_basic_shader);
-        m_basic_shader->set_mat4("model", mat4(1.0f));
-        terrain->draw(m_basic_shader);
-        m_lighting->apply_to_shader(m_basic_shader);
-        m_basic_shader->set_mat4("model", create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-        terrain->draw(m_basic_shader);
+        m_renderer->draw(terrain, m_basic_shader, mat4(1.0f));
+        m_renderer->draw(terrain, m_basic_shader, create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
     }
 
     void MainController::draw_water() const {
@@ -307,14 +284,12 @@ namespace app {
 
     void MainController::draw_grave() const {
         const engine::resources::Model *grave = m_resources->model("grave");
-        m_lighting->apply_to_shader(m_basic_shader);
         auto model = mat4(1.0f);
         model = rotate(model, glm::radians(-90.0f), X_AXIS);
         model = rotate(model, glm::radians(-48.0f), Z_AXIS);
         model = translate(model, vec3(29, 71, 12));
         model = scale(model, vec3(1.35));
-        m_basic_shader->set_mat4("model", model);
-        grave->draw(m_basic_shader);
+        m_renderer->draw(grave, m_basic_shader, model);
     }
 
     void MainController::draw_grass() const {
@@ -408,8 +383,6 @@ namespace app {
     }
 
     void MainController::draw_test_model() const {
-        m_lighting->apply_to_shader(m_basic_shader);
-
         auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
             auto m = mat4(1.0f);
             m = glm::rotate(m, glm::radians(rotation.x), X_AXIS);
@@ -417,8 +390,7 @@ namespace app {
             m = glm::rotate(m, glm::radians(rotation.z), Z_AXIS);
             m = glm::translate(m, translation);
             m = glm::scale(m, vec3(scale));
-            m_basic_shader->set_mat4("model", m);
-            m_resources->model(model_name)->draw(m_basic_shader);
+            m_renderer->draw(m_resources->model(model_name), m_basic_shader, m);
         };
 
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {

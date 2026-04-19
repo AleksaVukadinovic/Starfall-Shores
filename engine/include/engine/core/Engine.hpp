@@ -20,6 +20,7 @@
 #include <engine/graphics/FPSCameraController.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/graphics/LightingController.hpp>
+#include <engine/graphics/Renderer.hpp>
 
 #include <engine/util/Utils.hpp>
 #include <engine/util/Configuration.hpp>

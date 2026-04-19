@@ -4,6 +4,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
+#include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -95,6 +96,7 @@ namespace app {
         engine::graphics::PostProcessingController *m_bloom = nullptr;
         engine::graphics::ShadowController *m_shadow        = nullptr;
         engine::graphics::LightingController *m_lighting    = nullptr;
+        engine::graphics::Renderer *m_renderer              = nullptr;
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
 
