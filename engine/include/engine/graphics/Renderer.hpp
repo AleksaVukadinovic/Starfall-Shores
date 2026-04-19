@@ -8,11 +8,13 @@
 #include <engine/core/Controller.hpp>
 #include <glm/glm.hpp>
 #include <functional>
+#include <string>
 #include <vector>
 
 namespace engine::resources {
 class Model;
 class Shader;
+class ResourcesController;
 }
 
 namespace engine::graphics {
@@ -37,9 +39,9 @@ class ShadowController;
  * auto renderer = get<engine::graphics::Renderer>();
  * renderer->set_depth_scene([this] { render_depth_scene(); });
  * // in draw:
- * renderer->draw(model, shader, transform);
- * renderer->draw_blended(model, shader, transform);
- * renderer->draw_instanced(model, shader, matrices);
+ * renderer->draw("terrain", "basic", transform);
+ * renderer->draw_blended("water", "water_shader", transform);
+ * renderer->draw_instanced("path", "flower_shader", matrices);
  * @endcode
  */
 class Renderer final : public core::Controller {
@@ -48,20 +50,14 @@ public:
         return "Renderer";
     }
 
-    /**
-     * @brief Applies lighting uniforms, sets the model matrix, and draws the model.
-     */
     void draw(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform) const;
+    void draw(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform) const;
 
-    /**
-     * @brief Applies lighting uniforms, sets the model matrix, and draws the model with alpha blending enabled.
-     */
     void draw_blended(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform) const;
+    void draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform) const;
 
-    /**
-     * @brief Applies lighting uniforms and draws the model using hardware instancing.
-     */
     void draw_instanced(const resources::Model *model, const resources::Shader *shader, const std::vector<glm::mat4> &transforms) const;
+    void draw_instanced(const std::string &model_name, const std::string &shader_name, const std::vector<glm::mat4> &transforms) const;
 
     /**
      * @brief Registers a callback that renders the scene for the shadow depth pass.
@@ -75,6 +71,7 @@ private:
 
     LightingController *m_lighting = nullptr;
     ShadowController *m_shadow = nullptr;
+    resources::ResourcesController *m_resources = nullptr;
     std::function<void()> m_depth_scene_callback;
 };
 

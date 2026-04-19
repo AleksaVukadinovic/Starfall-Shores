@@ -53,18 +53,30 @@ namespace app {
     using engine::util::build_instance_matrices;
     using engine::util::build_instance_matrices_async;
 
+    constexpr std::array<std::pair<float, vec3>, 3> LOGS = {{
+        #include <coordinates/logs.include>
+    }};
+
+    constexpr std::array SHROOM_POSITIONS = {
+        #include <coordinates/shrooms.include>
+    };
+
     void MainController::draw() {
         draw_water();
-        draw_terrain();
+        m_renderer->draw("terrain", "basic", mat4(1.0f));
+        m_renderer->draw("terrain", "basic", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
         draw_campfire();
-        draw_logs();
-        draw_tents();
+        for (const auto &[angle, pos] : LOGS)
+            m_renderer->draw("log_seat", "basic", model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
+        m_renderer->draw("viking_tent", "basic", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
+        m_renderer->draw("stylized_tent", "basic", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
         draw_trees(m_resources->shader("flower_shader"));
         draw_bushes();
         draw_flowers();
         draw_path();
-        draw_mushrooms();
-        draw_grave();
+        for (const auto &shroom : SHROOM_POSITIONS)
+            m_renderer->draw("shrooms", "basic", model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
+        m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
         draw_grass();
         draw_test_model();
         if (!m_is_day)
@@ -114,38 +126,16 @@ namespace app {
     }
 
     void MainController::draw_campfire() const {
-        const engine::resources::Model *campfire = m_resources->model("campfire");
         m_lighting->apply_to_shader(m_basic_shader);
         m_basic_shader->set_vec3("light.diffuse", m_is_day ? vec3(0.5f) : vec3(5.0f));
-        const mat4 model = model_matrix(vec3(12.0f, 17.3f, 6.0f));
-        m_basic_shader->set_mat4("model", model);
-        campfire->draw(m_basic_shader);
-    }
-
-    void MainController::draw_logs() const {
-        const engine::resources::Model *log_seat = m_resources->model("log_seat");
-
-        constexpr std::array<std::pair<float, vec3>, 3> logs = {{
-            #include <coordinates/logs.include>
-        }};
-
-        for (const auto &[rotation_angle, position] : logs) {
-            m_renderer->draw(log_seat, m_basic_shader, model_matrix(position, vec3(0.04f), Y_AXIS, rotation_angle));
-        }
-    }
-
-    void MainController::draw_tents() const {
-        const engine::resources::Model *viking_tent   = m_resources->model("viking_tent");
-        const engine::resources::Model *stylized_tent = m_resources->model("stylized_tent");
-
-        m_renderer->draw(viking_tent, m_basic_shader, model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
-        m_renderer->draw(stylized_tent, m_basic_shader, model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
+        m_basic_shader->set_mat4("model", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
+        m_resources->model("campfire")->draw(m_basic_shader);
     }
 
     void MainController::draw_bushes() const {
         using BushData = std::array<float, 4>;
-        auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
-            m_renderer->draw_blended(bush_model, m_basic_shader, model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle));
+        auto draw_bush = [&](const std::string &model_name, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
+            m_renderer->draw_blended(model_name, "basic", model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle));
         };
 
         constexpr std::array<BushData, 5> bush1_positions = {{
@@ -158,13 +148,9 @@ namespace app {
             #include <coordinates/laurel_bushes.include>
         }};
 
-        const auto *bush1 = m_resources->model("bush1");
-        const auto *bush2 = m_resources->model("bush2");
-        const auto *laurel = m_resources->model("laurel_bush");
-
-        for (const auto &b : bush1_positions) draw_bush(bush1, b, -90.0f, X_AXIS);
-        for (const auto &b : bush2_positions) draw_bush(bush2, b);
-        for (const auto &b : laurel_positions) draw_bush(laurel, b);
+        for (const auto &b : bush1_positions) draw_bush("bush1", b, -90.0f, X_AXIS);
+        for (const auto &b : bush2_positions) draw_bush("bush2", b);
+        for (const auto &b : laurel_positions) draw_bush("laurel_bush", b);
     }
 
     void MainController::draw_flowers() const {
@@ -192,8 +178,6 @@ namespace app {
     }
 
     void MainController::draw_path() const {
-        const auto *shader = m_resources->shader("flower_shader");
-
         struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
         constexpr std::array<PathData, 19> path_segments = {{
             #include <coordinates/path_segments.include>
@@ -204,24 +188,7 @@ namespace app {
         for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments) {
             matrices.push_back(model_matrix(vec3(tx, ty, tz), vec3(rx, ry, rz), vec3(s)));
         }
-        m_renderer->draw_instanced(m_resources->model("path"), shader, matrices);
-    }
-
-    void MainController::draw_mushrooms() const {
-        const auto mushroom = m_resources->model("shrooms");
-
-        constexpr std::array shroom_positions = {
-            #include <coordinates/shrooms.include>
-        };
-        for (const auto &shroom : shroom_positions) {
-            m_renderer->draw(mushroom, m_basic_shader, model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
-        }
-    }
-
-    void MainController::draw_terrain() const {
-        const engine::resources::Model *terrain = m_resources->model("terrain");
-        m_renderer->draw(terrain, m_basic_shader, mat4(1.0f));
-        m_renderer->draw(terrain, m_basic_shader, model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
+        m_renderer->draw_instanced("path", "flower_shader", matrices);
     }
 
     void MainController::draw_water() const {
@@ -244,11 +211,6 @@ namespace app {
         m_fog->apply_to_shader(shader);
         const engine::resources::Skybox *skybox_cube = m_resources->skybox(m_is_day ? m_active_daytime_skybox : m_active_nighttime_skybox);
         m_graphics->draw_skybox(shader, skybox_cube);
-    }
-
-    void MainController::draw_grave() const {
-        const engine::resources::Model *grave = m_resources->model("grave");
-        m_renderer->draw(grave, m_basic_shader, model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
     }
 
     void MainController::draw_grass() const {
@@ -344,7 +306,7 @@ namespace app {
 
     void MainController::draw_test_model() const {
         auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
-            m_renderer->draw(m_resources->model(model_name), m_basic_shader, model_matrix(translation, rotation, vec3(scale)));
+            m_renderer->draw(model_name, "basic", model_matrix(translation, rotation, vec3(scale)));
         };
 
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
@@ -396,23 +358,14 @@ namespace app {
         draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
         draw_depth("campfire", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
 
-        constexpr std::array<std::pair<float, vec3>, 3> logs = {{
-            #include <coordinates/logs.include>
-        }};
-        for (const auto &[angle, pos] : logs)
+        for (const auto &[angle, pos] : LOGS)
             draw_depth("log_seat", model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
 
         draw_depth("viking_tent", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
         draw_depth("stylized_tent", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
 
-        auto draw_mushroom_depth = [&](const vec3 &t) {
-            draw_depth("shrooms", model_matrix(t, vec3(0.19f), X_AXIS, -90.0f));
-        };
-        constexpr std::array shroom_positions = {
-            #include <coordinates/shrooms.include>
-        };
-        for (const auto &shroom : shroom_positions)
-            draw_mushroom_depth(shroom);
+        for (const auto &shroom : SHROOM_POSITIONS)
+            draw_depth("shrooms", model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
 
         draw_depth("grave", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
 

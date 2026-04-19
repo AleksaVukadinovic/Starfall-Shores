@@ -6,6 +6,7 @@
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
+#include <engine/util/Transform.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
@@ -56,21 +57,16 @@ namespace app {
         void initialize() override;
         bool loop() override;
         void draw() override;
+
         void draw_skybox() const;
-        void draw_terrain() const;
         void draw_water() const;
         void draw_campfire() const;
-        void draw_logs() const;
-        void draw_tents() const;
         void draw_bushes() const;
         void draw_flowers() const;
         void draw_path() const;
-        void draw_mushrooms() const;
-        void draw_grave() const;
         void draw_grass() const;
         void draw_fire() const;
         void draw_test_model() const;
-
         void draw_trees(const engine::resources::Shader *shader) const;
 
         void render_depth_scene() const;
