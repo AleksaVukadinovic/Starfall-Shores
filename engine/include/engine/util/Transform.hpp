@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+#include <future>
 
 namespace engine::util {
 
@@ -24,22 +26,10 @@ inline constexpr auto ORIGIN = glm::vec3(0, 0, 0);
  * @param rotation_degrees Euler angles in degrees (x, y, z).
  * @param scale Scale factor per axis.
  * @returns The composed model matrix.
- *
- * @code
- * auto m = model_matrix({10, 20, 5}, {-90, 0, -48}, glm::vec3(1.35f));
- * @endcode
  */
-inline glm::mat4 model_matrix(const glm::vec3 &translation,
-                              const glm::vec3 &rotation_degrees,
-                              const glm::vec3 &scale) {
-    auto m = glm::mat4(1.0f);
-    m = glm::rotate(m, glm::radians(rotation_degrees.x), glm::vec3(1, 0, 0));
-    m = glm::rotate(m, glm::radians(rotation_degrees.y), glm::vec3(0, 1, 0));
-    m = glm::rotate(m, glm::radians(rotation_degrees.z), glm::vec3(0, 0, 1));
-    m = glm::translate(m, translation);
-    m = glm::scale(m, scale);
-    return m;
-}
+glm::mat4 model_matrix(const glm::vec3 &translation,
+                       const glm::vec3 &rotation_degrees,
+                       const glm::vec3 &scale);
 
 /**
  * @brief Creates a model matrix from a single-axis rotation (degrees), translation, and uniform scale.
@@ -49,21 +39,11 @@ inline glm::mat4 model_matrix(const glm::vec3 &translation,
  * @param rotation_axis The axis to rotate around.
  * @param rotation_angle_degrees Rotation angle in degrees.
  * @returns The composed model matrix.
- *
- * @code
- * auto m = model_matrix({10, 17, -14}, 0.037f, Y_AXIS, -20.0f);
- * @endcode
  */
-inline glm::mat4 model_matrix(const glm::vec3 &translation,
-                              const float uniform_scale,
-                              const glm::vec3 &rotation_axis,
-                              const float rotation_angle_degrees) {
-    auto m = glm::mat4(1.0f);
-    m = glm::rotate(m, glm::radians(rotation_angle_degrees), rotation_axis);
-    m = glm::translate(m, translation);
-    m = glm::scale(m, glm::vec3(uniform_scale));
-    return m;
-}
+glm::mat4 model_matrix(const glm::vec3 &translation,
+                       float uniform_scale,
+                       const glm::vec3 &rotation_axis,
+                       float rotation_angle_degrees);
 
 /**
  * @brief Creates a model matrix from a single-axis rotation (degrees), translation, and non-uniform scale.
@@ -74,29 +54,49 @@ inline glm::mat4 model_matrix(const glm::vec3 &translation,
  * @param rotation_angle_degrees Rotation angle in degrees.
  * @returns The composed model matrix.
  */
-inline glm::mat4 model_matrix(const glm::vec3 &translation,
-                              const glm::vec3 &scale,
-                              const glm::vec3 &rotation_axis,
-                              const float rotation_angle_degrees) {
-    auto m = glm::mat4(1.0f);
-    m = glm::rotate(m, glm::radians(rotation_angle_degrees), rotation_axis);
-    m = glm::translate(m, translation);
-    m = glm::scale(m, scale);
-    return m;
-}
+glm::mat4 model_matrix(const glm::vec3 &translation,
+                       const glm::vec3 &scale,
+                       const glm::vec3 &rotation_axis,
+                       float rotation_angle_degrees);
 
 /**
  * @brief Creates a translation-only model matrix.
  *
  * @param translation Position offset.
  * @returns The composed model matrix.
- *
- * @code
- * auto m = model_matrix({12.0f, 17.3f, 6.0f});
- * @endcode
  */
-inline glm::mat4 model_matrix(const glm::vec3 &translation) {
-    return glm::translate(glm::mat4(1.0f), translation);
+glm::mat4 model_matrix(const glm::vec3 &translation);
+
+/**
+ * @brief Builds a vector of model matrices by applying a transform function to each element.
+ *
+ * @param data Container of source data.
+ * @param transform_fn Function mapping each element to a glm::mat4.
+ * @returns Vector of model matrices.
+ */
+template<typename Container, typename TransformFn>
+std::vector<glm::mat4> build_instance_matrices(const Container &data, TransformFn transform_fn) {
+    std::vector<glm::mat4> matrices;
+    matrices.reserve(data.size());
+    for (const auto &entry : data)
+        matrices.push_back(transform_fn(entry));
+    return matrices;
+}
+
+/**
+ * @brief Asynchronously builds a vector of model matrices.
+ *
+ * Launches the matrix building on a separate thread and returns a future.
+ *
+ * @param data Container of source data.
+ * @param transform_fn Function mapping each element to a glm::mat4.
+ * @returns A future that resolves to the vector of model matrices.
+ */
+template<typename Container, typename TransformFn>
+std::future<std::vector<glm::mat4>> build_instance_matrices_async(const Container &data, TransformFn transform_fn) {
+    return std::async(std::launch::async, [&data, transform_fn = std::move(transform_fn)] {
+        return build_instance_matrices(data, transform_fn);
+    });
 }
 
 }// namespace engine::util

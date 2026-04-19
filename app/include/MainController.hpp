@@ -25,15 +25,6 @@ namespace app {
     using TreeData = std::array<float, 4>;
     struct OldTreeData { float x, y, z, scale, rotation_angle, rx, ry, rz; };
 
-    template<typename Container, typename TransformFn>
-    std::vector<glm::mat4> build_instanced_matrices(const Container &data, TransformFn transform_fn) {
-        std::vector<glm::mat4> matrices;
-        matrices.reserve(data.size());
-        for (const auto &entry : data)
-            matrices.push_back(transform_fn(entry));
-        return matrices;
-    }
-
     class MainController final : public engine::core::Controller {
     public:
         [[nodiscard]] std::string_view name() const override {
