@@ -61,8 +61,10 @@ namespace app {
         #include <coordinates/shrooms.include>
     };
 
+    using Effect = engine::graphics::Effect;
+
     void MainController::draw() {
-        draw_water();
+        m_renderer->draw_blended("water", "water_shader", model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f), Effect::Water);
         m_renderer->draw("terrain", "basic", mat4(1.0f));
         m_renderer->draw("terrain", "basic", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
         draw_campfire();
@@ -72,15 +74,48 @@ namespace app {
         m_renderer->draw("stylized_tent", "basic", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
         draw_trees(m_resources->shader("flower_shader"));
         draw_bushes();
-        draw_flowers();
-        draw_path();
+        {
+            constexpr std::array white_translations = {
+                #include <coordinates/white_flowers.include>
+            };
+            constexpr std::array red_translations = {
+                #include <coordinates/red_flowers.include>
+            };
+            auto white_f = build_instance_matrices_async(white_translations, [](const vec3 &t) {
+                return model_matrix(t, vec3(0.12f), X_AXIS, 90.0f);
+            });
+            auto red_f = build_instance_matrices_async(red_translations, [](const vec3 &t) {
+                return model_matrix(t, vec3(0.04f), X_AXIS, -90.0f);
+            });
+            m_renderer->draw_instanced("white_flowers", "flower_shader", white_f.get(), Effect::Wind);
+            m_renderer->draw_instanced("red_flowers", "flower_shader", red_f.get(), Effect::Wind);
+        }
+        {
+            struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
+            constexpr std::array<PathData, 19> path_segments = {{
+                #include <coordinates/path_segments.include>
+            }};
+            std::vector<mat4> matrices;
+            matrices.reserve(path_segments.size());
+            for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments)
+                matrices.push_back(model_matrix(vec3(tx, ty, tz), vec3(rx, ry, rz), vec3(s)));
+            m_renderer->draw_instanced("path", "flower_shader", matrices);
+        }
         for (const auto &shroom : SHROOM_POSITIONS)
             m_renderer->draw("shrooms", "basic", model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
         m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
-        draw_grass();
+        {
+            constexpr std::array grass_positions = {
+                #include <coordinates/grass.include>
+            };
+            const auto grass_matrices = build_instance_matrices(grass_positions, [](const vec3 &pos) {
+                return model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
+            });
+            m_renderer->draw_instanced("grass", "grass_shader", grass_matrices, Effect::Wind);
+        }
         draw_test_model();
         if (!m_is_day)
-            draw_fire();
+            m_renderer->draw_blended("fire", "fire_shader", model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f), Effect::Fire);
         draw_skybox();
     }
 
@@ -153,98 +188,12 @@ namespace app {
         for (const auto &b : laurel_positions) draw_bush("laurel_bush", b);
     }
 
-    void MainController::draw_flowers() const {
-        const auto *flower_shader = m_resources->shader("flower_shader");
-        m_lighting->apply_to_shader(flower_shader);
-        flower_shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
-        flower_shader->set_bool("windEnabled", wind_enabled);
-        flower_shader->set_float("windIntensity", wind_intensity);
-
-        constexpr std::array white_translations = {
-            #include <coordinates/white_flowers.include>
-        };
-        constexpr std::array red_translations = {
-            #include <coordinates/red_flowers.include>
-        };
-        auto white_matrices_f = build_instance_matrices_async(white_translations, [](const vec3 &t) {
-            return model_matrix(t, vec3(0.12f), X_AXIS, 90.0f);
-        });
-        auto red_matrices_f = build_instance_matrices_async(red_translations, [](const vec3 &t) {
-            return model_matrix(t, vec3(0.04f), X_AXIS, -90.0f);
-        });
-
-        m_resources->model("white_flowers")->draw_instanced(flower_shader, white_matrices_f.get());
-        m_resources->model("red_flowers")->draw_instanced(flower_shader, red_matrices_f.get());
-    }
-
-    void MainController::draw_path() const {
-        struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
-        constexpr std::array<PathData, 19> path_segments = {{
-            #include <coordinates/path_segments.include>
-        }};
-
-        std::vector<mat4> matrices;
-        matrices.reserve(path_segments.size());
-        for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments) {
-            matrices.push_back(model_matrix(vec3(tx, ty, tz), vec3(rx, ry, rz), vec3(s)));
-        }
-        m_renderer->draw_instanced("path", "flower_shader", matrices);
-    }
-
-    void MainController::draw_water() const {
-        const engine::resources::Model *water = m_resources->model("water");
-        const engine::resources::Shader *shader = m_resources->shader("water_shader");
-
-        m_lighting->apply_to_shader(shader);
-        shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
-        shader->set_vec3("waterColor", m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT);
-        shader->set_vec3("lightPos", m_lighting->light.position);
-
-        const auto model = model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
-        shader->set_mat4("model", model);
-        water->draw_blended(shader);
-    }
-
     void MainController::draw_skybox() const {
         const auto shader = m_resources->shader("skybox");
         shader->use();
         m_fog->apply_to_shader(shader);
         const engine::resources::Skybox *skybox_cube = m_resources->skybox(m_is_day ? m_active_daytime_skybox : m_active_nighttime_skybox);
         m_graphics->draw_skybox(shader, skybox_cube);
-    }
-
-    void MainController::draw_grass() const {
-        const auto *shader = m_resources->shader("grass_shader");
-        m_lighting->apply_to_shader(shader);
-        shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
-        shader->set_bool("windEnabled", wind_enabled);
-        shader->set_float("windIntensity", wind_intensity);
-
-        constexpr std::array grass_positions = {
-            #include <coordinates/grass.include>
-        };
-
-        const auto matrices = build_instance_matrices(grass_positions, [](const vec3 &pos) {
-            return model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
-        });
-        m_resources->model("grass")->draw_instanced(shader, matrices);
-    }
-
-    void MainController::draw_fire() const {
-        const engine::resources::Model *fire = m_resources->model("fire");
-        const engine::resources::Shader *shader = m_resources->shader("fire_shader");
-        shader->use();
-        shader->set_vec3("viewPos", m_camera->Position);
-        shader->set_mat4("projection", m_graphics->projection_matrix());
-        shader->set_mat4("view", m_camera->view_matrix());
-        shader->set_mat4("model", model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f));
-        shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time() - m_fire_start_time));
-        shader->set_vec3("fireColor", vec3(1.0f, 0.6f, 0.2f));
-        shader->set_vec3("glowColor", vec3(1.0f, 0.3f, 0.0f));
-        shader->set_float("intensity", 50.0f);
-        shader->set_float("flickerSpeed", 5.0f);
-        shader->set_float("distortionAmount", 0.1f);
-        fire->draw_blended(shader);
     }
 
     void MainController::update() {
@@ -271,7 +220,7 @@ namespace app {
                 m_day_change_requested = false;
                 apply_day_night_lighting();
                 if (!m_is_day)
-                    m_fire_start_time = PlatformController::get_time();
+                    m_renderer->fire.start_time = PlatformController::get_time();
             } else {
                 const float start_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 const float target_exposure = m_is_day ? NIGHT_EXPOSURE : DAY_EXPOSURE;
@@ -282,13 +231,13 @@ namespace app {
         }
     }
 
-    void MainController::update_toggles() {
+    void MainController::update_toggles() const {
         using namespace engine::platform;
         const auto platform = get<PlatformController>();
         if (platform->key(KEY_F).state() == Key::State::JustPressed)
             get<FogController>()->fog_enabled = !get<FogController>()->fog_enabled;
         if (platform->key(KEY_V).state() == Key::State::JustPressed)
-            wind_enabled = !wind_enabled;
+            m_renderer->wind.enabled = !m_renderer->wind.enabled;
         if (platform->key(KEY_R).state() == Key::State::JustPressed)
             get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
     }
@@ -302,6 +251,7 @@ namespace app {
         color     = m_is_day ? LIGHT_COLOR_DAY : LIGHT_COLOR_NIGHT;
         shininess = m_is_day ? SHININESS_DAY : SHININESS_NIGHT;
         m_shadow->light_position = position;
+        m_renderer->water.color = m_is_day ? glm::vec3(0.0f, 0.4f, 0.6f) : glm::vec3(0.0f, 0.1f, 0.3f);
     }
 
     void MainController::draw_test_model() const {

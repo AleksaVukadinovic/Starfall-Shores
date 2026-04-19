@@ -50,22 +50,14 @@ namespace app {
         void place_test_model();
         void clear_placed_models();
 
-        bool wind_enabled = false;
-        float wind_intensity = 0.8f;
-
     private:
         void initialize() override;
         bool loop() override;
         void draw() override;
 
         void draw_skybox() const;
-        void draw_water() const;
         void draw_campfire() const;
         void draw_bushes() const;
-        void draw_flowers() const;
-        void draw_path() const;
-        void draw_grass() const;
-        void draw_fire() const;
         void draw_test_model() const;
         void draw_trees(const engine::resources::Shader *shader) const;
 
@@ -74,7 +66,7 @@ namespace app {
         void update() override;
         void terminate() override;
         void update_day_night_transition();
-        void update_toggles();
+        void update_toggles() const;
 
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::resources::Shader *m_basic_shader           = nullptr;
@@ -90,15 +82,12 @@ namespace app {
         bool m_day_change_requested              = false;
         double m_day_change_timer                = 0.0;
         float m_current_exposure                 = DAY_EXPOSURE;
-        double m_fire_start_time                 = 0.0;
         static constexpr double DAY_CHANGE_DELAY = 5.0;
         static constexpr float DAY_EXPOSURE      = 1.3f;
         static constexpr float NIGHT_EXPOSURE    = 0.4f;
         std::string m_active_daytime_skybox      = "skybox_day";
         std::string m_active_nighttime_skybox    = "skybox_night";
 
-        static constexpr auto WATER_COLOR_DAY = glm::vec3(0.0f, 0.4f, 0.6f);
-        static constexpr auto WATER_COLOR_NIGHT = glm::vec3(0.0f, 0.1f, 0.3f);
         static constexpr auto LIGHT_POS_DAY = glm::vec3(0.0f, 60.0f, 0.0f);
         static constexpr auto LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);
         static constexpr auto LIGHT_COLOR_DAY = glm::vec3(1.0f, 1.0f, 1.0f);

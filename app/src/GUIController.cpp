@@ -6,6 +6,7 @@
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/Renderer.hpp>
 #include <imgui.h>
 
 namespace app {
@@ -163,9 +164,10 @@ void GUIController::draw_rain_controls() const {
 }
 
 void GUIController::draw_wind_controls() const {
+    auto renderer = engine::core::Controller::get<engine::graphics::Renderer>();
     ImGui::Begin("Wind");
-    ImGui::Checkbox("Enable Wind (V)", &m_main_controller->wind_enabled);
-    ImGui::SliderFloat("Wind Intensity", &m_main_controller->wind_intensity, 0.0f, 1.0f);
+    ImGui::Checkbox("Enable Wind (V)", &renderer->wind.enabled);
+    ImGui::SliderFloat("Wind Intensity", &renderer->wind.intensity, 0.0f, 1.0f);
     ImGui::End();
 }
 
