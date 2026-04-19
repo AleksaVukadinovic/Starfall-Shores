@@ -20,6 +20,18 @@ namespace app {
         float scale;
     };
 
+    using TreeData = std::array<float, 4>;
+    struct OldTreeData { float x, y, z, scale, rotation_angle, rx, ry, rz; };
+
+    template<typename Container, typename TransformFn>
+    std::vector<glm::mat4> build_instanced_matrices(const Container &data, TransformFn transform_fn) {
+        std::vector<glm::mat4> matrices;
+        matrices.reserve(data.size());
+        for (const auto &entry : data)
+            matrices.push_back(transform_fn(entry));
+        return matrices;
+    }
+
     class MainController final : public engine::core::Controller {
     public:
         [[nodiscard]] std::string_view name() const override {
@@ -56,7 +68,6 @@ namespace app {
         void draw_skybox() const;
         void draw_terrain() const;
         void draw_water() const;
-        void draw_forest() const;
         void draw_campfire() const;
         void draw_logs() const;
         void draw_tents() const;
@@ -68,6 +79,8 @@ namespace app {
         void draw_grass() const;
         void draw_fire() const;
         void draw_test_model() const;
+
+        void draw_trees(const engine::resources::Shader *shader) const;
 
         void setup_shadow_map();
         void render_shadow_map() const;
