@@ -25,7 +25,6 @@ namespace app {
         platform->set_enable_cursor(false);
         m_graphics = get<engine::graphics::GraphicsController>();
         m_bloom = get<engine::graphics::PostProcessingController>();
-        m_bloom->bloom_setup();
         m_fog               = get<FogController>();
         m_shadow            = get<engine::graphics::ShadowController>();
         m_lighting          = get<engine::graphics::LightingController>();
@@ -42,6 +41,7 @@ namespace app {
         m_camera->Pitch    = -5;
         m_camera->rotate_camera(0, 0);
         apply_day_night_lighting();
+        m_renderer->set_depth_scene([this] { render_depth_scene(); });
     }
 
     bool MainController::loop() {
@@ -60,10 +60,6 @@ namespace app {
     }
 
     void MainController::draw() {
-        if (m_shadow->enabled)
-            render_shadow_map();
-        m_bloom->underwater = m_camera->Position.y < 7.0f;
-        m_bloom->prepare_hdr();
         draw_water();
         draw_terrain();
         draw_campfire();
@@ -83,7 +79,6 @@ namespace app {
         if (!m_is_day)
             draw_fire();
         draw_skybox();
-        m_bloom->finalize_bloom();
     }
 
     void MainController::draw_trees(const engine::resources::Shader *shader) const {
@@ -327,6 +322,7 @@ namespace app {
     }
 
     void MainController::update() {
+        m_bloom->underwater = m_camera->Position.y < 7.0f;
         update_day_night_transition();
         update_toggles();
     }
@@ -428,12 +424,6 @@ namespace app {
         } else {
             m_active_nighttime_skybox = new_skybox;
         }
-    }
-
-    void MainController::render_shadow_map() const {
-        m_shadow->begin_depth_pass();
-        render_depth_scene();
-        m_shadow->end_depth_pass();
     }
 
     void MainController::render_depth_scene() const {

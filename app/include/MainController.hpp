@@ -82,7 +82,6 @@ namespace app {
 
         void draw_trees(const engine::resources::Shader *shader) const;
 
-        void render_shadow_map() const;
         void render_depth_scene() const;
 
         void update() override;

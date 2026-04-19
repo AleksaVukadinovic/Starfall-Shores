@@ -15,19 +15,16 @@ namespace engine::graphics {
         glm::vec3 underwater_color   = glm::vec3(0.0f, 0.3f, 0.5f);
         float underwater_intensity   = 0.4f;
 
-        void prepare_hdr();
-
-        void finalize_bloom();
-
-        void bloom_setup();
-
         [[nodiscard]] std::string_view name() const override {
-            return "app::BloomController";
+            return "PostProcessingController";
         }
 
+    private:
+        void initialize() override;
+        void begin_draw() override;
+        void end_draw() override;
         void terminate() override;
 
-    private:
         unsigned int m_pingpong_fbo[2]          = {};
         unsigned int m_pingpong_colorbuffers[2] = {};
         unsigned int m_hdr_fbo                  = 0;

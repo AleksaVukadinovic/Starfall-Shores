@@ -1,5 +1,6 @@
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/LightingController.hpp>
+#include <engine/graphics/ShadowController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/Shader.hpp>
 
@@ -7,6 +8,19 @@ namespace engine::graphics {
 
 void Renderer::initialize() {
     m_lighting = get<LightingController>();
+    m_shadow = get<ShadowController>();
+}
+
+void Renderer::begin_draw() {
+    if (m_shadow->enabled && m_depth_scene_callback) {
+        m_shadow->begin_depth_pass();
+        m_depth_scene_callback();
+        m_shadow->end_depth_pass();
+    }
+}
+
+void Renderer::set_depth_scene(std::function<void()> callback) {
+    m_depth_scene_callback = std::move(callback);
 }
 
 void Renderer::draw(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform) const {

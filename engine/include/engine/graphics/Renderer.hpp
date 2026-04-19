@@ -7,6 +7,7 @@
 
 #include <engine/core/Controller.hpp>
 #include <glm/glm.hpp>
+#include <functional>
 #include <vector>
 
 namespace engine::resources {
@@ -16,14 +17,14 @@ class Shader;
 
 namespace engine::graphics {
 class LightingController;
+class ShadowController;
 
 /**
  * @class Renderer
  * @brief High-level rendering interface that applies lighting/shadow/fog uniforms
  * and dispatches draw calls with the appropriate technique.
  *
- * Eliminates the boilerplate of manually calling LightingController::apply_to_shader,
- * setting the model matrix uniform, and choosing the right Model::draw variant.
+ * Also orchestrates the shadow depth pass automatically via a user-provided callback.
  *
  * Register it in your App::app_setup:
  * @code
@@ -34,6 +35,8 @@ class LightingController;
  * Usage:
  * @code
  * auto renderer = get<engine::graphics::Renderer>();
+ * renderer->set_depth_scene([this] { render_depth_scene(); });
+ * // in draw:
  * renderer->draw(model, shader, transform);
  * renderer->draw_blended(model, shader, transform);
  * renderer->draw_instanced(model, shader, matrices);
@@ -60,10 +63,19 @@ public:
      */
     void draw_instanced(const resources::Model *model, const resources::Shader *shader, const std::vector<glm::mat4> &transforms) const;
 
+    /**
+     * @brief Registers a callback that renders the scene for the shadow depth pass.
+     * The Renderer calls this automatically in begin_draw when shadows are enabled.
+     */
+    void set_depth_scene(std::function<void()> callback);
+
 private:
     void initialize() override;
+    void begin_draw() override;
 
     LightingController *m_lighting = nullptr;
+    ShadowController *m_shadow = nullptr;
+    std::function<void()> m_depth_scene_callback;
 };
 
 }

@@ -30,13 +30,12 @@ namespace app {
         shadow_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         lighting_controller->after(shadow_controller);
         renderer->after(lighting_controller);
-        main_controller->after(renderer);
-        post_processing_controller->after(main_controller);
-        fog_controller->after(main_controller);
-        greyscale_controller->after(main_controller);
-        rain_controller->after(main_controller);
+        post_processing_controller->after(renderer);
+        fog_controller->after(post_processing_controller);
+        greyscale_controller->after(post_processing_controller);
+        rain_controller->after(post_processing_controller);
+        main_controller->after(post_processing_controller);
         gui_controller->after(main_controller);
-        post_processing_controller->after(gui_controller);
     }
 
 }

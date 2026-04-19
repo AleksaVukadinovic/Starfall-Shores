@@ -38,7 +38,7 @@ namespace engine::graphics {
             m_scr_height = 1000;
     }
 
-    void PostProcessingController::bloom_setup() {
+    void PostProcessingController::initialize() {
         CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_fbo);
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_color_buffers);
@@ -150,7 +150,7 @@ namespace engine::graphics {
         this->render_quad();
     }
 
-    void PostProcessingController::prepare_hdr() {
+    void PostProcessingController::begin_draw() {
         update_screen_size();
 
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
@@ -158,7 +158,7 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void PostProcessingController::finalize_bloom() {
+    void PostProcessingController::end_draw() {
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
         CHECKED_GL_CALL(glViewport, 0, 0, m_scr_width, m_scr_height);
         render_bloom();
