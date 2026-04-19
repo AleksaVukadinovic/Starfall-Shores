@@ -21,6 +21,7 @@ void GUIController::initialize() {
     m_rain = get<RainController>();
     m_main_controller = get<MainController>();
     m_fps_camera = get<engine::graphics::FPSCameraController>();
+    m_shadow = get<engine::graphics::ShadowController>();
     m_last_update_time = static_cast<float>(engine::platform::PlatformController::get_time());
     m_fov = m_graphics->perspective_params().FOV;
 }
@@ -170,7 +171,7 @@ void GUIController::draw_wind_controls() const {
 
 void GUIController::draw_shadow_controls() const {
     ImGui::Begin("Shadows");
-    ImGui::Checkbox("Enable Shadows", &m_main_controller->shadows_enabled);
+    ImGui::Checkbox("Enable Shadows", &m_shadow->enabled);
     ImGui::End();
 }
 

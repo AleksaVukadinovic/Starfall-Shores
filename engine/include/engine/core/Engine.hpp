@@ -18,6 +18,8 @@
 #include <engine/graphics/Camera.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/FPSCameraController.hpp>
+#include <engine/graphics/ShadowController.hpp>
+#include <engine/graphics/LightingController.hpp>
 
 #include <engine/util/Utils.hpp>
 #include <engine/util/Configuration.hpp>

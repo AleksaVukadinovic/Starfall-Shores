@@ -4,9 +4,11 @@
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/ShadowController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
@@ -24,6 +26,8 @@ namespace app {
         m_bloom = get<engine::graphics::PostProcessingController>();
         m_bloom->bloom_setup();
         m_fog               = get<FogController>();
+        m_shadow            = get<engine::graphics::ShadowController>();
+        m_lighting          = get<engine::graphics::LightingController>();
         m_graphics->perspective_params().Far = m_fog->far_plane();
         m_resources         = get<engine::resources::ResourcesController>();
         m_basic_shader      = m_resources->shader("basic");
@@ -35,7 +39,7 @@ namespace app {
         m_camera->Yaw      = -38;
         m_camera->Pitch    = -5;
         m_camera->rotate_camera(0, 0);
-        setup_shadow_map();
+        apply_day_night_lighting();
     }
 
     bool MainController::loop() {
@@ -43,32 +47,6 @@ namespace app {
                 engine::platform::KeyId::KEY_ESCAPE).is_down() && !get<GUIController>()->is_enabled())
             return false;
         return true;
-    }
-
-    void MainController::set_common_shader_variables(const engine::resources::Shader *shader) const {
-        const auto light_position = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
-        const auto ambient        = m_is_day ? vec3(0.2f) : vec3(0.05f);
-        const auto diffuse        = m_is_day ? vec3(0.5f) : vec3(0.2f);
-        const auto specular       = m_is_day ? vec3(0.1) : vec3(0.05f);
-        const float shininess          = m_is_day ? 1024.0f : 2048.0f;
-        const auto light_color    = m_is_day ? LIGHT_COLOR_DAY : LIGHT_COLOR_NIGHT;
-        shader->use();
-        shader->set_vec3("light.position", light_position);
-        shader->set_vec3("light.ambient", ambient);
-        shader->set_vec3("light.diffuse", diffuse);
-        shader->set_vec3("light.specular", specular);
-        shader->set_vec3("lightColor", light_color);
-        shader->set_float("material.shininess", shininess);
-        shader->set_vec3("viewPos", m_camera->Position);
-        shader->set_mat4("projection", m_graphics->projection_matrix());
-        shader->set_mat4("view", m_camera->view_matrix());
-        shader->set_bool("shadowsEnabled", shadows_enabled);
-        if (shadows_enabled) {
-            shader->set_mat4("lightSpaceMatrix", light_space_matrix());
-            shader->set_int("shadowMap", 7);
-            engine::graphics::OpenGL::bind_texture_to_unit(m_shadow_map_texture, 7);
-        }
-        m_fog->apply_to_shader(shader);
     }
 
     mat4 create_model_matrix(const vec3 &position, const vec3 &scale, const vec3 &rotation_axis, const float rotation_angle) {
@@ -80,7 +58,7 @@ namespace app {
     }
 
     void MainController::draw() {
-        if (shadows_enabled)
+        if (m_shadow->enabled)
             render_shadow_map();
         m_bloom->underwater = m_camera->Position.y < 7.0f;
         m_bloom->prepare_hdr();
@@ -91,7 +69,7 @@ namespace app {
         draw_tents();
         {
             const auto *shader = m_resources->shader("flower_shader");
-            set_common_shader_variables(shader);
+            m_lighting->apply_to_shader(shader);
             draw_trees(shader);
         }
         draw_bushes();
@@ -162,7 +140,7 @@ namespace app {
 
     void MainController::draw_campfire() const {
         const engine::resources::Model *campfire = m_resources->model("campfire");
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
         m_basic_shader->set_vec3("light.diffuse", m_is_day ? vec3(0.5f) : vec3(5.0f));
         const mat4 model = translate(mat4(1.0f), vec3(12.0f, 17.3f, 6.0f)); // NOLINT
         m_basic_shader->set_mat4("model", model);
@@ -171,7 +149,7 @@ namespace app {
 
     void MainController::draw_logs() const {
         const engine::resources::Model *log_seat = m_resources->model("log_seat");
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
 
         constexpr std::array<std::pair<float, vec3>, 3> logs = {{
             #include <coordinates/logs.include>
@@ -187,7 +165,7 @@ namespace app {
     void MainController::draw_tents() const {
         const engine::resources::Model *viking_tent   = m_resources->model("viking_tent");
         const engine::resources::Model *stylized_tent = m_resources->model("stylized_tent");
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
 
         auto model = create_model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f);
         m_basic_shader->set_mat4("model", model);
@@ -199,7 +177,7 @@ namespace app {
     }
 
     void MainController::draw_bushes() const {
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
         using BushData = std::array<float, 4>;
         auto draw_bush = [&](const engine::resources::Model *bush_model, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
             const auto model = create_model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle);
@@ -228,7 +206,7 @@ namespace app {
 
     void MainController::draw_flowers() const {
         const auto *flower_shader = m_resources->shader("flower_shader");
-        set_common_shader_variables(flower_shader);
+        m_lighting->apply_to_shader(flower_shader);
         flower_shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
         flower_shader->set_bool("windEnabled", wind_enabled);
         flower_shader->set_float("windIntensity", wind_intensity);
@@ -256,7 +234,7 @@ namespace app {
 
     void MainController::draw_path() const {
         const auto *shader = m_resources->shader("flower_shader");
-        set_common_shader_variables(shader);
+        m_lighting->apply_to_shader(shader);
 
         struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
         constexpr std::array<PathData, 19> path_segments = {{
@@ -279,7 +257,7 @@ namespace app {
 
     void MainController::draw_mushrooms() const {
         const auto mushroom = m_resources->model("shrooms");
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
 
         auto draw_mushroom = [&](const vec3 &translation) {
             const auto model = create_model_matrix(translation, vec3(0.19f), X_AXIS, -90.0f);
@@ -297,10 +275,10 @@ namespace app {
 
     void MainController::draw_terrain() const {
         const engine::resources::Model *terrain = m_resources->model("terrain");
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
         m_basic_shader->set_mat4("model", mat4(1.0f));
         terrain->draw(m_basic_shader);
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
         m_basic_shader->set_mat4("model", create_model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
         terrain->draw(m_basic_shader);
     }
@@ -309,20 +287,10 @@ namespace app {
         const engine::resources::Model *water = m_resources->model("water");
         const engine::resources::Shader *shader = m_resources->shader("water_shader");
 
-        shader->use();
+        m_lighting->apply_to_shader(shader);
         shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
         shader->set_vec3("waterColor", m_is_day? WATER_COLOR_DAY: WATER_COLOR_NIGHT);
-        shader->set_vec3("lightPos", m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT);
-        shader->set_vec3("viewPos", m_camera->Position);
-        shader->set_mat4("projection", m_graphics->projection_matrix());
-        shader->set_mat4("view", m_camera->view_matrix());
-        shader->set_bool("shadowsEnabled", shadows_enabled);
-        if (shadows_enabled) {
-            shader->set_mat4("lightSpaceMatrix", light_space_matrix());
-            shader->set_int("shadowMap", 7);
-            engine::graphics::OpenGL::bind_texture_to_unit(m_shadow_map_texture, 7);
-        }
-        m_fog->apply_to_shader(shader);
+        shader->set_vec3("lightPos", m_lighting->light.position);
 
         const auto model = create_model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f);
         shader->set_mat4("model", model);
@@ -339,7 +307,7 @@ namespace app {
 
     void MainController::draw_grave() const {
         const engine::resources::Model *grave = m_resources->model("grave");
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
         auto model = mat4(1.0f);
         model = rotate(model, glm::radians(-90.0f), X_AXIS);
         model = rotate(model, glm::radians(-48.0f), Z_AXIS);
@@ -351,7 +319,7 @@ namespace app {
 
     void MainController::draw_grass() const {
         const auto *shader = m_resources->shader("grass_shader");
-        set_common_shader_variables(shader);
+        m_lighting->apply_to_shader(shader);
         shader->set_float("time", static_cast<float>(engine::platform::PlatformController::get_time()));
         shader->set_bool("windEnabled", wind_enabled);
         shader->set_float("windIntensity", wind_intensity);
@@ -404,6 +372,7 @@ namespace app {
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 m_fog->set_day(m_is_day);
                 m_day_change_requested = false;
+                apply_day_night_lighting();
                 if (!m_is_day)
                     m_fire_start_time = PlatformController::get_time();
             } else {
@@ -427,8 +396,19 @@ namespace app {
             get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
     }
 
+    void MainController::apply_day_night_lighting() const {
+        auto &[position, ambient, diffuse, specular, color, shininess] = m_lighting->light;
+        position  = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
+        ambient   = m_is_day ? AMBIENT_LIGHT_DAY : AMBIENT_LIGHT_NIGHT;
+        diffuse   = m_is_day ? DIFFUSE_LIGHT_DAY : DIFFUSE_LIGHT_NIGHT;
+        specular  = m_is_day ? SPECULAR_LIGHT_DAY : SPECULAR_LIGHT_NIGHT;
+        color     = m_is_day ? LIGHT_COLOR_DAY : LIGHT_COLOR_NIGHT;
+        shininess = m_is_day ? SHININESS_DAY : SHININESS_NIGHT;
+        m_shadow->light_position = position;
+    }
+
     void MainController::draw_test_model() const {
-        set_common_shader_variables(m_basic_shader);
+        m_lighting->apply_to_shader(m_basic_shader);
 
         auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
             auto m = mat4(1.0f);
@@ -463,14 +443,10 @@ namespace app {
     }
 
     void MainController::terminate() {
-        if (m_shadow_map_fbo) {
-            engine::graphics::OpenGL::destroy_shadow_map({m_shadow_map_fbo, m_shadow_map_texture});
-        }
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
             spdlog::info(std::format("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
                 model_name, rotation.x, rotation.y, rotation.z,
                 translation.x, translation.y, translation.z, scale));
-
         }
     }
 
@@ -482,31 +458,14 @@ namespace app {
         }
     }
 
-    void MainController::setup_shadow_map() {
-        auto [fbo, texture] = engine::graphics::OpenGL::create_shadow_map(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-        m_shadow_map_fbo = fbo;
-        m_shadow_map_texture = texture;
-    }
-
-    glm::mat4 MainController::light_space_matrix() const {
-        const auto light_pos = m_is_day ? LIGHT_POS_DAY : LIGHT_POS_NIGHT;
-        const auto light_projection = glm::ortho(-SHADOW_ORTHO_SIZE, SHADOW_ORTHO_SIZE, -SHADOW_ORTHO_SIZE, SHADOW_ORTHO_SIZE, SHADOW_NEAR, SHADOW_FAR);
-        const auto light_view = glm::lookAt(light_pos, vec3(0.0f, 15.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
-        return light_projection * light_view;
-    }
-
     void MainController::render_shadow_map() const {
-        engine::graphics::OpenGL::begin_shadow_pass(m_shadow_map_fbo, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+        m_shadow->begin_depth_pass();
         render_depth_scene();
-        const auto platform = get<engine::platform::PlatformController>();
-        engine::graphics::OpenGL::end_shadow_pass(platform->window()->width(), platform->window()->height());
+        m_shadow->end_depth_pass();
     }
 
     void MainController::render_depth_scene() const {
-        const auto lsm = light_space_matrix();
-
-        m_depth_shader->use();
-        m_depth_shader->set_mat4("lightSpaceMatrix", lsm);
+        m_shadow->setup_depth_shader(m_depth_shader);
 
         auto draw_depth = [&](const std::string &model_name, const mat4 &model_mat) {
             m_depth_shader->set_mat4("model", model_mat);
@@ -544,8 +503,7 @@ namespace app {
             draw_depth("grave", model);
         }
 
-        m_depth_instanced_shader->use();
-        m_depth_instanced_shader->set_mat4("lightSpaceMatrix", lsm);
+        m_shadow->setup_depth_instanced_shader(m_depth_instanced_shader);
 
         draw_trees(m_depth_instanced_shader);
 

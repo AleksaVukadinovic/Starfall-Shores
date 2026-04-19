@@ -1,9 +1,10 @@
 #pragma once
 #include <array>
-#include <cstdint>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
+#include <engine/graphics/ShadowController.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
@@ -80,10 +81,8 @@ namespace app {
 
         void draw_trees(const engine::resources::Shader *shader) const;
 
-        void setup_shadow_map();
         void render_shadow_map() const;
         void render_depth_scene() const;
-        [[nodiscard]] glm::mat4 light_space_matrix() const;
 
         void update() override;
         void terminate() override;
@@ -94,6 +93,8 @@ namespace app {
         engine::resources::Shader *m_basic_shader           = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
         engine::graphics::PostProcessingController *m_bloom = nullptr;
+        engine::graphics::ShadowController *m_shadow        = nullptr;
+        engine::graphics::LightingController *m_lighting    = nullptr;
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
 
@@ -108,21 +109,24 @@ namespace app {
         std::string m_active_daytime_skybox      = "skybox_day";
         std::string m_active_nighttime_skybox    = "skybox_night";
 
-        static constexpr auto LIGHT_POS_DAY = glm::vec3(0.0f, 60.0f, 0.0f);
-        static constexpr auto LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);
         static constexpr auto WATER_COLOR_DAY = glm::vec3(0.0f, 0.4f, 0.6f);
         static constexpr auto WATER_COLOR_NIGHT = glm::vec3(0.0f, 0.1f, 0.3f);
+        static constexpr auto LIGHT_POS_DAY = glm::vec3(0.0f, 60.0f, 0.0f);
+        static constexpr auto LIGHT_POS_NIGHT = glm::vec3(12.0f, 25.0f, 6.0f);
         static constexpr auto LIGHT_COLOR_DAY = glm::vec3(1.0f, 1.0f, 1.0f);
         static constexpr auto LIGHT_COLOR_NIGHT = glm::vec3(1.0f, 0.7f, 0.1f);
+        static constexpr auto AMBIENT_LIGHT_DAY = glm::vec3(0.2f);
+        static constexpr auto AMBIENT_LIGHT_NIGHT = glm::vec3(0.05f);
+        static constexpr auto DIFFUSE_LIGHT_DAY = glm::vec3(0.5f);
+        static constexpr auto DIFFUSE_LIGHT_NIGHT = glm::vec3(0.2f);
+        static constexpr auto SPECULAR_LIGHT_DAY = glm::vec3(0.1f);
+        static constexpr auto SPECULAR_LIGHT_NIGHT = glm::vec3(0.05f);
+        static constexpr auto SHININESS_DAY = 1024.0f;
+        static constexpr auto SHININESS_NIGHT = 2048.0f;
 
-        void set_common_shader_variables(const engine::resources::Shader *shader) const;
+        void apply_day_night_lighting() const;
 
         engine::resources::Shader *m_depth_shader           = nullptr;
         engine::resources::Shader *m_depth_instanced_shader = nullptr;
-        uint32_t m_shadow_map_fbo                           = 0;
-        uint32_t m_shadow_map_texture                       = 0;
-
-    public:
-        bool shadows_enabled = true;
     };
 }

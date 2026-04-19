@@ -19,6 +19,7 @@ namespace app {
         engine::graphics::Camera *m_camera = nullptr;
         engine::graphics::PostProcessingController *m_bloom = nullptr;
         engine::graphics::FPSCameraController *m_fps_camera = nullptr;
+        engine::graphics::ShadowController *m_shadow = nullptr;
         engine::platform::PlatformController *m_platform = nullptr;
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;

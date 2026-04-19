@@ -5,8 +5,10 @@
 #include <engine/graphics/FPSCameraController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
+#include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/ShadowController.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
@@ -19,8 +21,13 @@ namespace app {
         const auto greyscale_controller = register_controller<GreyscaleController>();
         const auto rain_controller = register_controller<RainController>();
         const auto fps_camera = register_controller<engine::graphics::FPSCameraController>();
+        const auto shadow_controller = register_controller<engine::graphics::ShadowController>();
+        const auto lighting_controller = register_controller<engine::graphics::LightingController>();
         main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         fps_camera->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
+        shadow_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
+        lighting_controller->after(shadow_controller);
+        main_controller->after(lighting_controller);
         post_processing_controller->after(main_controller);
         fog_controller->after(main_controller);
         greyscale_controller->after(main_controller);
