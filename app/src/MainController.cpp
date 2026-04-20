@@ -11,7 +11,6 @@
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/platform/PlatformController.hpp>
-#include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/util/Transform.hpp>
 
@@ -198,7 +197,7 @@ namespace app {
         color     = m_is_day ? LIGHT_COLOR_DAY : LIGHT_COLOR_NIGHT;
         shininess = m_is_day ? SHININESS_DAY : SHININESS_NIGHT;
         m_shadow->light_position = position;
-        m_renderer->water.color = m_is_day ? glm::vec3(0.0f, 0.4f, 0.6f) : glm::vec3(0.0f, 0.1f, 0.3f);
+        m_renderer->water.color = m_is_day ? glm::vec3(0.0f, 0.4f, 0.6f) : glm::vec3(0.0f, 0.0f, 0.08f);
 
         m_lighting->clear_point_lights();
         if (!m_is_day) {
@@ -258,6 +257,7 @@ namespace app {
     }
 
     void MainController::render_depth_scene() const {
+        if (!m_is_day) return;
         m_renderer->setup_depth_shader();
         m_renderer->draw_depth("terrain", mat4(1.0f));
         m_renderer->draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));

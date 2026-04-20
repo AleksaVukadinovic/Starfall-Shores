@@ -143,7 +143,7 @@ void Renderer::draw_batch_instanced_impl(const std::string &model_name, const st
     std::vector<glm::mat4> matrices;
     matrices.reserve(count);
     for (std::size_t i = 0; i < count; ++i)
-        matrices.push_back(util::model_matrix(transforms[i]));
+        matrices.emplace_back(util::model_matrix(transforms[i]));
     draw_instanced(model_name, shader_name, matrices, effect);
 }
 
@@ -173,7 +173,7 @@ void Renderer::draw_depth_batch_instanced_impl(const std::string &model_name,
     std::vector<glm::mat4> matrices;
     matrices.reserve(count);
     for (std::size_t i = 0; i < count; ++i)
-        matrices.push_back(util::model_matrix(transforms[i]));
+        matrices.emplace_back(util::model_matrix(transforms[i]));
     m_resources->model(model_name)->draw_instanced(m_depth_instanced_shader, matrices);
 }
 
