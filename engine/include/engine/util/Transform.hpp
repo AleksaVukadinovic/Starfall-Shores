@@ -17,6 +17,12 @@ inline constexpr auto Y_AXIS = glm::vec3(0, 1, 0);
 inline constexpr auto Z_AXIS = glm::vec3(0, 0, 1);
 inline constexpr auto ORIGIN = glm::vec3(0, 0, 0);
 
+struct TransformData {
+    glm::vec3 translation{0.0f, 0.0f, 0.0f};
+    glm::vec3 rotation{0.0f, 0.0f, 0.0f};
+    glm::vec3 scale{1.0f, 1.0f, 1.0f};
+};
+
 /**
  * @brief Creates a model matrix from per-axis Euler rotations (degrees), translation, and scale.
  *
@@ -66,6 +72,14 @@ glm::mat4 model_matrix(const glm::vec3 &translation,
  * @returns The composed model matrix.
  */
 glm::mat4 model_matrix(const glm::vec3 &translation);
+
+/**
+ * @brief Creates a model matrix from a TransformData struct.
+ *
+ * @param transform The transform data containing translation, rotation (Euler degrees), and scale.
+ * @returns The composed model matrix.
+ */
+glm::mat4 model_matrix(const TransformData &transform);
 
 /**
  * @brief Builds a vector of model matrices by applying a transform function to each element.

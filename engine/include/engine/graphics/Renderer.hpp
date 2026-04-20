@@ -6,6 +6,7 @@
 #pragma once
 
 #include <engine/core/Controller.hpp>
+#include <engine/util/Transform.hpp>
 #include <glm/glm.hpp>
 #include <functional>
 #include <string>
@@ -28,6 +29,12 @@ enum class Effect {
     Wind,
     Water,
     Fire
+};
+
+enum class DrawMethod {
+    Default,
+    Blended,
+    Instanced
 };
 
 struct WindParams {
@@ -69,7 +76,28 @@ public:
 
     void set_depth_scene(std::function<void()> callback);
 
+    template<std::size_t N>
+    void draw_batch(const std::string &model_name, const std::string &shader_name,
+                    const std::array<util::TransformData, N> &transforms,
+                    const DrawMethod method = DrawMethod::Default, const Effect effect = Effect::None) {
+        draw_batch_impl(model_name, shader_name, transforms.data(), transforms.size(), method, effect);
+    }
+
+    template<std::size_t N>
+    void draw_batch_instanced(const std::string &model_name, const std::string &shader_name,
+                              const std::array<util::TransformData, N> &transforms,
+                              const Effect effect = Effect::None) {
+        draw_batch_instanced_impl(model_name, shader_name, transforms.data(), transforms.size(), effect);
+    }
+
 private:
+    void draw_batch_impl(const std::string &model_name, const std::string &shader_name,
+                         const util::TransformData *transforms, std::size_t count,
+                         DrawMethod method, Effect effect) const;
+    void draw_batch_instanced_impl(const std::string &model_name, const std::string &shader_name,
+                                   const util::TransformData *transforms, std::size_t count,
+                                   Effect effect) const;
+
     void initialize() override;
     void begin_draw() override;
 

@@ -18,6 +18,7 @@
 namespace app {
     using vec3 = glm::vec3;
     using mat4 = glm::mat4;
+    using engine::util::TransformData;
 
     void MainController::initialize() {
         engine::graphics::OpenGL::enable_depth_testing();
@@ -53,111 +54,92 @@ namespace app {
     using engine::util::build_instance_matrices;
     using engine::util::build_instance_matrices_async;
 
-    constexpr std::array<std::pair<float, vec3>, 3> LOGS = {{
+    constexpr std::array<TransformData, 3> LOGS = {{
         #include <coordinates/logs.include>
     }};
 
-    constexpr std::array SHROOM_POSITIONS = {
+    constexpr std::array<TransformData, 5> SHROOM_POSITIONS = {{
         #include <coordinates/shrooms.include>
-    };
+    }};
+
+    constexpr std::array<TransformData, 68> white_translations = {{
+        #include <coordinates/white_flowers.include>
+    }};
+    constexpr std::array<TransformData, 31> red_translations = {{
+        #include <coordinates/red_flowers.include>
+    }};
+
+    constexpr std::array<TransformData, 35> grass_positions = {{
+        #include <coordinates/grass.include>
+    }};
+
+    constexpr std::array<TransformData, 22> yellow_trees = {{
+        #include <coordinates/yellow_trees.include>
+    }};
+    constexpr std::array<TransformData, 16> green_trees = {{
+        #include <coordinates/green_trees.include>
+    }};
+    constexpr std::array<TransformData, 5> tall_trees = {{
+        #include <coordinates/tall_trees.include>
+    }};
+    constexpr std::array<TransformData, 75> pine_trees = {{
+        #include <coordinates/pine_trees.include>
+    }};
+    constexpr std::array<TransformData, 1> oak_trees = {{
+        #include <coordinates/oak_trees.include>
+    }};
+    constexpr std::array<TransformData, 2> old_trees = {{
+        #include <coordinates/old_trees.include>
+    }};
+
+    constexpr std::array<TransformData, 5> bush1_positions = {{
+        #include <coordinates/bush1.include>
+    }};
+    constexpr std::array<TransformData, 3> bush2_positions = {{
+        #include <coordinates/bush2.include>
+    }};
+    constexpr std::array<TransformData, 6> laurel_positions = {{
+        #include <coordinates/laurel_bushes.include>
+    }};
+
+    constexpr std::array<TransformData, 19> path_segments = {{
+        #include <coordinates/path_segments.include>
+    }};
 
     using Effect = engine::graphics::Effect;
+    using DrawMethod = engine::graphics::DrawMethod;
 
     void MainController::draw() {
         m_renderer->draw_blended("water", "water_shader", model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f), Effect::Water);
         m_renderer->draw("terrain", "basic", mat4(1.0f));
         m_renderer->draw("terrain", "basic", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
         draw_campfire();
-        for (const auto &[angle, pos] : LOGS)
-            m_renderer->draw("log_seat", "basic", model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
+        m_renderer->draw_batch("log_seat", "basic", LOGS);
         m_renderer->draw("viking_tent", "basic", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
         m_renderer->draw("stylized_tent", "basic", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
-        draw_trees(m_resources->shader("flower_shader"));
-        draw_bushes();
-        {
-            constexpr std::array white_translations = {
-                #include <coordinates/white_flowers.include>
-            };
-            constexpr std::array red_translations = {
-                #include <coordinates/red_flowers.include>
-            };
-            auto white_f = build_instance_matrices_async(white_translations, [](const vec3 &t) {
-                return model_matrix(t, vec3(0.12f), X_AXIS, 90.0f);
-            });
-            auto red_f = build_instance_matrices_async(red_translations, [](const vec3 &t) {
-                return model_matrix(t, vec3(0.04f), X_AXIS, -90.0f);
-            });
-            m_renderer->draw_instanced("white_flowers", "flower_shader", white_f.get(), Effect::Wind);
-            m_renderer->draw_instanced("red_flowers", "flower_shader", red_f.get(), Effect::Wind);
-        }
-        {
-            struct PathData { float rx, ry, rz, tx, ty, tz, scale; };
-            constexpr std::array<PathData, 19> path_segments = {{
-                #include <coordinates/path_segments.include>
-            }};
-            std::vector<mat4> matrices;
-            matrices.reserve(path_segments.size());
-            for (const auto &[rx, ry, rz, tx, ty, tz, s] : path_segments)
-                matrices.push_back(model_matrix(vec3(tx, ty, tz), vec3(rx, ry, rz), vec3(s)));
-            m_renderer->draw_instanced("path", "flower_shader", matrices);
-        }
-        for (const auto &shroom : SHROOM_POSITIONS)
-            m_renderer->draw("shrooms", "basic", model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
+
+        m_renderer->draw_batch_instanced("yellow_tree", "flower_shader", yellow_trees);
+        m_renderer->draw_batch_instanced("green_tree", "flower_shader", green_trees);
+        m_renderer->draw_batch_instanced("beech_tree", "flower_shader", tall_trees);
+        m_renderer->draw_batch_instanced("pine_tree", "flower_shader", pine_trees);
+        m_renderer->draw_batch_instanced("oak_tree", "flower_shader", oak_trees);
+        m_renderer->draw_batch_instanced("old_tree", "flower_shader", old_trees);
+
+        m_renderer->draw_batch("bush1", "basic", bush1_positions, DrawMethod::Blended);
+        m_renderer->draw_batch("bush2", "basic", bush2_positions, DrawMethod::Blended);
+        m_renderer->draw_batch("laurel_bush", "basic", laurel_positions, DrawMethod::Blended);
+
+        m_renderer->draw_batch_instanced("white_flowers", "flower_shader", white_translations, Effect::Wind);
+        m_renderer->draw_batch_instanced("red_flowers", "flower_shader", red_translations, Effect::Wind);
+
+        m_renderer->draw_batch_instanced("path", "flower_shader", path_segments);
+        m_renderer->draw_batch("shrooms", "basic", SHROOM_POSITIONS);
         m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
-        {
-            constexpr std::array grass_positions = {
-                #include <coordinates/grass.include>
-            };
-            const auto grass_matrices = build_instance_matrices(grass_positions, [](const vec3 &pos) {
-                return model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
-            });
-            m_renderer->draw_instanced("grass", "grass_shader", grass_matrices, Effect::Wind);
-        }
+        m_renderer->draw_batch_instanced("grass", "grass_shader", grass_positions, Effect::Wind);
         draw_test_model();
         if (!m_is_day)
             m_renderer->draw_blended("fire", "fire_shader", model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f), Effect::Fire);
         draw_skybox();
-    }
-
-    void MainController::draw_trees(const engine::resources::Shader *shader) const {
-        constexpr std::array<TreeData, 22> yellow_trees = {{
-            #include <coordinates/yellow_trees.include>
-        }};
-        constexpr std::array<TreeData, 16> green_trees = {{
-            #include <coordinates/green_trees.include>
-        }};
-        constexpr std::array<TreeData, 5> tall_trees = {{
-            #include <coordinates/tall_trees.include>
-        }};
-        constexpr std::array<TreeData, 75> pine_trees = {{
-            #include <coordinates/pine_trees.include>
-        }};
-        constexpr std::array<TreeData, 1> oak_trees = {{
-            #include <coordinates/oak_trees.include>
-        }};
-        constexpr std::array<OldTreeData, 2> old_trees = {{
-            #include <coordinates/old_trees.include>
-        }};
-
-        auto tree_transform = [](const TreeData &t, const vec3 &axis, const float angle) {
-            return model_matrix(vec3(t[0], t[1], t[2]), vec3(t[3]), axis, angle);
-        };
-
-        auto yellow_f = build_instance_matrices_async(yellow_trees, [&](const TreeData &t) { return tree_transform(t, Y_AXIS, 0.0f); });
-        auto green_f = build_instance_matrices_async(green_trees, [&](const TreeData &t) { return tree_transform(t, X_AXIS, -90.0f); });
-        auto tall_f = build_instance_matrices_async(tall_trees, [&](const TreeData &t) { return tree_transform(t, Y_AXIS, 0.0f); });
-        auto pine_f = build_instance_matrices_async(pine_trees, [&](const TreeData &t) { return tree_transform(t, X_AXIS, -90.0f); });
-        auto oak_f = build_instance_matrices_async(oak_trees, [&](const TreeData &t) { return tree_transform(t, X_AXIS, 90.0f); });
-        auto old_f = build_instance_matrices_async(old_trees, [](const OldTreeData &t) {
-            return model_matrix(vec3(t.x, t.y, t.z), vec3(t.scale), vec3(t.rx, t.ry, t.rz), t.rotation_angle);
-        });
-
-        m_renderer->draw_instanced(m_resources->model("yellow_tree"), shader, yellow_f.get());
-        m_renderer->draw_instanced(m_resources->model("green_tree"), shader, green_f.get());
-        m_renderer->draw_instanced(m_resources->model("beech_tree"), shader, tall_f.get());
-        m_renderer->draw_instanced(m_resources->model("pine_tree"), shader, pine_f.get());
-        m_renderer->draw_instanced(m_resources->model("oak_tree"), shader, oak_f.get());
-        m_renderer->draw_instanced(m_resources->model("old_tree"), shader, old_f.get());
     }
 
     void MainController::draw_campfire() const {
@@ -165,27 +147,6 @@ namespace app {
         m_basic_shader->set_vec3("light.diffuse", m_is_day ? vec3(0.5f) : vec3(5.0f));
         m_basic_shader->set_mat4("model", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
         m_resources->model("campfire")->draw(m_basic_shader);
-    }
-
-    void MainController::draw_bushes() const {
-        using BushData = std::array<float, 4>;
-        auto draw_bush = [&](const std::string &model_name, const BushData &data, const float rotation_angle = 0.0f, const vec3 &rotation_axis = Y_AXIS) {
-            m_renderer->draw_blended(model_name, "basic", model_matrix(vec3(data[0], data[1], data[2]), vec3(data[3]), rotation_axis, rotation_angle));
-        };
-
-        constexpr std::array<BushData, 5> bush1_positions = {{
-            #include <coordinates/bush1.include>
-        }};
-        constexpr std::array<BushData, 3> bush2_positions = {{
-            #include <coordinates/bush2.include>
-        }};
-        constexpr std::array<BushData, 6> laurel_positions = {{
-            #include <coordinates/laurel_bushes.include>
-        }};
-
-        for (const auto &b : bush1_positions) draw_bush("bush1", b, -90.0f, X_AXIS);
-        for (const auto &b : bush2_positions) draw_bush("bush2", b);
-        for (const auto &b : laurel_positions) draw_bush("laurel_bush", b);
     }
 
     void MainController::draw_skybox() const {
@@ -282,9 +243,11 @@ namespace app {
 
     void MainController::terminate() {
         for (const auto &[model_name, translation, rotation, scale] : placed_models) {
-            spdlog::info(std::format("\nModel name: {}\nRotation: {}, {}, {}\nTranslation: {}, {}, {}\nScale: {}",
-                model_name, rotation.x, rotation.y, rotation.z,
-                translation.x, translation.y, translation.z, scale));
+            spdlog::info(std::format("\n// {}\n{{{{{:.3g}f, {:.3g}f, {:.3g}f}}, {{{:.3g}f, {:.3g}f, {:.3g}f}}, {{{:.3g}f, {:.3g}f, {:.3g}f}}}}",
+                model_name,
+                translation.x, translation.y, translation.z,
+                rotation.x, rotation.y, rotation.z,
+                scale, scale, scale));
         }
     }
 
@@ -308,26 +271,38 @@ namespace app {
         draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
         draw_depth("campfire", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
 
-        for (const auto &[angle, pos] : LOGS)
-            draw_depth("log_seat", model_matrix(pos, vec3(0.04f), Y_AXIS, angle));
+        for (const auto &t : LOGS)
+            draw_depth("log_seat", model_matrix(t));
 
         draw_depth("viking_tent", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
         draw_depth("stylized_tent", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
 
-        for (const auto &shroom : SHROOM_POSITIONS)
-            draw_depth("shrooms", model_matrix(shroom, vec3(0.19f), X_AXIS, -90.0f));
+        for (const auto &t : SHROOM_POSITIONS)
+            draw_depth("shrooms", model_matrix(t));
 
         draw_depth("grave", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
 
         m_shadow->setup_depth_instanced_shader(m_depth_instanced_shader);
-        draw_trees(m_depth_instanced_shader);
 
-        constexpr std::array grass_positions = {
-            #include <coordinates/grass.include>
+        auto draw_depth_instanced = [&](const std::string &model_name, const auto &transforms) {
+            std::vector<mat4> matrices;
+            matrices.reserve(transforms.size());
+            for (const auto &t : transforms)
+                matrices.push_back(model_matrix(t));
+            m_resources->model(model_name)->draw_instanced(m_depth_instanced_shader, matrices);
         };
-        const auto grass_matrices = build_instance_matrices(grass_positions, [](const vec3 &pos) {
-            return model_matrix(pos, vec3(20.0f), X_AXIS, 180.0f);
-        });
+
+        draw_depth_instanced("yellow_tree", yellow_trees);
+        draw_depth_instanced("green_tree", green_trees);
+        draw_depth_instanced("beech_tree", tall_trees);
+        draw_depth_instanced("pine_tree", pine_trees);
+        draw_depth_instanced("oak_tree", oak_trees);
+        draw_depth_instanced("old_tree", old_trees);
+
+        std::vector<mat4> grass_matrices;
+        grass_matrices.reserve(grass_positions.size());
+        for (const auto &t : grass_positions)
+            grass_matrices.push_back(model_matrix(t));
         m_resources->model("grass")->draw_instanced(m_depth_instanced_shader, grass_matrices);
     }
 }

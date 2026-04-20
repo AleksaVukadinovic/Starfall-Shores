@@ -23,9 +23,6 @@ namespace app {
         float scale;
     };
 
-    using TreeData = std::array<float, 4>;
-    struct OldTreeData { float x, y, z, scale, rotation_angle, rx, ry, rz; };
-
     class MainController final : public engine::core::Controller {
     public:
         [[nodiscard]] std::string_view name() const override {
@@ -57,9 +54,7 @@ namespace app {
 
         void draw_skybox() const;
         void draw_campfire() const;
-        void draw_bushes() const;
         void draw_test_model() const;
-        void draw_trees(const engine::resources::Shader *shader) const;
 
         void render_depth_scene() const;
 

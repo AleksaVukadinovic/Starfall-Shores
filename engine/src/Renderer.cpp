@@ -6,6 +6,7 @@
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/resources/Shader.hpp>
+#include <engine/util/Transform.hpp>
 
 namespace engine::graphics {
 
@@ -92,6 +93,34 @@ void Renderer::draw_instanced(const resources::Model *model, const resources::Sh
 
 void Renderer::draw_instanced(const std::string &model_name, const std::string &shader_name, const std::vector<glm::mat4> &transforms, const Effect effect) const {
     draw_instanced(m_resources->model(model_name), m_resources->shader(shader_name), transforms, effect);
+}
+
+void Renderer::draw_batch_impl(const std::string &model_name, const std::string &shader_name,
+                               const util::TransformData *transforms, const std::size_t count,
+                               const DrawMethod method, const Effect effect) const {
+    for (std::size_t i = 0; i < count; ++i) {
+        const auto matrix = util::model_matrix(transforms[i]);
+        switch (method) {
+            case DrawMethod::Default:
+                draw(model_name, shader_name, matrix, effect);
+                break;
+            case DrawMethod::Blended:
+                draw_blended(model_name, shader_name, matrix, effect);
+                break;
+            case DrawMethod::Instanced:
+                break;
+        }
+    }
+}
+
+void Renderer::draw_batch_instanced_impl(const std::string &model_name, const std::string &shader_name,
+                                         const util::TransformData *transforms, const std::size_t count,
+                                         const Effect effect) const {
+    std::vector<glm::mat4> matrices;
+    matrices.reserve(count);
+    for (std::size_t i = 0; i < count; ++i)
+        matrices.push_back(util::model_matrix(transforms[i]));
+    draw_instanced(model_name, shader_name, matrices, effect);
 }
 
 }

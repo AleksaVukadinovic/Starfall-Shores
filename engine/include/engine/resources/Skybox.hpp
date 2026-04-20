@@ -53,7 +53,7 @@ private:
     * @param path The path to the skybox texture.
     * @param name The name of the skybox.
     */
-    Skybox(uint32_t vao, uint32_t texture_id, std::filesystem::path path, std::string name)
+    Skybox(const uint32_t vao, const uint32_t texture_id, std::filesystem::path path, std::string name)
         : m_vao(vao)
         , m_texture_id(texture_id)
         , m_path(std::move(path))
