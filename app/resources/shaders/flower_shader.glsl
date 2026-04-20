@@ -50,6 +50,15 @@ struct Light {
     vec3 specular;
 };
 
+struct PointLight {
+    vec3 position;
+    vec3 diffuse;
+    vec3 specular;
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
@@ -64,6 +73,9 @@ uniform bool shadowsEnabled;
 uniform vec3 viewPos;
 uniform Material material;
 uniform Light light;
+
+uniform int numPointLights;
+uniform PointLight pointLights[4];
 
 uniform bool fogEnabled;
 uniform float fogIntensity;
@@ -126,6 +138,18 @@ void main()
         shadow = calculateShadow(FragPosLightSpace, norm, lightDir);
 
     vec3 result = ambient + (1.0 - shadow) * (diffuse + specular);
+
+    for (int i = 0; i < numPointLights; i++) {
+        vec3 pLightDir = normalize(pointLights[i].position - FragPos);
+        float pDist = length(pointLights[i].position - FragPos);
+        float attenuation = 1.0 / (pointLights[i].constant + pointLights[i].linear * pDist + pointLights[i].quadratic * pDist * pDist);
+        float pDiff = max(dot(norm, pLightDir), 0.0);
+        vec3 pDiffuse = pointLights[i].diffuse * pDiff * modifiedColor;
+        vec3 pReflectDir = reflect(-pLightDir, norm);
+        float pSpec = pow(max(dot(viewDir, pReflectDir), 0.0), material.shininess);
+        vec3 pSpecular = pointLights[i].specular * pSpec * material.specular;
+        result += attenuation * (pDiffuse + pSpecular);
+    }
 
     if (fogEnabled) {
         float dist = length(viewPos - FragPos);

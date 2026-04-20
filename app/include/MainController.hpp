@@ -53,7 +53,6 @@ namespace app {
         void draw() override;
 
         void draw_skybox() const;
-        void draw_campfire() const;
         void draw_test_model() const;
 
         void render_depth_scene() const;
@@ -64,7 +63,6 @@ namespace app {
         void update_toggles() const;
 
         engine::resources::ResourcesController *m_resources = nullptr;
-        engine::resources::Shader *m_basic_shader           = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
         engine::graphics::PostProcessingController *m_bloom = nullptr;
         engine::graphics::ShadowController *m_shadow        = nullptr;
@@ -97,8 +95,5 @@ namespace app {
         static constexpr auto SHININESS_NIGHT = 2048.0f;
 
         void apply_day_night_lighting() const;
-
-        engine::resources::Shader *m_depth_shader           = nullptr;
-        engine::resources::Shader *m_depth_instanced_shader = nullptr;
     };
 }

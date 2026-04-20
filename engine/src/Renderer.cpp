@@ -1,6 +1,7 @@
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/LightingController.hpp>
+#include <engine/graphics/LightSource.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
@@ -16,6 +17,8 @@ void Renderer::initialize() {
     m_graphics = get<GraphicsController>();
     m_camera = m_graphics->camera();
     m_resources = get<resources::ResourcesController>();
+    m_depth_shader = m_resources->shader("depth_shader");
+    m_depth_instanced_shader = m_resources->shader("depth_instanced_shader");
 }
 
 void Renderer::begin_draw() {
@@ -30,23 +33,32 @@ void Renderer::set_depth_scene(std::function<void()> callback) {
     m_depth_scene_callback = std::move(callback);
 }
 
-void Renderer::apply_effect(const resources::Shader *shader, const glm::mat4 &transform, const Effect effect) const {
+void Renderer::apply_effect(const resources::Shader *shader, const glm::mat4 &transform, const Effect effect, const LightSource *light_override) const {
     const auto time = static_cast<float>(platform::PlatformController::get_time());
 
     switch (effect) {
         case Effect::None:
-            m_lighting->apply_to_shader(shader);
+            if (light_override)
+                m_lighting->apply_to_shader(shader, *light_override);
+            else
+                m_lighting->apply_to_shader(shader);
             shader->set_mat4("model", transform);
             break;
         case Effect::Wind:
-            m_lighting->apply_to_shader(shader);
+            if (light_override)
+                m_lighting->apply_to_shader(shader, *light_override);
+            else
+                m_lighting->apply_to_shader(shader);
             shader->set_float("time", time);
             shader->set_bool("windEnabled", wind.enabled);
             shader->set_float("windIntensity", wind.intensity);
             shader->set_mat4("model", transform);
             break;
         case Effect::Water:
-            m_lighting->apply_to_shader(shader);
+            if (light_override)
+                m_lighting->apply_to_shader(shader, *light_override);
+            else
+                m_lighting->apply_to_shader(shader);
             shader->set_float("time", time);
             shader->set_vec3("waterColor", water.color);
             shader->set_vec3("lightPos", m_lighting->light.position);
@@ -77,6 +89,12 @@ void Renderer::draw(const std::string &model_name, const std::string &shader_nam
     draw(m_resources->model(model_name), m_resources->shader(shader_name), transform, effect);
 }
 
+void Renderer::draw(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const LightSource &light_override, const Effect effect) const {
+    const auto *shader = m_resources->shader(shader_name);
+    apply_effect(shader, transform, effect, &light_override);
+    m_resources->model(model_name)->draw(shader);
+}
+
 void Renderer::draw_blended(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, const Effect effect) const {
     apply_effect(shader, transform, effect);
     model->draw_blended(shader);
@@ -84,6 +102,12 @@ void Renderer::draw_blended(const resources::Model *model, const resources::Shad
 
 void Renderer::draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const Effect effect) const {
     draw_blended(m_resources->model(model_name), m_resources->shader(shader_name), transform, effect);
+}
+
+void Renderer::draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const LightSource &light_override, const Effect effect) const {
+    const auto *shader = m_resources->shader(shader_name);
+    apply_effect(shader, transform, effect, &light_override);
+    m_resources->model(model_name)->draw_blended(shader);
 }
 
 void Renderer::draw_instanced(const resources::Model *model, const resources::Shader *shader, const std::vector<glm::mat4> &transforms, const Effect effect) const {
@@ -121,6 +145,36 @@ void Renderer::draw_batch_instanced_impl(const std::string &model_name, const st
     for (std::size_t i = 0; i < count; ++i)
         matrices.push_back(util::model_matrix(transforms[i]));
     draw_instanced(model_name, shader_name, matrices, effect);
+}
+
+void Renderer::setup_depth_shader() const {
+    m_shadow->setup_depth_shader(m_depth_shader);
+}
+
+void Renderer::setup_depth_instanced_shader() const {
+    m_shadow->setup_depth_instanced_shader(m_depth_instanced_shader);
+}
+
+void Renderer::draw_depth(const std::string &model_name, const glm::mat4 &transform) const {
+    m_depth_shader->set_mat4("model", transform);
+    m_resources->model(model_name)->draw(m_depth_shader);
+}
+
+void Renderer::draw_depth_batch_impl(const std::string &model_name,
+                                     const util::TransformData *transforms, const std::size_t count) const {
+    for (std::size_t i = 0; i < count; ++i) {
+        m_depth_shader->set_mat4("model", util::model_matrix(transforms[i]));
+        m_resources->model(model_name)->draw(m_depth_shader);
+    }
+}
+
+void Renderer::draw_depth_batch_instanced_impl(const std::string &model_name,
+                                               const util::TransformData *transforms, const std::size_t count) const {
+    std::vector<glm::mat4> matrices;
+    matrices.reserve(count);
+    for (std::size_t i = 0; i < count; ++i)
+        matrices.push_back(util::model_matrix(transforms[i]));
+    m_resources->model(model_name)->draw_instanced(m_depth_instanced_shader, matrices);
 }
 
 }

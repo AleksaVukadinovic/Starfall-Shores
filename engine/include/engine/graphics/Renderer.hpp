@@ -6,6 +6,7 @@
 #pragma once
 
 #include <engine/core/Controller.hpp>
+#include <engine/graphics/LightSource.hpp>
 #include <engine/util/Transform.hpp>
 #include <glm/glm.hpp>
 #include <functional>
@@ -67,14 +68,33 @@ public:
 
     void draw(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, Effect effect = Effect::None) const;
     void draw(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, Effect effect = Effect::None) const;
+    void draw(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const LightSource &light_override, Effect effect = Effect::None) const;
 
     void draw_blended(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, Effect effect = Effect::None) const;
     void draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, Effect effect = Effect::None) const;
+    void draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const LightSource &light_override, Effect effect = Effect::None) const;
 
     void draw_instanced(const resources::Model *model, const resources::Shader *shader, const std::vector<glm::mat4> &transforms, Effect effect = Effect::None) const;
     void draw_instanced(const std::string &model_name, const std::string &shader_name, const std::vector<glm::mat4> &transforms, Effect effect = Effect::None) const;
 
     void set_depth_scene(std::function<void()> callback);
+
+    void draw_depth(const std::string &model_name, const glm::mat4 &transform) const;
+
+    template<std::size_t N>
+    void draw_depth_batch(const std::string &model_name,
+                          const std::array<util::TransformData, N> &transforms) const {
+        draw_depth_batch_impl(model_name, transforms.data(), transforms.size());
+    }
+
+    template<std::size_t N>
+    void draw_depth_batch_instanced(const std::string &model_name,
+                                    const std::array<util::TransformData, N> &transforms) const {
+        draw_depth_batch_instanced_impl(model_name, transforms.data(), transforms.size());
+    }
+
+    void setup_depth_shader() const;
+    void setup_depth_instanced_shader() const;
 
     template<std::size_t N>
     void draw_batch(const std::string &model_name, const std::string &shader_name,
@@ -98,16 +118,23 @@ private:
                                    const util::TransformData *transforms, std::size_t count,
                                    Effect effect) const;
 
+    void draw_depth_batch_impl(const std::string &model_name,
+                               const util::TransformData *transforms, std::size_t count) const;
+    void draw_depth_batch_instanced_impl(const std::string &model_name,
+                                         const util::TransformData *transforms, std::size_t count) const;
+
     void initialize() override;
     void begin_draw() override;
 
-    void apply_effect(const resources::Shader *shader, const glm::mat4 &transform, Effect effect) const;
+    void apply_effect(const resources::Shader *shader, const glm::mat4 &transform, Effect effect, const LightSource *light_override = nullptr) const;
 
     LightingController *m_lighting = nullptr;
     ShadowController *m_shadow = nullptr;
     GraphicsController *m_graphics = nullptr;
     Camera *m_camera = nullptr;
     resources::ResourcesController *m_resources = nullptr;
+    resources::Shader *m_depth_shader = nullptr;
+    resources::Shader *m_depth_instanced_shader = nullptr;
     std::function<void()> m_depth_scene_callback;
 };
 

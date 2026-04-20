@@ -32,9 +32,6 @@ namespace app {
         m_renderer          = get<engine::graphics::Renderer>();
         m_graphics->perspective_params().Far = m_fog->far_plane();
         m_resources         = get<engine::resources::ResourcesController>();
-        m_basic_shader      = m_resources->shader("basic");
-        m_depth_shader      = m_resources->shader("depth_shader");
-        m_depth_instanced_shader = m_resources->shader("depth_instanced_shader");
         m_camera            = m_graphics->camera();
         m_is_day           = true;
         m_camera->Position = vec3(5, 27, 17);
@@ -113,40 +110,29 @@ namespace app {
         m_renderer->draw_blended("water", "water_shader", model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f), Effect::Water);
         m_renderer->draw("terrain", "basic", mat4(1.0f));
         m_renderer->draw("terrain", "basic", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-        draw_campfire();
-        m_renderer->draw_batch("log_seat", "basic", LOGS);
         m_renderer->draw("viking_tent", "basic", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
         m_renderer->draw("stylized_tent", "basic", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
-
+        m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
+        m_renderer->draw("campfire", "basic", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
+        m_renderer->draw_batch("log_seat", "basic", LOGS);
+        m_renderer->draw_batch("bush1", "basic", bush1_positions, DrawMethod::Blended);
+        m_renderer->draw_batch("bush2", "basic", bush2_positions, DrawMethod::Blended);
+        m_renderer->draw_batch("laurel_bush", "basic", laurel_positions, DrawMethod::Blended);
         m_renderer->draw_batch_instanced("yellow_tree", "flower_shader", yellow_trees);
         m_renderer->draw_batch_instanced("green_tree", "flower_shader", green_trees);
         m_renderer->draw_batch_instanced("beech_tree", "flower_shader", tall_trees);
         m_renderer->draw_batch_instanced("pine_tree", "flower_shader", pine_trees);
         m_renderer->draw_batch_instanced("oak_tree", "flower_shader", oak_trees);
         m_renderer->draw_batch_instanced("old_tree", "flower_shader", old_trees);
-
-        m_renderer->draw_batch("bush1", "basic", bush1_positions, DrawMethod::Blended);
-        m_renderer->draw_batch("bush2", "basic", bush2_positions, DrawMethod::Blended);
-        m_renderer->draw_batch("laurel_bush", "basic", laurel_positions, DrawMethod::Blended);
-
         m_renderer->draw_batch_instanced("white_flowers", "flower_shader", white_translations, Effect::Wind);
         m_renderer->draw_batch_instanced("red_flowers", "flower_shader", red_translations, Effect::Wind);
-
         m_renderer->draw_batch_instanced("path", "flower_shader", path_segments);
         m_renderer->draw_batch("shrooms", "basic", SHROOM_POSITIONS);
-        m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
         m_renderer->draw_batch_instanced("grass", "grass_shader", grass_positions, Effect::Wind);
         draw_test_model();
         if (!m_is_day)
             m_renderer->draw_blended("fire", "fire_shader", model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f), Effect::Fire);
         draw_skybox();
-    }
-
-    void MainController::draw_campfire() const {
-        m_lighting->apply_to_shader(m_basic_shader);
-        m_basic_shader->set_vec3("light.diffuse", m_is_day ? vec3(0.5f) : vec3(5.0f));
-        m_basic_shader->set_mat4("model", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
-        m_resources->model("campfire")->draw(m_basic_shader);
     }
 
     void MainController::draw_skybox() const {
@@ -213,6 +199,18 @@ namespace app {
         shininess = m_is_day ? SHININESS_DAY : SHININESS_NIGHT;
         m_shadow->light_position = position;
         m_renderer->water.color = m_is_day ? glm::vec3(0.0f, 0.4f, 0.6f) : glm::vec3(0.0f, 0.1f, 0.3f);
+
+        m_lighting->clear_point_lights();
+        if (!m_is_day) {
+            engine::graphics::PointLightSource fire_light;
+            fire_light.position = glm::vec3(12.0f, 22.0f, 6.5f);
+            fire_light.diffuse  = glm::vec3(1.0f, 0.6f, 0.2f);
+            fire_light.specular = glm::vec3(1.0f, 0.4f, 0.1f);
+            fire_light.constant  = 1.0f;
+            fire_light.linear    = 0.045f;
+            fire_light.quadratic = 0.0075f;
+            m_lighting->add_point_light(fire_light);
+        }
     }
 
     void MainController::draw_test_model() const {
@@ -260,49 +258,23 @@ namespace app {
     }
 
     void MainController::render_depth_scene() const {
-        m_shadow->setup_depth_shader(m_depth_shader);
+        m_renderer->setup_depth_shader();
+        m_renderer->draw_depth("terrain", mat4(1.0f));
+        m_renderer->draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
+        m_renderer->draw_depth("campfire", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
+        m_renderer->draw_depth("viking_tent", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
+        m_renderer->draw_depth("stylized_tent", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
+        m_renderer->draw_depth("grave", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
+        m_renderer->draw_depth_batch("shrooms", SHROOM_POSITIONS);
+        m_renderer->draw_depth_batch("log_seat", LOGS);
 
-        auto draw_depth = [&](const std::string &model_name, const mat4 &model_mat) {
-            m_depth_shader->set_mat4("model", model_mat);
-            m_resources->model(model_name)->draw(m_depth_shader);
-        };
-
-        draw_depth("terrain", mat4(1.0f));
-        draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-        draw_depth("campfire", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
-
-        for (const auto &t : LOGS)
-            draw_depth("log_seat", model_matrix(t));
-
-        draw_depth("viking_tent", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
-        draw_depth("stylized_tent", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
-
-        for (const auto &t : SHROOM_POSITIONS)
-            draw_depth("shrooms", model_matrix(t));
-
-        draw_depth("grave", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
-
-        m_shadow->setup_depth_instanced_shader(m_depth_instanced_shader);
-
-        auto draw_depth_instanced = [&](const std::string &model_name, const auto &transforms) {
-            std::vector<mat4> matrices;
-            matrices.reserve(transforms.size());
-            for (const auto &t : transforms)
-                matrices.push_back(model_matrix(t));
-            m_resources->model(model_name)->draw_instanced(m_depth_instanced_shader, matrices);
-        };
-
-        draw_depth_instanced("yellow_tree", yellow_trees);
-        draw_depth_instanced("green_tree", green_trees);
-        draw_depth_instanced("beech_tree", tall_trees);
-        draw_depth_instanced("pine_tree", pine_trees);
-        draw_depth_instanced("oak_tree", oak_trees);
-        draw_depth_instanced("old_tree", old_trees);
-
-        std::vector<mat4> grass_matrices;
-        grass_matrices.reserve(grass_positions.size());
-        for (const auto &t : grass_positions)
-            grass_matrices.push_back(model_matrix(t));
-        m_resources->model("grass")->draw_instanced(m_depth_instanced_shader, grass_matrices);
+        m_renderer->setup_depth_instanced_shader();
+        m_renderer->draw_depth_batch_instanced("yellow_tree", yellow_trees);
+        m_renderer->draw_depth_batch_instanced("green_tree", green_trees);
+        m_renderer->draw_depth_batch_instanced("beech_tree", tall_trees);
+        m_renderer->draw_depth_batch_instanced("pine_tree", pine_trees);
+        m_renderer->draw_depth_batch_instanced("oak_tree", oak_trees);
+        m_renderer->draw_depth_batch_instanced("old_tree", old_trees);
+        m_renderer->draw_depth_batch_instanced("grass", grass_positions);
     }
 }

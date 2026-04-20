@@ -7,7 +7,9 @@
 
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/LightSource.hpp>
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace engine::resources {
 class Shader;
@@ -55,15 +57,27 @@ public:
 
     Light light;
 
+    void add_point_light(const PointLightSource &point_light);
+    void clear_point_lights();
+
     /**
      * @brief Activates the shader and sets all common uniforms: view, projection, viewPos,
-     * light properties, material shininess, shadow mapping, and fog.
+     * light properties, material shininess, shadow mapping, fog, and point lights.
      */
     void apply_to_shader(const resources::Shader *shader) const;
+
+    /**
+     * @brief Applies lighting to a shader with per-object overrides from a LightSource.
+     * Fields set in the override replace the corresponding global light values.
+     */
+    void apply_to_shader(const resources::Shader *shader, const LightSource &override) const;
 
 private:
     GraphicsController *m_graphics = nullptr;
     Camera* m_camera = nullptr;
+    std::vector<PointLightSource> m_point_lights;
+
+    void apply_point_lights(const resources::Shader *shader) const;
 
     void initialize() override;
 };
