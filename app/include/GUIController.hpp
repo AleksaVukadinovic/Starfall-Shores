@@ -6,6 +6,7 @@
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/platform/TimeController.hpp>
 
 namespace app {
     class GUIController final : public engine::core::Controller {
@@ -25,6 +26,7 @@ namespace app {
         GreyscaleController *m_greyscale = nullptr;
         RainController *m_rain = nullptr;
         MainController* m_main_controller = nullptr;
+        engine::platform::TimeController *m_time = nullptr;
 
         void initialize() override;
         void poll_events() override;
@@ -42,6 +44,7 @@ namespace app {
         void draw_fps_counter();
         void draw_tickrate_slider();
         void draw_fov_slider();
+        void draw_time_controls() const;
 
         float m_fps_accumulator = 0.0f;
         int m_fps_frame_count = 0;

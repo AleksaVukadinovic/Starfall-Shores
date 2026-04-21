@@ -7,6 +7,7 @@
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
 #include <engine/graphics/Renderer.hpp>
+#include <engine/platform/TimeController.hpp>
 #include <imgui.h>
 
 namespace app {
@@ -23,6 +24,7 @@ void GUIController::initialize() {
     m_main_controller = get<MainController>();
     m_fps_camera = get<engine::graphics::FPSCameraController>();
     m_shadow = get<engine::graphics::ShadowController>();
+    m_time = get<engine::platform::TimeController>();
     m_last_update_time = static_cast<float>(engine::platform::PlatformController::get_time());
     m_fov = m_graphics->perspective_params().FOV;
 }
@@ -49,6 +51,7 @@ void GUIController::draw() {
     draw_camera_info();
     draw_fov_slider();
     draw_tickrate_slider();
+    draw_time_controls();
     draw_fps_counter();
     m_graphics->end_gui();
 }
@@ -136,6 +139,19 @@ void GUIController::draw_fps_counter() {
 void GUIController::draw_tickrate_slider() {
     ImGui::Begin("Select tickrate");
     ImGui::SliderFloat("Select tickrate", &m_tickrate, 0.1f, 10.0f);
+    ImGui::End();
+}
+
+void GUIController::draw_time_controls() const {
+    ImGui::Begin("Time");
+    ImGui::Text("In-Game Time: %s", m_time->formatted_time().c_str());
+    ImGui::Text("%s", m_time->is_night() ? "Night" : "Day");
+    bool running = m_time->is_running();
+    if (ImGui::Checkbox("Time Running", &running))
+        m_time->set_running(running);
+    float tickrate = m_time->tickrate();
+    if (ImGui::SliderFloat("Time Speed", &tickrate, 0.0f, 10.0f))
+        m_time->set_tickrate(tickrate);
     ImGui::End();
 }
 
