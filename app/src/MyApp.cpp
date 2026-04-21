@@ -25,6 +25,7 @@ namespace app {
         const auto shadow_controller = register_controller<engine::graphics::ShadowController>();
         const auto lighting_controller = register_controller<engine::graphics::LightingController>();
         const auto renderer = register_controller<engine::graphics::Renderer>();
+        const auto time_controller = register_controller<engine::platform::TimeController>();
         main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         fps_camera->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         shadow_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
@@ -36,6 +37,7 @@ namespace app {
         rain_controller->after(post_processing_controller);
         main_controller->after(post_processing_controller);
         gui_controller->after(main_controller);
+        time_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
     }
 
 }
