@@ -90,6 +90,10 @@
       "water" : {
         "path" : "water/scene.gltf",
         "flip_uvs" : true
+      },
+      "lighthouse" : {
+        "path": "lighthouse/Lighthouse.glb",
+        "flip_uvs" : true
       }
     }
   },

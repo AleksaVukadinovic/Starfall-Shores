@@ -113,6 +113,7 @@ namespace app {
         m_renderer->draw("stylized_tent", "basic", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
         m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
         m_renderer->draw("campfire", "basic", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
+        m_renderer->draw("lighthouse", "basic", model_matrix(vec3(-102.0f, 15.0f, -107.0f), vec3(5.0f), Y_AXIS, 0));
         m_renderer->draw_batch("log_seat", "basic", LOGS);
         m_renderer->draw_batch("bush1", "basic", bush1_positions, DrawMethod::Blended);
         m_renderer->draw_batch("bush2", "basic", bush2_positions, DrawMethod::Blended);

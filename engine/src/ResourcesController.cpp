@@ -62,7 +62,7 @@ void ResourcesController::load_models() {
 
 void ResourcesController::load_textures() {
     if (!exists(m_textures_path)) {
-        spdlog::warn("[ResourcesController]: no {} found to load the textures from", m_textures_path.string());
+        spdlog::warn(std::format("[ResourcesController]: no {} found to load the textures from", m_textures_path.string()));
         return;
     }
     for (const auto &texture_entry: std::filesystem::directory_iterator(m_textures_path)) {
@@ -283,8 +283,7 @@ void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &texture
             textures.emplace_back(texture);
         } else {
             std::filesystem::path texture_path = m_model_path.parent_path() / ai_texture_path_string.C_Str();
-            Texture *texture = m_resources_controller->texture(texture_path.string(), texture_path,
-                                                               assimp_texture_type_to_engine(type));
+            Texture *texture = m_resources_controller->texture(texture_path.string(), texture_path, assimp_texture_type_to_engine(type));
             textures.emplace_back(texture);
         }
     }
