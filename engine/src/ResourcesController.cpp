@@ -72,7 +72,7 @@ void ResourcesController::load_textures() {
 
 void ResourcesController::load_skyboxes() {
     if (!exists(m_skyboxes_path)) {
-        spdlog::error("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string());
+        spdlog::error(std::format("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string()));
         return;
     }
     for (const auto &sky_boxes_entry: std::filesystem::directory_iterator(m_skyboxes_path)) {
@@ -141,7 +141,7 @@ Model *ResourcesController::model(const std::string &name) {
 Texture *ResourcesController::texture(const std::string &name, const std::filesystem::path &path, const TextureType texture_type, const bool flip_uvs) {
     auto &result = m_textures[name];
     if (!result) {
-        spdlog::info("load_texture(path={})", path.string());
+        spdlog::info(std::format("load_texture(path={})", path.string()));
         result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture(path, flip_uvs), texture_type, path,
                                                    path.stem()));
     }
@@ -151,7 +151,7 @@ Texture *ResourcesController::texture(const std::string &name, const std::filesy
 Skybox *ResourcesController::skybox(const std::string &name, const std::filesystem::path &path, const bool flip_uvs) {
     auto &result = m_sky_boxes[name];
     if (!result) {
-        spdlog::info("load_skybox(path={})", path.string());
+        spdlog::info(std::format("load_skybox(path={})", path.string()));
         result = std::make_unique<Skybox>(Skybox(graphics::OpenGL::init_skybox_cube(),
                                                  graphics::OpenGL::load_skybox_textures(path, flip_uvs),
                                                  path, name));
