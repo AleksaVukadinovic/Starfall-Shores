@@ -13,6 +13,9 @@ namespace engine::sound {
 
 class SoundController final : public core::Controller {
 public:
+    SoundController();
+    ~SoundController() override;
+
     [[nodiscard]] std::string_view name() const override {
         return "SoundController";
     }

@@ -16,12 +16,12 @@ class Sound {
     friend class sound::SoundController;
 
 public:
-    void play();
-    void play_looping();
-    void stop();
+    void play() const;
+    void play_looping() const;
+    void stop() const;
 
-    void set_volume(float volume);
-    void set_looping(bool looping);
+    void set_volume(float volume) const;
+    void set_looping(bool looping) const;
 
     [[nodiscard]] bool is_playing() const;
     [[nodiscard]] float volume() const;

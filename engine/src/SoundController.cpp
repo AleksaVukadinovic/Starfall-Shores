@@ -5,6 +5,9 @@
 
 namespace engine::sound {
 
+SoundController::SoundController() = default;
+SoundController::~SoundController() = default;
+
 void SoundController::initialize() {
     m_engine = std::make_unique<ma_engine>();
     const ma_result result = ma_engine_init(nullptr, m_engine.get());
@@ -16,9 +19,9 @@ void SoundController::terminate() {
     m_sounds.clear();
     if (m_engine) {
         ma_engine_uninit(m_engine.get());
-        m_engine.reset();
-        spdlog::info("SoundController: audio engine terminated");
     }
+    m_engine.reset();
+    spdlog::info("SoundController: audio engine terminated");
 }
 
 resources::Sound *SoundController::sound(const std::string &name, const std::filesystem::path &path) {

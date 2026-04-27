@@ -12,6 +12,7 @@
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/ResourcesController.hpp>
+#include <engine/sound/SoundController.hpp>
 #include <engine/util/Transform.hpp>
 
 namespace app {
@@ -37,6 +38,7 @@ namespace app {
         m_camera->rotate_camera(0, 0);
         apply_day_night_lighting();
         m_renderer->set_depth_scene([this] { render_depth_scene(); });
+        m_background_sound = get<engine::sound::SoundController>()->sound("ocean_wind.wav");
     }
 
     bool MainController::loop() {
@@ -147,6 +149,7 @@ namespace app {
         m_bloom->underwater = m_camera->Position.y < 7.0f;
         update_day_night_transition();
         update_toggles();
+        update_sound();
     }
 
     void MainController::update_day_night_transition() {
@@ -178,7 +181,7 @@ namespace app {
         }
     }
 
-    void MainController::update_toggles() const {
+    void MainController::update_toggles() {
         using namespace engine::platform;
         const auto platform = get<PlatformController>();
         if (platform->key(KEY_F).state() == Key::State::JustPressed)
@@ -187,6 +190,22 @@ namespace app {
             m_renderer->wind.enabled = !m_renderer->wind.enabled;
         if (platform->key(KEY_R).state() == Key::State::JustPressed)
             get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
+        if (platform->key(KEY_M).state() == Key::State::JustPressed)
+            m_sound_enabled = !m_sound_enabled;
+    }
+
+    void MainController::update_sound() const {
+        if (!m_background_sound) return;
+        if (m_sound_enabled) {
+            m_background_sound->set_volume(m_sound_volume / 100.0f);
+            if (!m_background_sound->is_playing()) {
+                m_background_sound->play_looping();
+            }
+        } else {
+            if (m_background_sound->is_playing()) {
+                m_background_sound->stop();
+            }
+        }
     }
 
     void MainController::apply_day_night_lighting() const {

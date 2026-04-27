@@ -44,40 +44,35 @@ Sound &Sound::operator=(Sound &&other) noexcept {
     return *this;
 }
 
-void Sound::play() {
-    RG_GUARANTEE(m_sound, "Sound not initialized: {}", m_name);
+void Sound::play() const {
     ma_sound_seek_to_pcm_frame(m_sound, 0);
     ma_sound_start(m_sound);
 }
 
-void Sound::play_looping() {
-    RG_GUARANTEE(m_sound, "Sound not initialized: {}", m_name);
+void Sound::play_looping() const {
     ma_sound_set_looping(m_sound, MA_TRUE);
     ma_sound_seek_to_pcm_frame(m_sound, 0);
     ma_sound_start(m_sound);
 }
 
-void Sound::stop() {
-    RG_GUARANTEE(m_sound, "Sound not initialized: {}", m_name);
+void Sound::stop() const {
     ma_sound_stop(m_sound);
 }
 
-void Sound::set_volume(const float volume) {
-    RG_GUARANTEE(m_sound, "Sound not initialized: {}", m_name);
+void Sound::set_volume(const float volume) const {
     ma_sound_set_volume(m_sound, volume);
 }
 
-void Sound::set_looping(const bool looping) {
-    RG_GUARANTEE(m_sound, "Sound not initialized: {}", m_name);
+void Sound::set_looping(const bool looping) const {
     ma_sound_set_looping(m_sound, looping ? MA_TRUE : MA_FALSE);
 }
 
 bool Sound::is_playing() const {
-    return m_sound ? ma_sound_is_playing(m_sound) : false;
+    return ma_sound_is_playing(m_sound);
 }
 
 float Sound::volume() const {
-    return m_sound ? ma_sound_get_volume(m_sound) : 0.0f;
+    return ma_sound_get_volume(m_sound);
 }
 
 } // namespace engine::resources
