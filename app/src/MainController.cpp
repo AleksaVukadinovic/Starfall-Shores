@@ -42,8 +42,7 @@ namespace app {
     }
 
     bool MainController::loop() {
-        if (const auto platform = get<engine::platform::PlatformController>(); platform->key(
-                engine::platform::KeyId::KEY_ESCAPE).is_down() && !get<GUIController>()->is_enabled())
+        if (get<GUIController>()->m_wants_quit)
             return false;
         return true;
     }

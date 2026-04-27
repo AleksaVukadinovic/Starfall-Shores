@@ -1,19 +1,36 @@
 #pragma once
 #include <MainController.hpp>
-#include "engine/graphics/GraphicsController.hpp"
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/FPSCameraController.hpp>
 #include <engine/graphics/FogController.hpp>
+#include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/RainController.hpp>
 #include <engine/platform/TimeController.hpp>
 
 namespace app {
+
+    enum class MenuPage {
+        Main,
+        Settings,
+    };
+
+    enum class SettingsCategory {
+        Graphics,
+        Environment,
+        Sound,
+        Time,
+        Debug,
+    };
+
     class GUIController final : public engine::core::Controller {
     public:
         [[nodiscard]] std::string_view name() const override {
             return "app::GUIController";
         }
+
+        bool m_wants_quit = false;
+        bool m_menu_open = false;
 
     private:
         engine::graphics::GraphicsController *m_graphics = nullptr;
@@ -25,36 +42,33 @@ namespace app {
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;
         RainController *m_rain = nullptr;
-        MainController* m_main_controller = nullptr;
+        MainController *m_main_controller = nullptr;
         engine::platform::TimeController *m_time = nullptr;
+
+        MenuPage m_page = MenuPage::Main;
+        SettingsCategory m_settings_category = SettingsCategory::Graphics;
 
         void initialize() override;
         void poll_events() override;
         void draw() override;
 
-        void draw_bloom_controls() const;
-        void draw_fog_controls() const;
-        void draw_greyscale_controls() const;
-        void draw_rain_controls() const;
-        void draw_wind_controls() const;
-        void draw_shadow_controls() const;
-        void draw_skybox_controls() const;
-        void draw_test_controls() const;
-        void draw_camera_info() const;
-        void draw_fps_counter();
-        void draw_tickrate_slider();
-        void draw_fov_slider();
-        void draw_time_controls() const;
-        void draw_sound_controls() const;
+        static void push_style();
+        static void pop_style();
+
+        void draw_main_menu();
+        void draw_settings();
+        void draw_settings_sidebar();
+        void draw_settings_content();
+
+        void draw_graphics_settings() const;
+        void draw_environment_settings() const;
+        void draw_sound_settings() const;
+        void draw_time_settings() const;
+        void draw_debug_settings() const;
 
         float m_fps_accumulator = 0.0f;
         int m_fps_frame_count = 0;
-        float m_last_update_time = 0.0f;
         float m_last_recorded_fps = 0.0f;
-
-        float m_tickrate = 1.0f;
         float m_fov = 0.0f;
-
-        float m_sound_volume = 0.0f;
     };
 }
