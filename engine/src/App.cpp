@@ -7,6 +7,7 @@
 #include <engine/util/ArgParser.hpp>
 #include <engine/util/Configuration.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <engine/sound/SoundController.hpp>
 #include <engine/util/Utils.hpp>
 #include <ranges>
 
@@ -38,11 +39,13 @@ void App::engine_setup(const int argc, char **argv) {
     const auto platform = register_controller<platform::PlatformController>();
     const auto graphics = register_controller<graphics::GraphicsController>();
     const auto resources = register_controller<resources::ResourcesController>();
+    const auto sound = register_controller<sound::SoundController>();
     const auto end = register_controller<EngineControllersEnd>();
     begin->before(platform);
     platform->before(graphics);
     graphics->before(resources);
-    resources->before(end);
+    resources->before(sound);
+    sound->before(end);
 }
 
 void App::initialize() {

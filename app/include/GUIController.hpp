@@ -45,6 +45,7 @@ namespace app {
         void draw_tickrate_slider();
         void draw_fov_slider();
         void draw_time_controls() const;
+        void draw_sound_controls() const;
 
         float m_fps_accumulator = 0.0f;
         int m_fps_frame_count = 0;
@@ -53,5 +54,7 @@ namespace app {
 
         float m_tickrate = 1.0f;
         float m_fov = 0.0f;
+
+        float m_sound_volume = 0.0f;
     };
 }

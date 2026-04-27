@@ -13,6 +13,7 @@
 
 namespace engine::resources {
     class ResourcesController;
+    class Sound;
 }
 
 namespace app {
@@ -43,6 +44,8 @@ namespace app {
         glm::vec3 test_rotation{0.0f, 0.0f, 0.0f};
         float test_scale = 1.0f;
         std::vector<PlacedModel> placed_models;
+        bool m_sound_enabled = false;
+        float m_sound_volume = 80.0f;
 
         void place_test_model();
         void clear_placed_models();
@@ -59,8 +62,9 @@ namespace app {
 
         void update() override;
         void terminate() override;
+        void update_sound() const;
         void update_day_night_transition();
-        void update_toggles() const;
+        void update_toggles();
 
         engine::resources::ResourcesController *m_resources = nullptr;
         engine::graphics::GraphicsController *m_graphics    = nullptr;
@@ -70,6 +74,7 @@ namespace app {
         engine::graphics::Renderer *m_renderer              = nullptr;
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
+        engine::resources::Sound *m_background_sound               = nullptr;
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;

@@ -52,6 +52,7 @@ void GUIController::draw() {
     draw_fov_slider();
     draw_tickrate_slider();
     draw_time_controls();
+    draw_sound_controls();
     draw_fps_counter();
     m_graphics->end_gui();
 }
@@ -221,5 +222,13 @@ void GUIController::draw_test_controls() const {
     ImGui::Text("Placed models: %zu", m_main_controller->placed_models.size());
     ImGui::End();
 }
+
+void GUIController::draw_sound_controls() const {
+    ImGui::Begin("Sound Controls");
+    ImGui::Checkbox("Enable Sound", &m_main_controller->m_sound_enabled);
+    ImGui::SliderFloat("General Volume", &m_main_controller->m_sound_volume, 0.0f, 150.0f);
+    ImGui::End();
+}
+
 
 }// namespace app
