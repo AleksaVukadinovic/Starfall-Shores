@@ -68,6 +68,9 @@ public:
     */
     Shader *shader(const std::string &name, const std::filesystem::path &path = "");
 
+    /**
+     * @brief Helper function that loads embedded textures for .glb format
+     */
     Texture *texture_from_memory(const std::string &name, const uint8_t *data, int32_t length,
                                  TextureType texture_type = TextureType::Regular, bool flip_uvs = false);
 

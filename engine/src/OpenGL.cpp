@@ -68,8 +68,7 @@ uint32_t OpenGL::generate_texture_from_memory(const uint8_t *data, const int32_t
         CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     } else {
-        throw util::EngineError(util::EngineError::Type::AssetLoadingError,
-                                "Failed to load embedded texture from memory");
+        throw util::EngineError(util::EngineError::Type::AssetLoadingError, "Failed to load embedded texture from memory");
     }
     return texture_id;
 }
@@ -108,8 +107,7 @@ bool OpenGL::shader_compiled_successfully(const uint32_t shader_id) {
     return success;
 }
 
-uint32_t OpenGL::compile_shader(const std::string &shader_source,
-                                const resources::ShaderType shader_type) {
+uint32_t OpenGL::compile_shader(const std::string &shader_source, const resources::ShaderType shader_type) {
     const uint32_t shader_id = CHECKED_GL_CALL(glCreateShader, shader_type_to_opengl_type(shader_type));
     const char *shader_source_cstr = shader_source.c_str();
     CHECKED_GL_CALL(glShaderSource, shader_id, 1, &shader_source_cstr, nullptr);
@@ -149,10 +147,9 @@ std::string_view gl_call_error_description(GLenum error) {
 }
 
 void OpenGL::assert_no_error(const std::source_location location) {
-    if (auto error = glGetError(); error != GL_NO_ERROR) {
+    if (const auto error = glGetError(); error != GL_NO_ERROR) {
         throw util::EngineError(util::EngineError::Type::OpenGLError,
-                                std::format("OpenGL call error: '{}'", gl_call_error_description(error)),
-                                location);
+                                std::format("OpenGL call error: '{}'", gl_call_error_description(error)), location);
     };
 }
 
@@ -174,13 +171,9 @@ uint32_t OpenGL::load_skybox_textures(const std::filesystem::path &path, const b
             stbi_image_free(data);
         };
         if (data) {
-            uint32_t i = face_index(file.path()
-                                        .stem()
-                                        .c_str());
+            const uint32_t i = face_index(file.path().stem().c_str());
             int32_t format = texture_format(nr_channels);
-            CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format,
-                            GL_UNSIGNED_BYTE,
-                            data);
+            CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         } else {
             throw util::EngineError(util::EngineError::Type::AssetLoadingError,
                                     std::format("Failed to load skybox texture {}", path.string()));
@@ -251,21 +244,14 @@ void OpenGL::destroy_shadow_map(const ShadowMap &shadow_map) {
 }
 
 uint32_t face_index(std::string_view name) {
-    if (name == "right") {
-        return 0;
-    } else if (name == "left") {
-        return 1;
-    } else if (name == "top") {
-        return 2;
-    } else if (name == "bottom") {
-        return 3;
-    } else if (name == "front") {
-        return 4;
-    } else if (name == "back") {
-        return 5;
-    }
+    if (name == "right")  return 0;
+    if (name == "left")   return 1;
+    if (name == "top")    return 2;
+    if (name == "bottom") return 3;
+    if (name == "front")  return 4;
+    if (name == "back")   return 5;
     RG_SHOULD_NOT_REACH_HERE(
-        "Unknown face name: {}. The cubemap textures should be named: right, left, top, bottom, front, back; by their respective faces in the cubemap. The extension of the image file is ignored.", name);
+            "Unknown face name: {}. The cubemap textures should be named: right, left, top, bottom, front, back; by their respective faces in the cubemap. The extension of the image file is ignored.", name);
 }
 
 int32_t stbi_number_of_channels_to_gl_format(int32_t number_of_channels) {

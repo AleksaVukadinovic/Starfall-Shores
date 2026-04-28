@@ -195,7 +195,7 @@ bool has_cycle(It first, It last, Adjacent adjacent, OutputIt cycle_output = nul
         if (!visited.contains(*root) && visit(visit, *root)) {
             if constexpr (!std::is_same_v<OutputIt, std::nullptr_t>) {
                 std::move(path.begin(), path.end(), cycle_output);
-            };
+            }
             return true;
         }
     }

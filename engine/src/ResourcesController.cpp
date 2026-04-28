@@ -162,7 +162,7 @@ Skybox *ResourcesController::skybox(const std::string &name, const std::filesyst
 Shader *ResourcesController::shader(const std::string &name, const std::filesystem::path &path) {
     auto &result = m_shaders[name];
     if (!result) {
-        spdlog::info("load_shader(path={})", path.string());
+        spdlog::info(std::format("load_shader(path={})", path.string()));
         result = std::make_unique<Shader>(ShaderCompiler::compile_from_file(name, path));
     }
     return result.get();

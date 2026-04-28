@@ -41,7 +41,7 @@ void Camera::move_camera(const Movement direction, const float delta_time) {
 }
 
 // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-void Camera::rotate_camera(float x_offset, float y_offset, bool constrain_pitch) {
+void Camera::rotate_camera(float x_offset, float y_offset, const bool constrain_pitch) {
     x_offset *= MouseSensitivity;
     y_offset *= MouseSensitivity;
 

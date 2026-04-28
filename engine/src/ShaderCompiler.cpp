@@ -11,7 +11,7 @@ using namespace graphics;
 int to_opengl_type(ShaderType type);
 
 Shader ShaderCompiler::compile_from_source(std::string shader_name, std::string shader_source) {
-    spdlog::info("ShaderCompiler::Compiling: {}", shader_name);
+    spdlog::info(std::format("ShaderCompiler::Compiling: {}", shader_name));
     ShaderCompiler compiler(std::move(shader_name), std::move(shader_source));
     ShaderParsingResult parsing_result = compiler.parse_source();
     OpenGL::ShaderProgramId shader_program = compiler.compile(parsing_result);
