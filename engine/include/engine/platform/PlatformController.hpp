@@ -112,6 +112,14 @@ namespace engine::platform {
             m_target_fps = fps;
         }
 
+        void set_fullscreen(bool fullscreen);
+
+        [[nodiscard]] bool is_fullscreen() const {
+            return m_fullscreen;
+        }
+
+        void set_window_size(int width, int height) const;
+
         /**
         * @brief Swaps the current draw buffer for the main window. Should be called at the end of the frame.
         */
@@ -172,6 +180,11 @@ namespace engine::platform {
         * @brief Tracks whether the cursor is currently enabled/visible
         */
         bool m_cursor_enabled = true;
+        bool m_fullscreen = false;
+        int m_windowed_x = 0;
+        int m_windowed_y = 0;
+        int m_windowed_width = 0;
+        int m_windowed_height = 0;
         float m_target_fps = 0.0f;
     };
 } // namespace engine

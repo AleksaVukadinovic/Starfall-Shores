@@ -30,12 +30,30 @@ namespace engine::graphics {
 
     void PostProcessingController::update_screen_size() {
         const auto platform = get<platform::PlatformController>();
-        m_scr_width = platform->window()->width();
-        m_scr_height = platform->window()->height();
-        if (m_scr_width == 0)
-            m_scr_width = 1400;
-        if (m_scr_height == 0)
-            m_scr_height = 1000;
+        unsigned int w = platform->window()->width();
+        unsigned int h = platform->window()->height();
+        if (w == 0)
+            w = 1400;
+        if (h == 0)
+            h = 1000;
+        if (w != m_scr_width || h != m_scr_height) {
+            m_scr_width = w;
+            m_scr_height = h;
+            resize_framebuffers();
+        }
+    }
+
+    void PostProcessingController::resize_framebuffers() {
+        for (uint8_t i = 0; i < 2; ++i) {
+            CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[i]);
+            CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, m_scr_width, m_scr_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+        }
+        CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, m_rbo_depth);
+        CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_scr_width, m_scr_height);
+        for (uint8_t i = 0; i < 2; ++i) {
+            CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_pingpong_colorbuffers[i]);
+            CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, m_scr_width, m_scr_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+        }
     }
 
     void PostProcessingController::initialize() {
@@ -43,7 +61,11 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_color_buffers);
 
-        update_screen_size();
+        const auto platform = get<platform::PlatformController>();
+        m_scr_width = platform->window()->width();
+        m_scr_height = platform->window()->height();
+        if (m_scr_width == 0) m_scr_width = 1400;
+        if (m_scr_height == 0) m_scr_height = 1000;
         for (uint8_t i = 0; i < 2; ++i) {
             CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[i]);
             CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, m_scr_width, m_scr_height, 0, GL_RGBA, GL_FLOAT, nullptr);
@@ -59,6 +81,7 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, rbo_depth);
         CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_scr_width, m_scr_height);
         CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
+        m_rbo_depth = rbo_depth;
 
         unsigned int attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
         CHECKED_GL_CALL(glDrawBuffers, 2, attachments);
@@ -164,6 +187,11 @@ namespace engine::graphics {
 
         CHECKED_GL_CALL(glDeleteTextures, 2, m_color_buffers);
         CHECKED_GL_CALL(glDeleteTextures, 2, m_pingpong_colorbuffers);
+
+        if (m_rbo_depth != 0) {
+            CHECKED_GL_CALL(glDeleteRenderbuffers, 1, &m_rbo_depth);
+            m_rbo_depth = 0;
+        }
 
         if (m_quad_vao != 0) {
             CHECKED_GL_CALL(glDeleteVertexArrays, 1, &m_quad_vao);

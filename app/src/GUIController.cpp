@@ -81,6 +81,19 @@ void GUIController::initialize() {
     m_shadow = get<engine::graphics::ShadowController>();
     m_time = get<engine::platform::TimeController>();
     m_fov = m_graphics->perspective_params().FOV;
+
+    const int w = m_platform->window()->width();
+    const int h = m_platform->window()->height();
+    static constexpr int res_w[] = {1280, 1400, 1600, 1920, 2560, 3840};
+    static constexpr int res_h[] = {720,  1000, 900,  1080, 1440, 2160};
+    m_resolution_index = 1;
+    for (int i = 0; i < 6; ++i) {
+        if (res_w[i] == w && res_h[i] == h) {
+            m_resolution_index = i;
+            break;
+        }
+    }
+    m_fullscreen = m_platform->is_fullscreen();
 }
 
 void GUIController::poll_events() {
@@ -269,7 +282,27 @@ static void section_header(const char *label) {
     ImGui::Dummy({0, 4});
 }
 
-void GUIController::draw_graphics_settings() const {
+void GUIController::draw_graphics_settings() {
+    section_header("Display");
+
+    static const char *resolution_labels[] = {"1280 x 720", "1400 x 1000", "1600 x 900", "1920 x 1080", "2560 x 1440", "3840 x 2160"};
+    static constexpr int resolution_widths[]  = {1280, 1400, 1600, 1920, 2560, 3840};
+    static constexpr int resolution_heights[] = {720,  1000, 900,  1080, 1440, 2160};
+    static constexpr int resolution_count = 6;
+
+    bool fs = m_platform->is_fullscreen();
+    if (ImGui::Checkbox("Fullscreen", &fs)) {
+        m_fullscreen = fs;
+        m_platform->set_fullscreen(fs);
+    }
+
+    if (!fs) {
+        if (ImGui::Combo("Resolution", &m_resolution_index, resolution_labels, resolution_count)) {
+            m_platform->set_window_size(resolution_widths[m_resolution_index], resolution_heights[m_resolution_index]);
+        }
+    }
+
+    ImGui::Dummy({0, 8});
     section_header("Bloom");
     ImGui::SliderFloat("Bloom Intensity", &m_bloom->bloom_strength, 0.0f, 50.0f);
     ImGui::SliderFloat("Exposure",        &m_bloom->exposure, 0.1f, 20.0f);

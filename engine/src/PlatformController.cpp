@@ -267,6 +267,25 @@ namespace engine::platform {
         glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, enabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     }
 
+    void PlatformController::set_fullscreen(const bool fullscreen) {
+        GLFWwindow *handle = m_window.handle_();
+        if (fullscreen && !m_fullscreen) {
+            glfwGetWindowPos(handle, &m_windowed_x, &m_windowed_y);
+            glfwGetWindowSize(handle, &m_windowed_width, &m_windowed_height);
+            GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+            glfwSetWindowMonitor(handle, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        } else if (!fullscreen && m_fullscreen) {
+            glfwSetWindowMonitor(handle, nullptr, m_windowed_x, m_windowed_y, m_windowed_width, m_windowed_height, 0);
+        }
+        m_fullscreen = fullscreen;
+    }
+
+    void PlatformController::set_window_size(const int width, const int height) const {
+        if (m_fullscreen) return;
+        glfwSetWindowSize(m_window.handle_(), width, height);
+    }
+
     bool PlatformController::is_cursor_enabled() const {
         return m_cursor_enabled;
     }

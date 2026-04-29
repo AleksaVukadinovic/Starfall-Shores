@@ -29,12 +29,14 @@ namespace engine::graphics {
         unsigned int m_pingpong_colorbuffers[2] = {};
         unsigned int m_hdr_fbo                  = 0;
         unsigned int m_color_buffers[2]         = {};
+        unsigned int m_rbo_depth                = 0;
         unsigned int m_scr_width                  = 0;
         unsigned int m_scr_height                 = 0;
         unsigned int m_quad_vao                  = 0;
         unsigned int m_quad_vbo                  = 0;
 
         void update_screen_size();
+        void resize_framebuffers();
         void render_bloom();
         void render_quad();
     };

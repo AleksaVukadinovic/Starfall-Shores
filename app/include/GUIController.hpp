@@ -60,7 +60,7 @@ namespace app {
         void draw_settings_sidebar();
         void draw_settings_content();
 
-        void draw_graphics_settings() const;
+        void draw_graphics_settings();
         void draw_environment_settings() const;
         void draw_sound_settings() const;
         void draw_time_settings() const;
@@ -70,5 +70,7 @@ namespace app {
         int m_fps_frame_count = 0;
         float m_last_recorded_fps = 0.0f;
         float m_fov = 0.0f;
+        int m_resolution_index = 0;
+        bool m_fullscreen = false;
     };
 }
