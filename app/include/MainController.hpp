@@ -1,4 +1,5 @@
 #pragma once
+#include <engine/platform/TimeController.hpp>
 #include <array>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
@@ -36,7 +37,7 @@ namespace app {
             "terrain", "campfire", "log_seat", "viking_tent", "stylized_tent",
             "yellow_tree", "green_tree", "beech_tree", "pine_tree", "oak_tree", "old_tree",
             "bush1", "bush2", "laurel_bush", "flowers2", "red_flowers",
-            "path", "shrooms", "grave", "fire", "water", "grass", "grass"
+            "path", "shrooms", "grave", "fire", "water", "grass", "grass", "crow", "seagull"
         };
 
         int selected_model_index = 0;
@@ -72,6 +73,7 @@ namespace app {
         engine::graphics::ShadowController *m_shadow        = nullptr;
         engine::graphics::LightingController *m_lighting    = nullptr;
         engine::graphics::Renderer *m_renderer              = nullptr;
+        engine::platform::TimeController *m_time = nullptr;
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
         engine::resources::Sound *m_background_sound               = nullptr;

@@ -32,6 +32,7 @@ namespace app {
         m_renderer          = get<engine::graphics::Renderer>();
         m_graphics->perspective_params().Far = m_fog->far_plane();
         m_resources         = get<engine::resources::ResourcesController>();
+        m_time = get<engine::platform::TimeController>();
         m_camera            = m_graphics->camera();
         m_is_day           = true;
         m_camera->Position = vec3(5, 27, 17);
@@ -153,7 +154,10 @@ namespace app {
 
     void MainController::update_day_night_transition() {
         using namespace engine::platform;
-        if (const auto platform = get<PlatformController>(); platform->key(KEY_N).state() == Key::State::JustPressed) {
+
+        if (const auto platform = get<PlatformController>(); platform->key(KEY_N).state() == Key::State::JustPressed ||
+            (m_time->hours() >= 23 && m_is_day && !m_day_change_requested) ||
+            (m_time->hours() >= 7 && !m_is_day && !m_day_change_requested)) {
             if (!m_day_change_requested) {
                 m_day_change_requested = true;
                 m_day_change_timer = PlatformController::get_time();

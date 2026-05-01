@@ -37,7 +37,7 @@ private:
     void update() override;
 
     float m_in_game_hours = 12.0f;
-    float m_tickrate = 1.0f;
+    float m_tickrate = 0.2f;
     bool m_running = true;
 
     std::string m_day_skybox_name = "skybox_day";
