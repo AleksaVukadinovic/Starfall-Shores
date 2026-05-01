@@ -94,6 +94,12 @@
       "lighthouse" : {
         "path": "lighthouse/Lighthouse.glb",
         "flip_uvs" : true
+      },
+      "crow": {
+        "path": "crow/crow.glb"
+      },
+      "seagull": {
+        "path": "seagull/seagull.glb"
       }
     }
   },
