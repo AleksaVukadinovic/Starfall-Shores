@@ -4,10 +4,6 @@
 
 #include <engine/core/Controller.hpp>
 
-namespace engine::resources {
-    class Shader;
-}
-
 class FogController : public engine::core::Controller {
 public:
     static constexpr float FAR_PLANE_CLEAR = 250.0f;
@@ -21,7 +17,6 @@ public:
     float fog_end       = FAR_PLANE_FOG;
     glm::vec3 fog_color = FOG_COLOR_DAY;
 
-    void apply_to_shader(const engine::resources::Shader *shader) const;
     void transition(float progress, bool currently_day);
     void set_day(bool is_day);
     [[nodiscard]] float far_plane() const;

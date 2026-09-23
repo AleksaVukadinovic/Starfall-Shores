@@ -6,6 +6,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/Renderer.hpp>
 #include <engine/platform/TimeController.hpp>
 
 namespace app {
@@ -44,6 +45,7 @@ namespace app {
         RainController *m_rain = nullptr;
         MainController *m_main_controller = nullptr;
         engine::platform::TimeController *m_time = nullptr;
+        engine::graphics::Renderer *m_renderer = nullptr;
 
         MenuPage m_page = MenuPage::Main;
         SettingsCategory m_settings_category = SettingsCategory::Graphics;

@@ -13,16 +13,29 @@
 #include <vector>
 
 namespace engine::resources {
+    class Model;
     class ResourcesController;
+    class Shader;
     class Sound;
 }
 
 namespace app {
     struct PlacedModel {
         std::string model_name;
+        const engine::resources::Model *model;
         glm::vec3 translation;
         glm::vec3 rotation;
         float scale;
+    };
+
+    /**
+     * @brief A model drawn by the scene: its placements, how to draw them, and whether they cast shadows.
+     */
+    struct SceneObject {
+        const engine::graphics::DrawBatch *batch = nullptr;
+        const engine::resources::Shader *shader  = nullptr;
+        engine::graphics::Effect effect          = engine::graphics::Effect::None;
+        bool casts_shadow                        = false;
     };
 
     class MainController final : public engine::core::Controller {
@@ -36,10 +49,14 @@ namespace app {
         static constexpr std::array TEST_MODEL_NAMES = {
             "terrain", "campfire", "log_seat", "viking_tent", "stylized_tent",
             "yellow_tree", "green_tree", "beech_tree", "pine_tree", "oak_tree", "old_tree",
-            "bush1", "bush2", "laurel_bush", "flowers2", "red_flowers",
-            "path", "shrooms", "grave", "fire", "water", "grass", "grass", "crow", "seagull"
+            "bush1", "bush2", "laurel_bush", "white_flowers", "red_flowers",
+            "path", "shrooms", "grave", "fire", "water", "grass", "lighthouse", "crow", "seagull"
         };
 
+        /**
+         * @brief Set by the GUI while the model placement tool is open; the model being placed is only drawn then.
+         */
+        bool model_placement_active = false;
         int selected_model_index = 0;
         glm::vec3 test_translation{0.0f, 0.0f, 0.0f};
         glm::vec3 test_rotation{0.0f, 0.0f, 0.0f};
@@ -56,8 +73,9 @@ namespace app {
         bool loop() override;
         void draw() override;
 
+        void create_scene();
         void draw_skybox() const;
-        void draw_test_model() const;
+        void draw_placed_models() const;
 
         void render_depth_scene() const;
 
@@ -77,6 +95,10 @@ namespace app {
         FogController *m_fog                                = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
         engine::resources::Sound *m_background_sound               = nullptr;
+        const engine::resources::Shader *m_placement_shader = nullptr;
+
+        std::vector<SceneObject> m_scene_objects;
+        SceneObject m_fire;
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;

@@ -1,27 +1,42 @@
 #include<glad/glad.h>
 #include <engine/graphics/OpenGL.hpp>
-#include <engine/util/Utils.hpp>
+#include <engine/graphics/ShaderInterface.hpp>
+#include <engine/util/Errors.hpp>
 #include <engine/resources/Mesh.hpp>
 #include <engine/resources/Shader.hpp>
-#include <unordered_map>
 
 namespace engine::resources {
 
     Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
-               std::vector<Texture *> textures) {
-        // NOLINTBEGIN
+               const std::vector<Texture *> &textures) {
         static_assert(std::is_trivial_v<Vertex>);
-        uint32_t VAO, VBO, EBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
+        glGenVertexArrays(1, &m_vao);
+        glGenBuffers(1, &m_vbo);
+        glGenBuffers(1, &m_ebo);
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindVertexArray(m_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), GL_STATIC_DRAW);
+        attach_vertex_buffers();
+        glBindVertexArray(0);
+
+        m_index_count = indices.size();
+        for (const Texture *texture: textures) {
+            const uint32_t unit = graphics::texture_unit(texture->type());
+            RG_GUARANTEE(unit < TEXTURE_UNIT_COUNT, "Texture unit {} is out of the range reserved for mesh textures.", unit);
+            if (m_texture_ids[unit] == 0) {
+                m_texture_ids[unit] = texture->id();
+            }
+            m_has_normal_map |= texture->type() == TextureType::Normal;
+        }
+    }
+
+    void Mesh::attach_vertex_buffers() const {
+        // NOLINTBEGIN
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, Position));
@@ -37,62 +52,35 @@ namespace engine::resources {
 
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, Bitangent));
-
-        glBindVertexArray(0);
         // NOLINTEND
-        m_vao         = VAO;
-        m_num_indices = indices.size();
-        m_textures    = std::move(textures);
+    }
+
+    void Mesh::bind_textures(const Shader *shader) const {
+        for (uint32_t unit = 0; unit < TEXTURE_UNIT_COUNT; ++unit) {
+            if (m_texture_ids[unit] != 0) {
+                glActiveTexture(GL_TEXTURE0 + unit);
+                glBindTexture(GL_TEXTURE_2D, m_texture_ids[unit]);
+            }
+        }
+        shader->set_bool("hasNormalMap", m_has_normal_map);
     }
 
     void Mesh::draw(const Shader *shader) const {
-        std::unordered_map<std::string_view, uint32_t> counts;
-        std::string uniform_name;
-        uniform_name.reserve(32);
-        bool has_normal_map = false;
-        for (int i = 0; i < m_textures.size(); i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            const auto &texture_type = Texture::uniform_name_convention(m_textures[i]->type());
-            if (m_textures[i]->type() == TextureType::Normal)
-                has_normal_map = true;
-            uniform_name.append(texture_type);
-            const auto count = (counts[texture_type] += 1);
-            uniform_name.append(std::to_string(count));
-            shader->set_int(uniform_name, i);
-            glBindTexture(GL_TEXTURE_2D, m_textures[i]->id());
-            uniform_name.clear();
-        }
-        shader->set_bool("hasNormalMap", has_normal_map);
+        bind_textures(shader);
         glBindVertexArray(m_vao);
-        glDrawElements(GL_TRIANGLES, m_num_indices, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, nullptr);
     }
 
-    void Mesh::draw_instanced(const Shader *shader, const unsigned int number_of_instances) const {
-        std::unordered_map<std::string_view, uint32_t> counts;
-        std::string uniform_name;
-        uniform_name.reserve(32);
-        bool has_normal_map = false;
-        for (int i = 0; i < m_textures.size(); i++) {
-            CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0 + i);
-            const auto &texture_type = Texture::uniform_name_convention(m_textures[i]->type());
-            if (m_textures[i]->type() == TextureType::Normal)
-                has_normal_map = true;
-            uniform_name.append(texture_type);
-            const auto count = (counts[texture_type] += 1);
-            uniform_name.append(std::to_string(count));
-            shader->set_int(uniform_name, i);
-            CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_textures[i]->id());
-            uniform_name.clear();
-        }
-        shader->set_bool("hasNormalMap", has_normal_map);
-        CHECKED_GL_CALL(glBindVertexArray, m_vao);
-        CHECKED_GL_CALL(glDrawElementsInstanced, GL_TRIANGLES, m_num_indices, GL_UNSIGNED_INT, nullptr, number_of_instances);
-        CHECKED_GL_CALL(glBindVertexArray, 0);
+    void Mesh::draw_instanced(const Shader *shader, const uint32_t instanced_vao, const uint32_t instance_count) const {
+        bind_textures(shader);
+        CHECKED_GL_CALL(glBindVertexArray, instanced_vao);
+        CHECKED_GL_CALL(glDrawElementsInstanced, GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, nullptr, instance_count);
     }
 
     void Mesh::destroy() const {
         glDeleteVertexArrays(1, &m_vao);
+        glDeleteBuffers(1, &m_vbo);
+        glDeleteBuffers(1, &m_ebo);
     }
 
 }

@@ -5,6 +5,7 @@
 
 #pragma once
 #include <engine/graphics/Camera.hpp>
+#include <engine/graphics/GpuProfiler.hpp>
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformEventObserver.hpp>
 
@@ -89,6 +90,13 @@ public:
     }
 
     /**
+     * @brief Frame profiler. Engine passes open their own sections; open custom sections with @ref GpuProfiler::begin_section.
+     */
+    GpuProfiler &profiler() {
+        return m_profiler;
+    }
+
+    /**
     * @brief Compute the projection matrix.
     * @returns Return perspective projection by default.
     */
@@ -168,6 +176,7 @@ private:
 
     glm::mat4 m_projection_matrix{};
     Camera m_camera{};
+    GpuProfiler m_profiler;
     ImGuiContext *m_imgui_context{};
 };
 

@@ -40,6 +40,9 @@ void ResourcesController::load_shaders() {
         return;
     }
     for (const auto &shader_path: std::filesystem::directory_iterator(m_shaders_path)) {
+        if (!shader_path.is_regular_file() || shader_path.path().extension() != ".glsl") {
+            continue; // e.g. the include/ directory with shared shader code
+        }
         const auto name = shader_path.path().stem().string();
         shader(name, shader_path);
     }
@@ -92,6 +95,10 @@ public:
      */
     std::vector<Mesh> process_meshes();
 
+    [[nodiscard]] const util::AABB &bounds() const {
+        return m_bounds;
+    }
+
     explicit AssimpSceneProcessor(ResourcesController *resources_controller, const aiScene *scene, std::filesystem::path model_path) :
             m_scene(scene), m_model_path(std::move(model_path)), m_resources_controller(resources_controller) {
     }
@@ -104,6 +111,7 @@ private:
     static TextureType assimp_texture_type_to_engine(aiTextureType type);
 
     std::vector<Mesh> m_meshes;
+    util::AABB m_bounds;
     const aiScene *m_scene;
     std::filesystem::path m_model_path;
     ResourcesController *m_resources_controller;
@@ -133,7 +141,7 @@ Model *ResourcesController::model(const std::string &name) {
         }
         AssimpSceneProcessor scene_processor(this, scene, model_path);
         std::vector<Mesh> meshes = scene_processor.process_meshes();
-        result = std::make_unique<Model>(Model(std::move(meshes), model_path, name));
+        result = std::make_unique<Model>(Model(std::move(meshes), model_path, name, scene_processor.bounds()));
     }
     return result.get();
 }
@@ -203,6 +211,7 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
         vertex.Position.x = mesh->mVertices[i].x;
         vertex.Position.y = mesh->mVertices[i].y;
         vertex.Position.z = mesh->mVertices[i].z;
+        m_bounds.expand(vertex.Position);
 
         if (mesh->HasNormals()) {
             vertex.Normal.x = mesh->mNormals[i].x;
@@ -236,7 +245,7 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
 
     auto material = m_scene->mMaterials[mesh->mMaterialIndex];
     std::vector<Texture *> textures = process_materials(material);
-    m_meshes.emplace_back(Mesh(vertices, indices, std::move(textures)));
+    m_meshes.emplace_back(Mesh(vertices, indices, textures));
 }
 
 std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) const {

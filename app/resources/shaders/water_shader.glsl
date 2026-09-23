@@ -4,16 +4,13 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 
+#include "frame.glsl"
+
 out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
-out vec4 FragPosLightSpace;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-uniform mat4 lightSpaceMatrix;
-uniform float time;
 
 void main()
 {
@@ -30,53 +27,24 @@ void main()
     FragPos = vec3(model * vec4(modifiedPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * modifiedNormal;
     TexCoords = aTexCoords;
-    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }
 
 //#shader fragment
 #version 330 core
 
+#include "frame.glsl"
+#include "shadows.glsl"
+#include "fog.glsl"
+
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
-in vec4 FragPosLightSpace;
 
 out vec4 FragColor;
 
 uniform sampler2D texture_diffuse1;
-uniform sampler2D shadowMap;
-uniform bool shadowsEnabled;
-uniform float time;
-uniform vec3 lightPos;
-uniform vec3 viewPos;
 uniform vec3 waterColor;
-
-uniform bool fogEnabled;
-uniform float fogIntensity;
-uniform float fogStart;
-uniform float fogEnd;
-uniform vec3 fogColor;
-
-float calculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
-{
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
-    if (projCoords.z > 1.0)
-        return 0.0;
-    float currentDepth = projCoords.z;
-    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for (int x = -2; x <= 2; ++x) {
-        for (int y = -2; y <= 2; ++y) {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 25.0;
-    return shadow;
-}
 
 void main()
 {
@@ -87,7 +55,7 @@ void main()
     vec4 waterTexture = texture(texture_diffuse1, movingTexCoords);
 
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
+    vec3 lightDir = normalize(lightPosition - FragPos);
 
     float diff = max(dot(norm, lightDir), 0.2);
 
@@ -100,9 +68,7 @@ void main()
 
     vec3 result = waterTexture.rgb * diff + vec3(1.0) * spec * specularStrength;
 
-    float shadow = 0.0;
-    if (shadowsEnabled)
-        shadow = calculateShadow(FragPosLightSpace, norm, lightDir);
+    float shadow = calculateShadow(FragPos, norm);
     result *= (1.0 - shadow * 0.5);
 
     float depthFactor = 0.7 + 0.3 * sin(time * 0.1 + TexCoords.x * 5.0 + TexCoords.y * 5.0);
@@ -112,13 +78,7 @@ void main()
     float fresnel = pow(1.0 - max(dot(normViewDir, norm), 0.0), 2.0);
     float alpha = mix(0.8, 1.0, fresnel);
 
-    if (fogEnabled) {
-        float dist = length(viewPos - FragPos);
-        float fogRange = max(fogEnd - fogStart, 0.001);
-        float normalizedDist = max(dist - fogStart, 0.0) / fogRange;
-        float fogFactor = exp(-pow(normalizedDist * fogIntensity, 2.0));
-        finalColor = mix(fogColor, finalColor, fogFactor);
-    }
+    finalColor = applyFog(finalColor, FragPos);
 
     FragColor = vec4(finalColor, alpha);
 }

@@ -80,6 +80,7 @@ void GUIController::initialize() {
     m_fps_camera = get<engine::graphics::FPSCameraController>();
     m_shadow = get<engine::graphics::ShadowController>();
     m_time = get<engine::platform::TimeController>();
+    m_renderer = get<engine::graphics::Renderer>();
     m_fov = m_graphics->perspective_params().FOV;
 
     const int w = m_platform->window()->width();
@@ -117,6 +118,8 @@ void GUIController::poll_events() {
 }
 
 void GUIController::draw() {
+    m_main_controller->model_placement_active =
+            m_menu_open && m_page == MenuPage::Settings && m_settings_category == SettingsCategory::Debug;
     m_graphics->begin_gui();
 
     if (m_menu_open) {
@@ -306,9 +309,7 @@ void GUIController::draw_graphics_settings() {
     section_header("Bloom");
     ImGui::SliderFloat("Bloom Intensity", &m_bloom->bloom_strength, 0.0f, 50.0f);
     ImGui::SliderFloat("Exposure",        &m_bloom->exposure, 0.1f, 20.0f);
-    int passes = static_cast<int>(m_bloom->bloom_passes);
-    if (ImGui::SliderInt("Bloom Passes", &passes, 0, 20))
-        m_bloom->bloom_passes = static_cast<uint32_t>(passes);
+    ImGui::SliderFloat("Bloom Radius",    &m_bloom->bloom_radius, 0.001f, 0.02f, "%.3f");
 
     ImGui::Dummy({0, 8});
     section_header("Shadows");
@@ -360,10 +361,9 @@ void GUIController::draw_environment_settings() const {
 
     ImGui::Dummy({0, 8});
     section_header("Wind");
-    auto renderer = engine::core::Controller::get<engine::graphics::Renderer>();
-    ImGui::Checkbox("Enable Wind", &renderer->wind.enabled);
-    if (renderer->wind.enabled)
-        ImGui::SliderFloat("Wind Intensity", &renderer->wind.intensity, 0.0f, 1.0f);
+    ImGui::Checkbox("Enable Wind", &m_renderer->wind.enabled);
+    if (m_renderer->wind.enabled)
+        ImGui::SliderFloat("Wind Intensity", &m_renderer->wind.intensity, 0.0f, 1.0f);
 
     ImGui::Dummy({0, 8});
     section_header("Skybox");
@@ -402,6 +402,29 @@ void GUIController::draw_time_settings() const {
 }
 
 void GUIController::draw_debug_settings() const {
+    section_header("Performance");
+    ImGui::Text("FPS: %.0f (%.2f ms)", m_last_recorded_fps, m_last_recorded_fps > 0.0f ? 1000.0f / m_last_recorded_fps : 0.0f);
+    if (ImGui::BeginTable("##profiler", 3)) {
+        ImGui::TableSetupColumn("Section");
+        ImGui::TableSetupColumn("GPU ms");
+        ImGui::TableSetupColumn("CPU ms");
+        ImGui::TableHeadersRow();
+        for (const auto &[section, gpu_ms, cpu_ms]: m_graphics->profiler().timings()) {
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted(section.data(), section.data() + section.size());
+            ImGui::TableNextColumn();
+            ImGui::Text("%.2f", gpu_ms);
+            ImGui::TableNextColumn();
+            ImGui::Text("%.2f", cpu_ms);
+        }
+        ImGui::EndTable();
+    }
+    const auto &stats = m_renderer->stats();
+    ImGui::Text("Draw calls: %u", stats.draw_calls);
+    ImGui::Text("Objects drawn: %u, culled: %u", stats.objects_drawn, stats.objects_culled);
+
+    ImGui::Dummy({0, 8});
     section_header("Camera");
     const auto &c = *m_camera;
     ImGui::Text("Position: (%.1f, %.1f, %.1f)", c.Position.x, c.Position.y, c.Position.z);

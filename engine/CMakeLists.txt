@@ -14,6 +14,8 @@ file(GLOB engine-sources src/*.cpp)
 file(GLOB engine-headers include/engine/*.hpp)
 
 ################ Libs ################
+# spdlog's bundled fmt fails to compile with recent Clang (consteval format strings); use std::format instead.
+set(SPDLOG_USE_STD_FORMAT ON CACHE BOOL "Use std::format instead of the bundled fmt library" FORCE)
 add_subdirectory(libs/spdlog EXCLUDE_FROM_ALL)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE SPDLOG_DEBUG_ON SPDLOG_TRACE_ON RG_ENGINE_TRACE)
 

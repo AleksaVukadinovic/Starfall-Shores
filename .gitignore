@@ -1,5 +1,11 @@
 matf_rg_engine
 
+# Build directories (CMake, CLion); they contain machine-specific generated files
+build/
+build-*/
+cmake-build-*/
+
+# CMake artifacts produced by in-source builds
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -11,9 +17,11 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-/cmake-build-debug*
-/cmake-build-release*
+
+# IDE and OS
 /.idea/
+.DS_Store
+
 *.a
 /docs/
 engine/test/app/test-app

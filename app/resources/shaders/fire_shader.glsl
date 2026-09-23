@@ -5,23 +5,23 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 
+#include "frame.glsl"
+
 out vec2 TexCoords;
 out vec3 Normal;
 out vec3 FragPos;
 out float VertexHeight;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-uniform float time;
+uniform float flameTime;
 
 void main()
 {
     vec3 pos = aPos;
     float height = clamp(pos.y, 0.0, 1.0);
-    float sway = sin(time * 3.0 + pos.y * 4.0) * 0.08 * height * height
-               + sin(time * 5.3 + pos.y * 7.0) * 0.04 * height
-               + sin(time * 1.7 + pos.x * 3.0) * 0.03 * height;
+    float sway = sin(flameTime * 3.0 + pos.y * 4.0) * 0.08 * height * height
+               + sin(flameTime * 5.3 + pos.y * 7.0) * 0.04 * height
+               + sin(flameTime * 1.7 + pos.x * 3.0) * 0.03 * height;
     pos.x += sway;
     pos.z += sway * 0.6;
 
@@ -43,7 +43,7 @@ in vec3 FragPos;
 in float VertexHeight;
 
 uniform sampler2D texture_diffuse1;
-uniform float time;
+uniform float flameTime;
 uniform vec3 fireColor;
 uniform vec3 glowColor;
 uniform float intensity;
@@ -78,7 +78,7 @@ float fbm(vec2 p) {
 }
 
 void main() {
-    float t = time * flickerSpeed;
+    float t = flameTime * flickerSpeed;
     vec2 uv = TexCoords;
 
     float n1 = fbm(vec2(uv.x * 3.0 + t * 0.4, uv.y * 4.0 - t * 1.2));

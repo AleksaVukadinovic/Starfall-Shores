@@ -6,16 +6,14 @@ layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangent;
 layout (location = 4) in vec3 aBitangent;
 
+#include "frame.glsl"
+
 out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
 out mat3 TBN;
-out vec4 FragPosLightSpace;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -30,7 +28,6 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
 
-    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }
 
@@ -39,72 +36,23 @@ void main()
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BrightColor;
 
+#include "frame.glsl"
+#include "shadows.glsl"
+#include "fog.glsl"
+
 struct Material {
     vec3 specular;
-    float shininess;
-};
-
-struct Light {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
-
-struct PointLight {
-    vec3 position;
-    vec3 diffuse;
-    vec3 specular;
-    float constant;
-    float linear;
-    float quadratic;
 };
 
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 in mat3 TBN;
-in vec4 FragPosLightSpace;
 
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_normal1;
-uniform sampler2D texture_height1;
-uniform sampler2D shadowMap;
 uniform bool hasNormalMap;
-uniform bool hasHeightMap;
-uniform bool shadowsEnabled;
-uniform vec3 viewPos;
 uniform Material material;
-uniform Light light;
-uniform vec3 lightColor;
-uniform int numPointLights;
-uniform PointLight pointLights[4];
-
-uniform bool fogEnabled;
-uniform float fogIntensity;
-uniform float fogStart;
-uniform float fogEnd;
-uniform vec3 fogColor;
-
-float calculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
-{
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
-    if (projCoords.z > 1.0)
-        return 0.0;
-    float currentDepth = projCoords.z;
-    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for (int x = -2; x <= 2; ++x) {
-        for (int y = -2; y <= 2; ++y) {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 25.0;
-    return shadow;
-}
 
 void main()
 {
@@ -122,20 +70,18 @@ void main()
     }
 
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 lightDir = normalize(light.position - FragPos);
+    vec3 lightDir = normalize(lightPosition - FragPos);
 
-    vec3 ambient = light.ambient * texColor.rgb * lightColor;
+    vec3 ambient = lightAmbient * texColor.rgb * lightColor;
 
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * texColor.rgb * lightColor;
+    vec3 diffuse = lightDiffuse * diff * texColor.rgb * lightColor;
 
     vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * material.specular * lightColor;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 specular = lightSpecular * spec * material.specular * lightColor;
 
-    float shadow = 0.0;
-    if (shadowsEnabled)
-        shadow = calculateShadow(FragPosLightSpace, norm, lightDir);
+    float shadow = calculateShadow(FragPos, normalize(Normal));
 
     vec3 result = ambient + (1.0 - shadow) * (diffuse + specular);
 
@@ -146,18 +92,12 @@ void main()
         float pDiff = max(dot(norm, pLightDir), 0.0);
         vec3 pDiffuse = pointLights[i].diffuse * pDiff * texColor.rgb;
         vec3 pReflectDir = reflect(-pLightDir, norm);
-        float pSpec = pow(max(dot(viewDir, pReflectDir), 0.0), material.shininess);
+        float pSpec = pow(max(dot(viewDir, pReflectDir), 0.0), shininess);
         vec3 pSpecular = pointLights[i].specular * pSpec * material.specular;
         result += attenuation * (pDiffuse + pSpecular);
     }
 
-    if (fogEnabled) {
-        float dist = length(viewPos - FragPos);
-        float fogRange = max(fogEnd - fogStart, 0.001);
-        float normalizedDist = max(dist - fogStart, 0.0) / fogRange;
-        float fogFactor = exp(-pow(normalizedDist * fogIntensity, 2.0));
-        result = mix(fogColor, result, fogFactor);
-    }
+    result = applyFog(result, FragPos);
 
     float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
 

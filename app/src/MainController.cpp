@@ -17,7 +17,6 @@
 
 namespace app {
     using vec3 = glm::vec3;
-    using mat4 = glm::mat4;
     using engine::util::TransformData;
 
     void MainController::initialize() {
@@ -38,6 +37,7 @@ namespace app {
         m_camera->Position = vec3(5, 27, 17);
         m_camera->rotate_camera(0, 0);
         apply_day_night_lighting();
+        create_scene();
         m_renderer->set_depth_scene([this] { render_depth_scene(); });
         m_background_sound = get<engine::sound::SoundController>()->sound("ocean_wind.wav");
     }
@@ -49,14 +49,24 @@ namespace app {
     }
 
     using engine::util::model_matrix;
-    using engine::util::build_instance_matrices;
-    using engine::util::build_instance_matrices_async;
 
-    constexpr std::array<TransformData, 3> LOGS = {{
+    static constexpr std::array<TransformData, 1> WATER = {{{{0, 0, 7}, {-90, 0, 0}, {30, 30, 1}}}};
+    static constexpr std::array<TransformData, 2> TERRAIN = {{
+        {{0, 0, 0}, {0, 0, 0}, {1, 1, 1}},
+        {{-8.15f, 2.3f, -89.5f}, {0, 0, 0}, {0.72f, 0.72f, 0.72f}},
+    }};
+    static constexpr std::array<TransformData, 1> VIKING_TENT = {{{{16, 17, -14}, {0, -20, 0}, {0.037f, 0.037f, 0.037f}}}};
+    static constexpr std::array<TransformData, 1> STYLIZED_TENT = {{{{0, 20, -33}, {0, -128, 0}, {0.06f, 0.06f, 0.06f}}}};
+    static constexpr std::array<TransformData, 1> GRAVE = {{{{29, 71, 12}, {-90, 0, -48}, {1.35f, 1.35f, 1.35f}}}};
+    static constexpr std::array<TransformData, 1> CAMPFIRE = {{{{12.0f, 17.3f, 6.0f}}}};
+    static constexpr std::array<TransformData, 1> LIGHTHOUSE = {{{{-102.0f, 15.0f, -107.0f}, {0, 0, 0}, {5, 5, 5}}}};
+    static constexpr std::array<TransformData, 1> FIRE = {{{{12, 20.5f, 6.5f}, {0, 0, 0}, {3.1f, 3.1f, 3.1f}}}};
+
+    static constexpr std::array<TransformData, 3> LOGS = {{
         #include <coordinates/logs.include>
     }};
 
-    constexpr std::array<TransformData, 5> SHROOM_POSITIONS = {{
+    static constexpr std::array<TransformData, 5> SHROOM_POSITIONS = {{
         #include <coordinates/shrooms.include>
     }};
 
@@ -104,43 +114,76 @@ namespace app {
         #include <coordinates/path_segments.include>
     }};
 
-    using Effect = engine::graphics::Effect;
-    using DrawMethod = engine::graphics::DrawMethod;
+    using engine::graphics::DrawMethod;
+    using engine::graphics::Effect;
+
+    struct SceneObjectDescription {
+        std::string_view model;
+        std::string_view shader;
+        std::span<const TransformData> transforms;
+        DrawMethod method = DrawMethod::Default;
+        Effect effect     = Effect::None;
+        bool casts_shadow = false;
+    };
+
+    /**
+     * @brief Everything the scene draws, in drawing order. Resolved into @ref SceneObject instances once, in @ref MainController::create_scene.
+     */
+    static constexpr std::array SCENE = {
+        SceneObjectDescription{.model = "water", .shader = "water_shader", .transforms = WATER, .method = DrawMethod::Blended, .effect = Effect::Water},
+        SceneObjectDescription{.model = "terrain", .shader = "basic", .transforms = TERRAIN, .casts_shadow = true},
+        SceneObjectDescription{.model = "viking_tent", .shader = "basic", .transforms = VIKING_TENT, .casts_shadow = true},
+        SceneObjectDescription{.model = "stylized_tent", .shader = "basic", .transforms = STYLIZED_TENT, .casts_shadow = true},
+        SceneObjectDescription{.model = "grave", .shader = "basic", .transforms = GRAVE, .casts_shadow = true},
+        SceneObjectDescription{.model = "campfire", .shader = "basic", .transforms = CAMPFIRE, .casts_shadow = true},
+        SceneObjectDescription{.model = "lighthouse", .shader = "basic", .transforms = LIGHTHOUSE},
+        SceneObjectDescription{.model = "log_seat", .shader = "basic", .transforms = LOGS, .casts_shadow = true},
+        SceneObjectDescription{.model = "bush1", .shader = "basic", .transforms = bush1_positions, .method = DrawMethod::Blended},
+        SceneObjectDescription{.model = "bush2", .shader = "basic", .transforms = bush2_positions, .method = DrawMethod::Blended},
+        SceneObjectDescription{.model = "laurel_bush", .shader = "basic", .transforms = laurel_positions, .method = DrawMethod::Blended},
+        SceneObjectDescription{.model = "yellow_tree", .shader = "flower_shader", .transforms = yellow_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
+        SceneObjectDescription{.model = "green_tree", .shader = "flower_shader", .transforms = green_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
+        SceneObjectDescription{.model = "beech_tree", .shader = "flower_shader", .transforms = tall_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
+        SceneObjectDescription{.model = "pine_tree", .shader = "flower_shader", .transforms = pine_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
+        SceneObjectDescription{.model = "oak_tree", .shader = "flower_shader", .transforms = oak_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
+        SceneObjectDescription{.model = "old_tree", .shader = "flower_shader", .transforms = old_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
+        SceneObjectDescription{.model = "white_flowers", .shader = "flower_shader", .transforms = white_translations, .method = DrawMethod::Instanced, .effect = Effect::Wind},
+        SceneObjectDescription{.model = "red_flowers", .shader = "flower_shader", .transforms = red_translations, .method = DrawMethod::Instanced, .effect = Effect::Wind},
+        SceneObjectDescription{.model = "path", .shader = "flower_shader", .transforms = path_segments, .method = DrawMethod::Instanced},
+        SceneObjectDescription{.model = "shrooms", .shader = "basic", .transforms = SHROOM_POSITIONS, .casts_shadow = true},
+        SceneObjectDescription{.model = "grass", .shader = "grass_shader", .transforms = grass_positions, .method = DrawMethod::Instanced, .effect = Effect::Wind, .casts_shadow = true},
+    };
+
+    void MainController::create_scene() {
+        auto create_object = [this](const SceneObjectDescription &description) {
+            const auto *model = m_resources->model(std::string(description.model));
+            return SceneObject{
+                .batch        = m_renderer->create_batch(model, description.transforms, description.method),
+                .shader       = m_resources->shader(std::string(description.shader)),
+                .effect       = description.effect,
+                .casts_shadow = description.casts_shadow,
+            };
+        };
+        m_scene_objects.reserve(SCENE.size());
+        for (const auto &description: SCENE) {
+            m_scene_objects.push_back(create_object(description));
+        }
+        m_fire = create_object({.model = "fire", .shader = "fire_shader", .transforms = FIRE, .method = DrawMethod::Blended, .effect = Effect::Fire});
+        m_placement_shader = m_resources->shader("basic");
+    }
 
     void MainController::draw() {
-        m_renderer->draw_blended("water", "water_shader", model_matrix(vec3(0, 0, 7), vec3(30, 30, 1), X_AXIS, -90.0f), Effect::Water);
-        m_renderer->draw("terrain", "basic", mat4(1.0f));
-        m_renderer->draw("terrain", "basic", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-        m_renderer->draw("viking_tent", "basic", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
-        m_renderer->draw("stylized_tent", "basic", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
-        m_renderer->draw("grave", "basic", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
-        m_renderer->draw("campfire", "basic", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
-        m_renderer->draw("lighthouse", "basic", model_matrix(vec3(-102.0f, 15.0f, -107.0f), vec3(5.0f), Y_AXIS, 0));
-        m_renderer->draw_batch("log_seat", "basic", LOGS);
-        m_renderer->draw_batch("bush1", "basic", bush1_positions, DrawMethod::Blended);
-        m_renderer->draw_batch("bush2", "basic", bush2_positions, DrawMethod::Blended);
-        m_renderer->draw_batch("laurel_bush", "basic", laurel_positions, DrawMethod::Blended);
-        m_renderer->draw_batch_instanced("yellow_tree", "flower_shader", yellow_trees);
-        m_renderer->draw_batch_instanced("green_tree", "flower_shader", green_trees);
-        m_renderer->draw_batch_instanced("beech_tree", "flower_shader", tall_trees);
-        m_renderer->draw_batch_instanced("pine_tree", "flower_shader", pine_trees);
-        m_renderer->draw_batch_instanced("oak_tree", "flower_shader", oak_trees);
-        m_renderer->draw_batch_instanced("old_tree", "flower_shader", old_trees);
-        m_renderer->draw_batch_instanced("white_flowers", "flower_shader", white_translations, Effect::Wind);
-        m_renderer->draw_batch_instanced("red_flowers", "flower_shader", red_translations, Effect::Wind);
-        m_renderer->draw_batch_instanced("path", "flower_shader", path_segments);
-        m_renderer->draw_batch("shrooms", "basic", SHROOM_POSITIONS);
-        m_renderer->draw_batch_instanced("grass", "grass_shader", grass_positions, Effect::Wind);
-        draw_test_model();
+        for (const auto &object: m_scene_objects) {
+            m_renderer->draw(object.batch, object.shader, object.effect);
+        }
+        draw_placed_models();
         if (!m_is_day)
-            m_renderer->draw_blended("fire", "fire_shader", model_matrix(vec3(12, 20.5, 6.5), vec3(3.1), Y_AXIS, 0.0f), Effect::Fire);
+            m_renderer->draw(m_fire.batch, m_fire.shader, m_fire.effect);
         draw_skybox();
     }
 
     void MainController::draw_skybox() const {
         const auto shader = m_resources->shader("skybox");
-        shader->use();
-        m_fog->apply_to_shader(shader);
         const engine::resources::Skybox *skybox_cube = m_resources->skybox(m_is_day ? m_active_daytime_skybox : m_active_nighttime_skybox);
         m_graphics->draw_skybox(shader, skybox_cube);
     }
@@ -235,26 +278,19 @@ namespace app {
         }
     }
 
-    void MainController::draw_test_model() const {
-        auto draw_with_transform = [&](const std::string &model_name, const vec3 &translation, const vec3 &rotation, const float scale) {
-            m_renderer->draw(model_name, "basic", model_matrix(translation, rotation, vec3(scale)));
-        };
-
-        for (const auto &[model_name, translation, rotation, scale] : placed_models) {
-            draw_with_transform(model_name, translation, rotation, scale);
+    void MainController::draw_placed_models() const {
+        for (const auto &[model_name, model, translation, rotation, scale] : placed_models) {
+            m_renderer->draw(model, m_placement_shader, model_matrix(translation, rotation, vec3(scale)));
         }
-
-        const auto &current_name = TEST_MODEL_NAMES[selected_model_index];
-        draw_with_transform(current_name, test_translation, test_rotation, test_scale);
+        if (model_placement_active) {
+            const auto *model = m_resources->model(TEST_MODEL_NAMES[selected_model_index]);
+            m_renderer->draw(model, m_placement_shader, model_matrix(test_translation, test_rotation, vec3(test_scale)));
+        }
     }
 
     void MainController::place_test_model() {
-        placed_models.push_back({
-            TEST_MODEL_NAMES[selected_model_index],
-            test_translation,
-            test_rotation,
-            test_scale
-        });
+        const auto *model_name = TEST_MODEL_NAMES[selected_model_index];
+        placed_models.push_back({model_name, m_resources->model(model_name), test_translation, test_rotation, test_scale});
     }
 
     void MainController::clear_placed_models() {
@@ -262,7 +298,7 @@ namespace app {
     }
 
     void MainController::terminate() {
-        for (const auto &[model_name, translation, rotation, scale] : placed_models) {
+        for (const auto &[model_name, model, translation, rotation, scale] : placed_models) {
             spdlog::info(std::format("\n// {}\n{{{{{:.3g}f, {:.3g}f, {:.3g}f}}, {{{:.3g}f, {:.3g}f, {:.3g}f}}, {{{:.3g}f, {:.3g}f, {:.3g}f}}}}",
                 model_name,
                 translation.x, translation.y, translation.z,
@@ -281,23 +317,9 @@ namespace app {
 
     void MainController::render_depth_scene() const {
         if (!m_is_day) return;
-        m_renderer->setup_depth_shader();
-        m_renderer->draw_depth("terrain", mat4(1.0f));
-        m_renderer->draw_depth("terrain", model_matrix(vec3(-8.15f, 2.3f, -89.5), vec3(0.72f), Y_AXIS, 0.0f));
-        m_renderer->draw_depth("campfire", model_matrix(vec3(12.0f, 17.3f, 6.0f)));
-        m_renderer->draw_depth("viking_tent", model_matrix(vec3(16, 17, -14), vec3(0.037), Y_AXIS, -20.0f));
-        m_renderer->draw_depth("stylized_tent", model_matrix(vec3(0, 20, -33), vec3(0.06), Y_AXIS, -128.0f));
-        m_renderer->draw_depth("grave", model_matrix(vec3(29, 71, 12), vec3(-90, 0, -48), vec3(1.35)));
-        m_renderer->draw_depth_batch("shrooms", SHROOM_POSITIONS);
-        m_renderer->draw_depth_batch("log_seat", LOGS);
-
-        m_renderer->setup_depth_instanced_shader();
-        m_renderer->draw_depth_batch_instanced("yellow_tree", yellow_trees);
-        m_renderer->draw_depth_batch_instanced("green_tree", green_trees);
-        m_renderer->draw_depth_batch_instanced("beech_tree", tall_trees);
-        m_renderer->draw_depth_batch_instanced("pine_tree", pine_trees);
-        m_renderer->draw_depth_batch_instanced("oak_tree", oak_trees);
-        m_renderer->draw_depth_batch_instanced("old_tree", old_trees);
-        m_renderer->draw_depth_batch_instanced("grass", grass_positions);
+        for (const auto &object: m_scene_objects) {
+            if (object.casts_shadow)
+                m_renderer->draw_depth(object.batch);
+        }
     }
 }

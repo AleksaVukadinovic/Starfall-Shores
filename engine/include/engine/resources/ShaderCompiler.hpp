@@ -9,6 +9,7 @@
 #include <engine/resources/Shader.hpp>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace engine::resources {
 /**
@@ -44,6 +45,9 @@ struct ShaderParsingResult {
 *     FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 * }
 * @endcode
+*
+* Shaders compiled from a file can share code with `#include "file.glsl"` lines. Included files are looked up in the
+* `include/` directory next to the shader and are pasted in place, each at most once per shader.
 */
 class ShaderCompiler {
 public:
@@ -71,14 +75,21 @@ public:
 
 private:
     /**
+    * @brief Recursively replaces `#include "file"` lines in `source` with the contents of the file in `m_include_directory`.
+    * Files already in `included_files` are skipped.
+    */
+    std::string resolve_includes(const std::string &source, std::vector<std::filesystem::path> &included_files) const;
+
+    /**
     * @brief Compile shader sources into an OpenGL shader program.
     * @returns A @ref graphics::OpenGL::ShaderProgramId referencing OpenGL shader program.
     */
     graphics::OpenGL::ShaderProgramId compile(const ShaderParsingResult &shader_sources);
 
-    ShaderCompiler(std::string shader_name, std::string shader_source) : m_shader_name(
-            std::move(shader_name))
-                                                                         , m_sources(std::move(shader_source)) {
+    ShaderCompiler(std::string shader_name, std::string shader_source, std::filesystem::path include_directory = "")
+        : m_shader_name(std::move(shader_name))
+        , m_sources(std::move(shader_source))
+        , m_include_directory(std::move(include_directory)) {
     }
 
     /**
@@ -98,6 +109,7 @@ private:
 
     std::string m_shader_name;
     std::string m_sources;
+    std::filesystem::path m_include_directory;
 };
 }
 

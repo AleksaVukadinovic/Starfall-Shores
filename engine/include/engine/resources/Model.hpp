@@ -5,10 +5,13 @@
 
 #pragma once
 #include <engine/resources/Mesh.hpp>
+#include <engine/util/Geometry.hpp>
 #include <algorithm>
 #include <utility>
 
 namespace engine::resources {
+    class InstanceBuffer;
+
     /**
     * @class Model
     * @brief Represents a model object within the OpenGL context as an array of @ref Mesh objects.
@@ -24,17 +27,12 @@ namespace engine::resources {
         void draw(const Shader *shader) const;
 
         /**
-         * @brief Enables blending
-         * @param shader The shader to use for drawing
-         */
-        void draw_blended(const Shader *shader) const;
-
-        /**
-        * @brief Draws the model using a given shader by drawing all the meshes in the model.
+        * @brief Draws `instance_count` instances of the model, reading per-instance transforms from `instances`.
         * @param shader The shader to use for drawing.
-        * @param model_matrices Model matrix for each transition
+        * @param instances Instance data created for this model.
+        * @param instance_count Number of instances to draw, at most the number of transforms last uploaded to `instances`.
         */
-        void draw_instanced(const Shader *shader, const std::vector<glm::mat4> &model_matrices) const;
+        void draw_instanced(const Shader *shader, const InstanceBuffer &instances, uint32_t instance_count) const;
 
         /**
         * @brief Destroys the model in the OpenGL context.
@@ -65,6 +63,13 @@ namespace engine::resources {
             return m_name;
         }
 
+        /**
+        * @brief Returns the bounding box of the model in its local space.
+        */
+        [[nodiscard]] const util::AABB &bounds() const {
+            return m_bounds;
+        }
+
     private:
         /**
         * @brief The meshes in the model.
@@ -78,6 +83,7 @@ namespace engine::resources {
         * @brief The name of the model by which it can be referenced using the @ref engine::resources::ResourcesController::model function.
         */  
         std::string m_name;
+        util::AABB m_bounds;
 
         Model() = default;
 
@@ -86,11 +92,13 @@ namespace engine::resources {
         * @param meshes The meshes in the model.
         * @param path The path to the model file from which the model was loaded.
         * @param name The name of the model by which it can be referenced using the @ref engine::resources::ResourcesController::model function.
+        * @param bounds The bounding box of all the model vertices.
         */  
         Model(std::vector<Mesh> meshes, std::filesystem::path path,
-              std::string name) : m_meshes(std::move(meshes))
+              std::string name, const util::AABB &bounds) : m_meshes(std::move(meshes))
                               , m_path(std::move(path))
-                              , m_name(std::move(name)) {
+                              , m_name(std::move(name))
+                              , m_bounds(bounds) {
         }
     };
 } // namespace engine

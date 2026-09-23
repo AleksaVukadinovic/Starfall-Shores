@@ -44,9 +44,11 @@ namespace engine::graphics {
         (void) io;
         RG_GUARANTEE(ImGui_ImplGlfw_InitForOpenGL(handle, true), "ImGUI failed to initialize for OpenGL");
         RG_GUARANTEE(ImGui_ImplOpenGL3_Init("#version 330 core"), "ImGUI failed to initialize for OpenGL");
+        m_profiler.initialize();
     }
 
     void GraphicsController::terminate() {
+        m_profiler.destroy();
         if (ImGui::GetCurrentContext()) {
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
@@ -59,6 +61,7 @@ namespace engine::graphics {
     }
 
     void GraphicsController::end_draw() {
+        m_profiler.end_frame();
         get<platform::PlatformController>()->swap_buffers();
     }
 
@@ -75,6 +78,7 @@ namespace engine::graphics {
     }
 
     void GraphicsController::begin_gui() {
+        m_profiler.begin_section("GUI");
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -86,10 +90,7 @@ namespace engine::graphics {
     }
 
     void GraphicsController::draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) const {
-        const auto view = glm::mat4(glm::mat3(m_camera.view_matrix()));
         shader->use();
-        shader->set_mat4("view", view);
-        shader->set_mat4("projection", projection_matrix<>());
         CHECKED_GL_CALL(glDepthFunc, GL_LEQUAL);
         CHECKED_GL_CALL(glBindVertexArray, skybox->vao());
         CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);

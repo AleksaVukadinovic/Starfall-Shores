@@ -21,9 +21,13 @@
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/Renderer.hpp>
+#include <engine/graphics/DrawBatch.hpp>
+#include <engine/graphics/GpuProfiler.hpp>
+#include <engine/graphics/ShaderInterface.hpp>
 
 #include <engine/util/Utils.hpp>
 #include <engine/util/Transform.hpp>
+#include <engine/util/Geometry.hpp>
 #include <engine/util/Configuration.hpp>
 #include <engine/util/ArgParser.hpp>
 #include <engine/util/Errors.hpp>
@@ -31,6 +35,7 @@
 #include <engine/resources/ShaderCompiler.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/resources/Model.hpp>
+#include <engine/resources/InstanceBuffer.hpp>
 #include <engine/resources/Shader.hpp>
 #include <engine/resources/Texture.hpp>
 #include <engine/resources/Skybox.hpp>

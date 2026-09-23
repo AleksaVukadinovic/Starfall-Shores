@@ -1,22 +1,20 @@
-/**
- * @file Renderer.hpp
- * @brief Provides a high-level rendering API that combines lighting, shadows, fog, and model drawing.
- */
-
 #pragma once
 
 #include <engine/core/Controller.hpp>
-#include <engine/graphics/LightSource.hpp>
+#include <engine/graphics/DrawBatch.hpp>
+#include <engine/util/Geometry.hpp>
 #include <engine/util/Transform.hpp>
 #include <glm/glm.hpp>
 #include <functional>
-#include <string>
+#include <memory>
+#include <span>
 #include <vector>
+
+class FogController;
 
 namespace engine::resources {
 class Model;
 class Shader;
-class ResourcesController;
 }
 
 namespace engine::graphics {
@@ -24,19 +22,6 @@ class LightingController;
 class ShadowController;
 class GraphicsController;
 class Camera;
-
-enum class Effect {
-    None,
-    Wind,
-    Water,
-    Fire
-};
-
-enum class DrawMethod {
-    Default,
-    Blended,
-    Instanced
-};
 
 struct WindParams {
     bool enabled       = false;
@@ -56,6 +41,24 @@ struct FireParams {
     double start_time           = 0.0;
 };
 
+/**
+ * @brief What the @ref Renderer drew in the current frame, excluding shadow passes.
+ */
+struct RenderStats {
+    uint32_t draw_calls{0};
+    uint32_t objects_drawn{0};
+    uint32_t objects_culled{0};
+};
+
+/**
+ * @class Renderer
+ * @brief Draws @ref DrawBatch objects with frustum culling, and renders the shadow maps.
+ *
+ * Once per frame, before anything is drawn, the renderer:
+ * 1. renders the stale shadow cascades by invoking the depth scene callback (see @ref Renderer::set_depth_scene),
+ * 2. uploads camera, light, fog and shadow data into the frame uniform block (see @ref FrameUniforms),
+ *    so draws only set per-object uniforms.
+ */
 class Renderer final : public core::Controller {
 public:
     [[nodiscard]] std::string_view name() const override {
@@ -66,76 +69,72 @@ public:
     WaterParams water;
     FireParams fire;
 
-    void draw(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, Effect effect = Effect::None) const;
-    void draw(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, Effect effect = Effect::None) const;
-    void draw(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const LightSource &light_override, Effect effect = Effect::None) const;
+    /**
+     * @brief Creates a batch of `model` placed at `transforms`. The batch lives until the renderer terminates.
+     */
+    const DrawBatch *create_batch(const resources::Model *model, std::span<const util::TransformData> transforms,
+                                  DrawMethod method = DrawMethod::Default);
 
-    void draw_blended(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, Effect effect = Effect::None) const;
-    void draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, Effect effect = Effect::None) const;
-    void draw_blended(const std::string &model_name, const std::string &shader_name, const glm::mat4 &transform, const LightSource &light_override, Effect effect = Effect::None) const;
+    /**
+     * @brief Draws every visible transform of `batch`.
+     */
+    void draw(const DrawBatch *batch, const resources::Shader *shader, Effect effect = Effect::None);
 
-    void draw_instanced(const resources::Model *model, const resources::Shader *shader, const std::vector<glm::mat4> &transforms, Effect effect = Effect::None) const;
-    void draw_instanced(const std::string &model_name, const std::string &shader_name, const std::vector<glm::mat4> &transforms, Effect effect = Effect::None) const;
+    /**
+     * @brief Draws a single model at a transform that may change every frame, e.g. an object being placed in the editor.
+     */
+    void draw(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, Effect effect = Effect::None);
 
+    /**
+     * @brief Sets the function that draws the shadow casters with @ref Renderer::draw_depth. It's called once per stale shadow cascade.
+     */
     void set_depth_scene(std::function<void()> callback);
 
-    void draw_depth(const std::string &model_name, const glm::mat4 &transform) const;
+    /**
+     * @brief Draws the batch into the shadow cascade that's currently being rendered. Call only from the depth scene callback.
+     */
+    void draw_depth(const DrawBatch *batch);
 
-    template<std::size_t N>
-    void draw_depth_batch(const std::string &model_name,
-                          const std::array<util::TransformData, N> &transforms) const {
-        draw_depth_batch_impl(model_name, transforms.data(), transforms.size());
-    }
-
-    template<std::size_t N>
-    void draw_depth_batch_instanced(const std::string &model_name,
-                                    const std::array<util::TransformData, N> &transforms) const {
-        draw_depth_batch_instanced_impl(model_name, transforms.data(), transforms.size());
-    }
-
-    void setup_depth_shader() const;
-    void setup_depth_instanced_shader() const;
-
-    template<std::size_t N>
-    void draw_batch(const std::string &model_name, const std::string &shader_name,
-                    const std::array<util::TransformData, N> &transforms,
-                    const DrawMethod method = DrawMethod::Default, const Effect effect = Effect::None) {
-        draw_batch_impl(model_name, shader_name, transforms.data(), transforms.size(), method, effect);
-    }
-
-    template<std::size_t N>
-    void draw_batch_instanced(const std::string &model_name, const std::string &shader_name,
-                              const std::array<util::TransformData, N> &transforms,
-                              const Effect effect = Effect::None) {
-        draw_batch_instanced_impl(model_name, shader_name, transforms.data(), transforms.size(), effect);
+    [[nodiscard]] const RenderStats &stats() const {
+        return m_stats;
     }
 
 private:
-    void draw_batch_impl(const std::string &model_name, const std::string &shader_name,
-                         const util::TransformData *transforms, std::size_t count,
-                         DrawMethod method, Effect effect) const;
-    void draw_batch_instanced_impl(const std::string &model_name, const std::string &shader_name,
-                                   const util::TransformData *transforms, std::size_t count,
-                                   Effect effect) const;
-
-    void draw_depth_batch_impl(const std::string &model_name,
-                               const util::TransformData *transforms, std::size_t count) const;
-    void draw_depth_batch_instanced_impl(const std::string &model_name,
-                                         const util::TransformData *transforms, std::size_t count) const;
+    /**
+     * @brief Bounds of objects whose vertices an effect animates are grown by this fraction, so they aren't culled while still visible.
+     */
+    static constexpr float ANIMATED_BOUNDS_PADDING = 0.25f;
 
     void initialize() override;
     void begin_draw() override;
+    void terminate() override;
 
-    void apply_effect(const resources::Shader *shader, const glm::mat4 &transform, Effect effect, const LightSource *light_override = nullptr) const;
+    void render_shadow_maps();
+    void update_frame_uniforms() const;
+    void apply_effect(const resources::Shader *shader, Effect effect) const;
+
+    /**
+     * @brief Collects the transforms of `batch` whose bounds (grown by `padding`) intersect `frustum`.
+     */
+    std::span<const glm::mat4> visible_transforms(const DrawBatch &batch, const util::Frustum &frustum, float padding);
+
+    [[nodiscard]] static float bounds_padding(Effect effect);
 
     LightingController *m_lighting = nullptr;
     ShadowController *m_shadow = nullptr;
     GraphicsController *m_graphics = nullptr;
+    FogController *m_fog = nullptr;
     Camera *m_camera = nullptr;
-    resources::ResourcesController *m_resources = nullptr;
     resources::Shader *m_depth_shader = nullptr;
     resources::Shader *m_depth_instanced_shader = nullptr;
     std::function<void()> m_depth_scene_callback;
+
+    std::vector<std::unique_ptr<DrawBatch>> m_batches;
+    std::vector<glm::mat4> m_visible_transforms;
+    util::Frustum m_view_frustum;
+    util::Frustum m_shadow_frustum;
+    uint32_t m_frame_uniform_buffer = 0;
+    RenderStats m_stats;
 };
 
 }

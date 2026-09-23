@@ -2,15 +2,15 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 
-out vec3 TexCoords;
+#include "frame.glsl"
 
-uniform mat4 projection;
-uniform mat4 view;
+out vec3 TexCoords;
 
 void main()
 {
     TexCoords = aPos;
-    vec4 pos = projection * view * vec4(aPos, 1.0);
+    // Drop the translation of the view matrix, so the skybox always surrounds the camera.
+    vec4 pos = projection * mat4(mat3(view)) * vec4(aPos, 1.0);
     gl_Position = pos.xyww;
 }
 
@@ -18,15 +18,11 @@ void main()
 #version 330 core
 out vec4 FragColor;
 
+#include "frame.glsl"
+
 in vec3 TexCoords;
 
 uniform samplerCube skybox;
-
-uniform bool fogEnabled;
-uniform float fogIntensity;
-uniform float fogStart;
-uniform float fogEnd;
-uniform vec3 fogColor;
 
 void main()
 {

@@ -4,18 +4,89 @@ Starfall Shores is a custom-built graphics engine created for a university cours
 
 Key goals included writing everything from scratch, gaining deeper insight into graphics pipelines, and implementing efficient rendering strategies commonly found in game engines.
 
+## Features
+
+- **Scene:** an island camp with tents, a campfire, a lighthouse, forests, flowers, grass, and water
+- **Day/night cycle:** driven by an in-game clock, with smooth exposure and fog transitions and a campfire light at night
+- **Cascaded shadow maps:** four cascades follow the camera, with soft filtered edges, and are re-rendered only when they go stale
+- **HDR rendering with bloom:** mip-chain downsample/upsample bloom, exposure tone mapping, and greyscale, underwater, and rain screen effects
+- **Effects:** wind-animated vegetation, animated water, a procedural fire shader, and fog
+- **Performance:** frustum culling, instanced rendering with persistent GPU buffers, and one per-frame uniform buffer shared by all shaders
+- **Built-in GPU/CPU profiler:** open **Settings → Debug** in the pause menu to see per-pass timings, draw calls, and culling statistics
+- **In-app editor:** ImGui settings (graphics, environment, sound, time) and a model placement tool
+- **3D models:** loaded with Assimp (glTF, GLB, OBJ, ...)
+- **Sound:** played through miniaudio
+
 # Setup
 
-## Linux
+Clone the repository together with its submodules (GLFW and spdlog):
 
-### Debian based (Ubuntu, Debian...)
+```bash
+git clone --recursive <repository-url>
+# or, in an existing clone:
+git submodule update --init --recursive
+```
 
-**To setup the necessary libraries, run:**  
-`./setup.sh`
+## Dependencies
 
-**To generate docs, run:**  
-`doxygen Doxyfile`   
-Open the documentation file in your browser: `docs/html/index.html`
+The setup script installs the build tools, Assimp, and a Python virtual environment with `libclang` (used by `check.py`):
+
+```bash
+./setup.sh
+```
+
+It supports **macOS** (through Homebrew) and **Debian-based Linux** (Ubuntu, Debian, ...).
+
+## Build
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+The executable is written to `app/APP`. CLion works out of the box: open the project folder and run the `APP` target.
+
+## Run
+
+The app loads `config.json` and `resources/` relative to the working directory, so **run it from the `app/` directory**:
+
+```bash
+cd app && ./APP
+```
+
+## Controls
+
+| Key | Action |
+|---|---|
+| `W` `A` `S` `D` / arrow keys | Move |
+| `Space` / `C` | Move up / down |
+| `Shift` | Sprint |
+| `Q` / `E` | Rotate |
+| Mouse | Look around |
+| `Esc` | Pause menu and settings |
+| `N` | Toggle day / night |
+| `F` | Toggle fog |
+| `R` | Toggle rain |
+| `V` | Toggle wind |
+| `M` | Toggle sound |
+| `P` | Toggle cursor |
+
+## Code style check
+
+`check.py` verifies the project naming conventions and include rules:
+
+```bash
+./venv/bin/python check.py app
+./venv/bin/python check.py engine
+```
+
+## Documentation
+
+```bash
+doxygen Doxyfile
+```
+
+Then open `docs/html/index.html` in your browser.
 
 # Engine
 
@@ -53,6 +124,10 @@ int run(int argc, char** argv) {
 * `terminate` - `App` terminates its state
 * `on_exit` - do a final cleanup, and return an exit code
 
+All of these phases are forwarded to **controllers**: singletons that you register in `app_setup` with
+`register_controller<T>()` and access anywhere with `Controller::get<T>()`. Their execution order is defined with
+`before()` / `after()` and resolved with a topological sort.
+
 ## The App class
 
 Here is the interface of the `engine/core/App.hpp` class:
@@ -76,37 +151,72 @@ class App {
     };
 ```
 
+## Rendering
+
+The `Renderer` draws `DrawBatch`es: a model placed at a fixed set of transforms. A batch is created once, and its model
+matrices, bounding boxes, and (for instanced batches) GPU instance buffer are prepared up front:
+
+```cpp
+const auto *trees = renderer->create_batch(resources->model("pine_tree"), PINE_TREES, DrawMethod::Instanced);
+// every frame:
+renderer->draw(trees, resources->shader("flower_shader"));
+```
+
+Every frame, the renderer re-renders only the stale shadow cascades, uploads camera, lighting, and fog data into a
+single uniform buffer, and frustum-culls each draw.
+
+Shaders are single `.glsl` files with `//#shader vertex` and `//#shader fragment` sections. They can share code with
+`#include "file.glsl"` from `resources/shaders/include/`. `frame.glsl` provides the per-frame uniforms,
+`shadows.glsl` provides shadow sampling, and `fog.glsl` provides fog.
+
 ## Project structure
 
-Here is how the `Engine` is structured. You only need to include `<engine/core/Engine.hpp>` in your part of the project
-and all the header files will be available.
+You only need to include `<engine/core/Engine.hpp>` in your part of the project and all the header files will be available.
 
 ```bash
 ├── core
-│   ├── App.hpp
-│   ├── Controller.hpp
-│   └── Engine.hpp
+│   ├── App.hpp                 # main loop
+│   ├── Controller.hpp          # controller base class and registration
+│   └── Engine.hpp              # includes everything
 ├── graphics
-│   ├── Camera.hpp
-│   ├── GraphicsController.hpp
-│   └── OpenGL.hpp
+│   ├── Camera.hpp
+│   ├── DrawBatch.hpp           # prepared static placements of a model
+│   ├── FPSCameraController.hpp
+│   ├── FogController.hpp
+│   ├── GpuProfiler.hpp         # per-section GPU/CPU frame timings
+│   ├── GraphicsController.hpp
+│   ├── GreyscaleController.hpp
+│   ├── LightSource.hpp
+│   ├── LightingController.hpp
+│   ├── OpenGL.hpp
+│   ├── PostProcessingController.hpp  # HDR, bloom, screen effects
+│   ├── RainController.hpp
+│   ├── Renderer.hpp            # culling, batching, shadow passes
+│   ├── ShaderInterface.hpp     # C++ side of the shader uniform layout
+│   └── ShadowController.hpp    # cascaded shadow maps
 ├── platform
-│   ├── Input.hpp
-│   ├── PlatformController.hpp
-│   ├── PlatformEventObserver.hpp
-│   └── Window.hpp
+│   ├── Input.hpp
+│   ├── PlatformController.hpp
+│   ├── PlatformEventObserver.hpp
+│   ├── TimeController.hpp      # in-game clock
+│   └── Window.hpp
 ├── resources
-│   ├── Mesh.hpp
-│   ├── Model.hpp
-│   ├── ResourcesController.hpp
-│   ├── ShaderCompiler.hpp
-│   ├── Shader.hpp
-│   ├── Skybox.hpp
-│   └── Texture.hpp
+│   ├── InstanceBuffer.hpp
+│   ├── Mesh.hpp
+│   ├── Model.hpp
+│   ├── ResourcesController.hpp
+│   ├── ShaderCompiler.hpp
+│   ├── Shader.hpp
+│   ├── Skybox.hpp
+│   ├── Sound.hpp
+│   └── Texture.hpp
+├── sound
+│   └── SoundController.hpp
 └── util
     ├── ArgParser.hpp
     ├── Configuration.hpp
     ├── Errors.hpp
+    ├── Geometry.hpp            # AABB and frustum
+    ├── Transform.hpp
     └── Utils.hpp
-p
 ```

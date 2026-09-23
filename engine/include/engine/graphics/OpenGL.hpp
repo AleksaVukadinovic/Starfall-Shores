@@ -139,15 +139,36 @@ public:
     */
     static std::string get_compilation_error_message(uint32_t shader_id);
 
+    /**
+    * @brief Enables alpha blending with the standard `src_alpha, 1 - src_alpha` blend function.
+    */
+    static void enable_blending();
+
+    static void disable_blending();
+
+    /**
+    * @brief A depth texture array with one layer per shadow cascade, and the framebuffer used to render into it.
+    */
     struct ShadowMap {
         uint32_t fbo;
         uint32_t texture;
     };
 
-    static ShadowMap create_shadow_map(uint32_t width, uint32_t height);
-    static void begin_shadow_pass(uint32_t fbo, uint32_t width, uint32_t height);
+    /**
+    * @brief Creates a `size` x `size` depth texture array with `layers` layers, set up for hardware depth comparison
+    * (`sampler2DArrayShadow`) with bilinear filtering.
+    */
+    static ShadowMap create_shadow_map(uint32_t size, uint32_t layers);
+
+    /**
+    * @brief Binds `layer` of the shadow map as the depth render target and clears it.
+    */
+    static void begin_shadow_pass(const ShadowMap &shadow_map, uint32_t size, uint32_t layer);
+
     static void end_shadow_pass(uint32_t screen_width, uint32_t screen_height);
-    static void bind_texture_to_unit(uint32_t texture_id, uint32_t unit);
+
+    static void bind_texture_array_to_unit(uint32_t texture_id, uint32_t unit);
+
     static void destroy_shadow_map(const ShadowMap &shadow_map);
 
 private:

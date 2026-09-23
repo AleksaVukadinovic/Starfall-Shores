@@ -1,7 +1,10 @@
 #include <glad/glad.h>
 #include <engine/resources/ShaderCompiler.hpp>
 #include <engine/util/Errors.hpp>
+#include <algorithm>
+#include <array>
 #include <format>
+#include <sstream>
 #include <spdlog/spdlog.h>
 #include <engine/graphics/OpenGL.hpp>
 
@@ -41,6 +44,14 @@ OpenGL::ShaderProgramId ShaderCompiler::compile(const ShaderParsingResult &shade
         glAttachShader(shader_program_id, geometry_shader_id);
     }
     glLinkProgram(shader_program_id);
+    int32_t linked = 0;
+    glGetProgramiv(shader_program_id, GL_LINK_STATUS, &linked);
+    if (!linked) {
+        std::array<char, 1024> info_log{};
+        glGetProgramInfoLog(shader_program_id, static_cast<int32_t>(info_log.size()), nullptr, info_log.data());
+        throw util::EngineError(util::EngineError::Type::ShaderCompilationError,
+                                std::format("Shader program {} failed to link:\n{}", m_shader_name, info_log.data()));
+    }
     return shader_program_id;
 }
 
@@ -73,6 +84,11 @@ ShaderParsingResult ShaderCompiler::parse_source() {
                 "Error compiling: {}. Source for vertex and fragment shader must be defined. Vertex shader source must begin with: '//#shader vertex'; and fragment shader source must begin with: '//#shader fragment'",
                 m_shader_name));
     }
+    // Every stage is compiled separately, so each one gets its own copy of the included files.
+    for (std::string *stage: {&parsing_result.vertex_shader, &parsing_result.fragment_shader, &parsing_result.geometry_shader}) {
+        std::vector<std::filesystem::path> included_files;
+        *stage = resolve_includes(*stage, included_files);
+    }
     return parsing_result;
 }
 
@@ -83,10 +99,40 @@ Shader ShaderCompiler::compile_from_file(std::string shader_name,
                                 std::format("Shader source file {} for shader {} not found.",shader_path.string(),shader_name));
     }
     std::string shader_source = util::read_text_file(shader_path);
-    ShaderCompiler compiler(std::move(shader_name), std::move(shader_source));
+    ShaderCompiler compiler(std::move(shader_name), std::move(shader_source), shader_path.parent_path() / "include");
     ShaderParsingResult parsing_result = compiler.parse_source();
     OpenGL::ShaderProgramId shader_program = compiler.compile(parsing_result);
     Shader result(shader_program, shader_name, shader_source, shader_path);
+    return result;
+}
+
+std::string ShaderCompiler::resolve_includes(const std::string &source, std::vector<std::filesystem::path> &included_files) const {
+    static constexpr std::string_view INCLUDE_DIRECTIVE = "#include";
+    std::string result;
+    result.reserve(source.size());
+    std::istringstream ss(source);
+    std::string line;
+    while (std::getline(ss, line)) {
+        if (!line.starts_with(INCLUDE_DIRECTIVE)) {
+            result.append(line).push_back('\n');
+            continue;
+        }
+        const auto open  = line.find('"');
+        const auto close = line.rfind('"');
+        RG_GUARANTEE(open != std::string::npos && close > open, "Malformed shader include: '{}'. Expected: #include \"file.glsl\"", line);
+        RG_GUARANTEE(!m_include_directory.empty(), "Shader {} uses '{}', but includes are only supported for shaders compiled from a file.",
+                     m_shader_name, line);
+        const std::filesystem::path include_path = m_include_directory / line.substr(open + 1, close - open - 1);
+        if (std::ranges::find(included_files, include_path) != included_files.end()) {
+            continue;
+        }
+        if (!exists(include_path)) {
+            throw util::EngineError(util::EngineError::Type::FileNotFound,
+                                    std::format("Shader include {} not found.", include_path.string()));
+        }
+        included_files.push_back(include_path);
+        result.append(resolve_includes(util::read_text_file(include_path), included_files));
+    }
     return result;
 }
 
