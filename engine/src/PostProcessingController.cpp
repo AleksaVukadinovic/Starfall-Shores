@@ -2,7 +2,6 @@
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
-#include <engine/graphics/RainController.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <glad/glad.h>
 #include <algorithm>
@@ -168,14 +167,6 @@ namespace engine::graphics {
         m_final_shader->set_bool("underwaterEnabled", underwater);
         m_final_shader->set_vec3("underwaterColor", underwater_color);
         m_final_shader->set_float("underwaterIntensity", underwater_intensity);
-
-        const auto rain = get<RainController>();
-        m_final_shader->set_bool("rainEnabled", rain->rain_enabled);
-        m_final_shader->set_float("rainIntensity", rain->rain_intensity);
-        m_final_shader->set_float("rainSpeed", rain->rain_speed);
-        m_final_shader->set_float("rainOpacity", rain->rain_opacity);
-        m_final_shader->set_float("rainStreakLength", rain->rain_streak_length);
-        m_final_shader->set_float("rainTime", static_cast<float>(platform::PlatformController::get_time()));
 
         render_quad();
     }

@@ -36,6 +36,7 @@ void main()
 #include "frame.glsl"
 #include "shadows.glsl"
 #include "fog.glsl"
+#include "weather.glsl"
 
 in vec3 FragPos;
 in vec3 Normal;
@@ -54,7 +55,8 @@ void main()
 
     vec4 waterTexture = texture(texture_diffuse1, movingTexCoords);
 
-    vec3 norm = normalize(Normal);
+    vec2 ripples = rainRipples(FragPos.xz);
+    vec3 norm = normalize(normalize(Normal) + vec3(ripples.x, 0.0, ripples.y) * 0.6);
     vec3 lightDir = normalize(lightPosition - FragPos);
 
     float diff = max(dot(norm, lightDir), 0.2);

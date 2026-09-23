@@ -34,9 +34,10 @@ namespace app {
         post_processing_controller->after(renderer);
         fog_controller->after(post_processing_controller);
         greyscale_controller->after(post_processing_controller);
-        rain_controller->after(post_processing_controller);
+        // Rain is transparent: it's drawn after the whole scene, including the skybox, and before the GUI.
+        rain_controller->after(main_controller);
         main_controller->after(post_processing_controller);
-        gui_controller->after(main_controller);
+        gui_controller->after(rain_controller);
         time_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
     }
 

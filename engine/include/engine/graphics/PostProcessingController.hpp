@@ -11,7 +11,7 @@ class Shader;
 namespace engine::graphics {
     /**
      * @class PostProcessingController
-     * @brief Renders the scene into an HDR framebuffer, then applies bloom, tone mapping and screen-space effects.
+     * @brief Renders the scene into an HDR framebuffer, then applies bloom, tone mapping, greyscale and the underwater tint.
      *
      * Bloom blurs the bright parts of the scene by progressively downsampling them through a chain of
      * half-resolution textures and additively upsampling them back ("dual filtering", as in Call of Duty: Advanced Warfare).

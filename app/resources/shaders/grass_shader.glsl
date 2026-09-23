@@ -51,6 +51,7 @@ out vec4 FragColor;
 #include "frame.glsl"
 #include "shadows.glsl"
 #include "fog.glsl"
+#include "weather.glsl"
 
 struct Material {
     vec3 specular;
@@ -73,7 +74,7 @@ void main()
     if (texColor.a < 0.1)
         discard;
 
-    vec3 modifiedColor = texColor.rgb;
+    vec3 modifiedColor = wetAlbedo(texColor.rgb, surfaceWetness(normalize(Normal)));
 
     vec3 norm;
     if (hasNormalMap) {

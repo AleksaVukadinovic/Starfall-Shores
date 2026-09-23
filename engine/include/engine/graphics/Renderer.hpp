@@ -11,6 +11,7 @@
 #include <vector>
 
 class FogController;
+class RainController;
 
 namespace engine::resources {
 class Model;
@@ -56,7 +57,7 @@ struct RenderStats {
  *
  * Once per frame, before anything is drawn, the renderer:
  * 1. renders the stale shadow cascades by invoking the depth scene callback (see @ref Renderer::set_depth_scene),
- * 2. uploads camera, light, fog and shadow data into the frame uniform block (see @ref FrameUniforms),
+ * 2. uploads camera, light, fog, rain and shadow data into the frame uniform block (see @ref FrameUniforms),
  *    so draws only set per-object uniforms.
  */
 class Renderer final : public core::Controller {
@@ -124,6 +125,7 @@ private:
     ShadowController *m_shadow = nullptr;
     GraphicsController *m_graphics = nullptr;
     FogController *m_fog = nullptr;
+    RainController *m_rain = nullptr;
     Camera *m_camera = nullptr;
     resources::Shader *m_depth_shader = nullptr;
     resources::Shader *m_depth_instanced_shader = nullptr;

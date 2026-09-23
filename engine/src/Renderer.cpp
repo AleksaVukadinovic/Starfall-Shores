@@ -3,6 +3,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/OpenGL.hpp>
+#include <engine/graphics/RainController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShaderInterface.hpp>
 #include <engine/graphics/ShadowController.hpp>
@@ -18,6 +19,7 @@ void Renderer::initialize() {
     m_shadow = get<ShadowController>();
     m_graphics = get<GraphicsController>();
     m_fog = get<FogController>();
+    m_rain = get<RainController>();
     m_camera = m_graphics->camera();
     const auto resources = get<resources::ResourcesController>();
     m_depth_shader = resources->shader("depth_shader");
@@ -124,6 +126,9 @@ void Renderer::update_frame_uniforms() const {
     uniforms.fog_intensity = m_fog->fog_intensity;
     uniforms.fog_start     = m_fog->fog_start;
     uniforms.fog_end       = m_fog->fog_end;
+
+    uniforms.wetness        = m_rain->wetness();
+    uniforms.rain_intensity = m_rain->current_intensity();
 
     CHECKED_GL_CALL(glBindBuffer, GL_UNIFORM_BUFFER, m_frame_uniform_buffer);
     CHECKED_GL_CALL(glBufferSubData, GL_UNIFORM_BUFFER, 0, sizeof(FrameUniforms), &uniforms);

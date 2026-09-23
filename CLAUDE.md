@@ -92,7 +92,12 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 - `PlatformController`: GLFW window, input (`key(KEY_X).state() == Key::State::JustPressed`, `is_down()`), `dt()`, `get_time()`.
 - `FPSCameraController`: WASD/arrows to move, Space/C for up/down, Shift to sprint, Q/E to rotate, P to toggle the cursor.
 - `TimeController`: in-game clock. Starts at 12:00, `tickrate` is 0.2 in-game hours per real second, night is 23:00–07:00.
-- `FogController`, `RainController`, `GreyscaleController`: parameter holders, read by the shaders and post-processing. They're declared in the global namespace, not in `engine::`.
+- `FogController`, `GreyscaleController`: parameter holders, read by the shaders and post-processing. Like `RainController`, they're declared in the global namespace, not in `engine::`.
+- `RainController`: real 3D rain.
+  - Up to 40k camera-facing streaks, generated in `rain.glsl` from `gl_InstanceID` plus time (no vertex data, empty VAO). They're world-stable and wrap around a 40×24×40 box around the camera.
+  - It's drawn in its own `draw()` after `MainController` (after the skybox) and before the GUI. Drops are depth-tested, don't write depth, and don't write to the bloom attachment (`glColorMaski`). They have their own "Rain" profiler section.
+  - Intensity eases in and out over `FADE_SECONDS`. `wetness` follows it (wets in ~15 s, dries in ~45 s).
+  - Both values go to all shaders through `FrameUniforms` (`wetness`, `rainIntensity`). `include/weather.glsl` has `surfaceWetness`/`wetAlbedo`/`wetSpecular`, used by the lit shaders, and `rainRipples`, used by water. Wind slants the drops.
 
 ## App (`app/`)
 - `MyApp.cpp` registers the app controllers and the optional engine controllers and sets their order.

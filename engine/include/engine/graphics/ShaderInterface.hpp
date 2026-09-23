@@ -75,7 +75,8 @@ struct FrameUniforms {
     float fog_intensity{};
     float fog_start{};
     float fog_end{};
-    float padding[2]{};
+    float wetness{};
+    float rain_intensity{};
 
     PointLightUniforms point_lights[MAX_POINT_LIGHTS]{};
 };
@@ -84,6 +85,7 @@ static_assert(sizeof(PointLightUniforms) == 48);
 static_assert(MAX_SHADOW_CASCADES <= 4, "cascade_texel_sizes packs one float per cascade into a vec4");
 static_assert(offsetof(FrameUniforms, view_position) == 400);
 static_assert(offsetof(FrameUniforms, fog_start) == 512);
+static_assert(offsetof(FrameUniforms, rain_intensity) == 524);
 static_assert(offsetof(FrameUniforms, point_lights) == 528);
 
 } // namespace engine::graphics

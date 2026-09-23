@@ -34,6 +34,8 @@ layout (std140) uniform FrameUniforms {
     float fogIntensity;
     float fogStart;
     float fogEnd;
+    float wetness;
+    float rainIntensity;
 
     PointLight pointLights[MAX_POINT_LIGHTS];
 };

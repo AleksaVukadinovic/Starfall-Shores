@@ -353,11 +353,13 @@ void GUIController::draw_environment_settings() const {
     section_header("Rain");
     ImGui::Checkbox("Enable Rain", &m_rain->rain_enabled);
     if (m_rain->rain_enabled) {
-        ImGui::SliderFloat("Rain Intensity",  &m_rain->rain_intensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Rain Speed",      &m_rain->rain_speed, 0.1f, 5.0f);
-        ImGui::SliderFloat("Rain Opacity",    &m_rain->rain_opacity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Streak Length",   &m_rain->rain_streak_length, 0.02f, 0.5f);
+        ImGui::SliderFloat("Rain Intensity", &m_rain->rain_intensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Fall Speed",     &m_rain->fall_speed, 2.0f, 30.0f);
+        ImGui::SliderFloat("Drop Length",    &m_rain->drop_length, 0.05f, 2.0f);
+        ImGui::SliderFloat("Drop Width",     &m_rain->drop_width, 0.002f, 0.05f, "%.3f");
+        ImGui::SliderFloat("Rain Opacity",   &m_rain->opacity, 0.0f, 1.0f);
     }
+    ImGui::TextDisabled("Wetness: %.0f%%", m_rain->wetness() * 100.0f);
 
     ImGui::Dummy({0, 8});
     section_header("Wind");

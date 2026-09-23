@@ -39,6 +39,7 @@ layout (location = 1) out vec4 BrightColor;
 #include "frame.glsl"
 #include "shadows.glsl"
 #include "fog.glsl"
+#include "weather.glsl"
 
 struct Material {
     vec3 specular;
@@ -72,14 +73,17 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 lightDir = normalize(lightPosition - FragPos);
 
-    vec3 ambient = lightAmbient * texColor.rgb * lightColor;
+    float surfaceWet = surfaceWetness(normalize(Normal));
+    vec3 albedo = wetAlbedo(texColor.rgb, surfaceWet);
+
+    vec3 ambient = lightAmbient * albedo * lightColor;
 
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = lightDiffuse * diff * texColor.rgb * lightColor;
+    vec3 diffuse = lightDiffuse * diff * albedo * lightColor;
 
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular = lightSpecular * spec * material.specular * lightColor;
+    vec3 specular = lightSpecular * spec * material.specular * lightColor + wetSpecular(norm, viewDir, lightDir, surfaceWet);
 
     float shadow = calculateShadow(FragPos, normalize(Normal));
 
@@ -90,7 +94,7 @@ void main()
         float pDist = length(pointLights[i].position - FragPos);
         float attenuation = 1.0 / (pointLights[i].constant + pointLights[i].linear * pDist + pointLights[i].quadratic * pDist * pDist);
         float pDiff = max(dot(norm, pLightDir), 0.0);
-        vec3 pDiffuse = pointLights[i].diffuse * pDiff * texColor.rgb;
+        vec3 pDiffuse = pointLights[i].diffuse * pDiff * albedo;
         vec3 pReflectDir = reflect(-pLightDir, norm);
         float pSpec = pow(max(dot(viewDir, pReflectDir), 0.0), shininess);
         vec3 pSpecular = pointLights[i].specular * pSpec * material.specular;
