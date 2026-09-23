@@ -14,9 +14,12 @@ namespace engine::resources {
 
 void ResourcesController::initialize() {
     load_shaders();
+    // Models only request their textures; all the images are then decoded in parallel at once.
+    m_texture_loader.emplace();
     load_models();
     load_textures();
-    load_skyboxes();
+    m_texture_loader->load_all();
+    m_texture_loader.reset();
 }
 
 void ResourcesController::terminate() {
@@ -73,20 +76,6 @@ void ResourcesController::load_textures() {
     }
 }
 
-void ResourcesController::load_skyboxes() {
-    if (!exists(m_skyboxes_path)) {
-        spdlog::error(std::format("[ResourcesController]: no {} found to load the skyboxes from", m_skyboxes_path.string()));
-        return;
-    }
-    for (const auto &sky_boxes_entry: std::filesystem::directory_iterator(m_skyboxes_path)) {
-        skybox(sky_boxes_entry.path().stem().string(), sky_boxes_entry.path());
-    }
-}
-
-/**
- * @class AssimpSceneProcessor
- * @brief Processes the meshes in an Assimp scene.
- */
 class AssimpSceneProcessor {
 public:
     /**
@@ -147,22 +136,35 @@ Model *ResourcesController::model(const std::string &name) {
 }
 
 Texture *ResourcesController::texture(const std::string &name, const std::filesystem::path &path, const TextureType texture_type, const bool flip_uvs) {
-    auto &result = m_textures[name];
-    if (!result) {
-        spdlog::info(std::format("load_texture(path={})", path.string()));
-        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture(path, flip_uvs), texture_type, path,
-                                                   path.stem()));
+    if (const auto it = m_textures.find(name); it != m_textures.end()) {
+        return it->second.get();
     }
-    return result.get();
+    spdlog::info(std::format("load_texture(path={})", path.string()));
+    return create_texture(name, path, path.stem().string(), texture_type, [path, flip_uvs] { return load_image(path, flip_uvs); },
+                          file_size(path));
+}
+
+Texture *ResourcesController::create_texture(const std::string &name, const std::filesystem::path &path, const std::string &texture_name,
+                                             const TextureType texture_type, TextureLoader::Decoder decode, const std::uintmax_t decode_cost) {
+    const uint32_t texture_id = graphics::OpenGL::create_texture();
+    if (m_texture_loader) {
+        m_texture_loader->enqueue(texture_id, std::move(decode), decode_cost);
+    } else {
+        graphics::OpenGL::upload_texture(texture_id, decode());
+    }
+    auto &texture = m_textures[name];
+    texture = std::make_unique<Texture>(Texture(texture_id, texture_type, path, texture_name));
+    return texture.get();
 }
 
 Skybox *ResourcesController::skybox(const std::string &name, const std::filesystem::path &path, const bool flip_uvs) {
     auto &result = m_sky_boxes[name];
     if (!result) {
-        spdlog::info(std::format("load_skybox(path={})", path.string()));
+        const std::filesystem::path skybox_path = path.empty() ? m_skyboxes_path / name : path;
+        spdlog::info(std::format("load_skybox(path={})", skybox_path.string()));
         result = std::make_unique<Skybox>(Skybox(graphics::OpenGL::init_skybox_cube(),
-                                                 graphics::OpenGL::load_skybox_textures(path, flip_uvs),
-                                                 path, name));
+                                                 graphics::OpenGL::load_skybox_textures(skybox_path, flip_uvs),
+                                                 skybox_path, name));
     }
     return result.get();
 }
@@ -178,13 +180,14 @@ Shader *ResourcesController::shader(const std::string &name, const std::filesyst
 
 Texture *ResourcesController::texture_from_memory(const std::string &name, const uint8_t *data, const int32_t length,
                                                    const TextureType texture_type, const bool flip_uvs) {
-    auto &result = m_textures[name];
-    if (!result) {
-        spdlog::info(std::format("load_texture_from_memory(name={})", name));
-        result = std::make_unique<Texture>(Texture(graphics::OpenGL::generate_texture_from_memory(data, length, flip_uvs),
-                                                   texture_type, "", name));
+    if (const auto it = m_textures.find(name); it != m_textures.end()) {
+        return it->second.get();
     }
-    return result.get();
+    spdlog::info(std::format("load_texture_from_memory(name={})", name));
+    // The data belongs to the Assimp scene, which is gone by the time a deferred decode runs, so the decoder keeps a copy.
+    return create_texture(name, "", name, texture_type,
+                          [bytes = std::vector(data, data + length), flip_uvs] { return load_image_from_memory(bytes, flip_uvs); },
+                          static_cast<std::uintmax_t>(length));
 }
 
 std::vector<Mesh> AssimpSceneProcessor::process_meshes() {
@@ -250,13 +253,12 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
 
 std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) const {
     std::vector<Texture *> textures;
+    // Only the texture types that shaders sample are loaded; decoding the others would only slow down startup.
+    // Add aiTextureType_SPECULAR, aiTextureType_HEIGHT, or aiTextureType_METALNESS here once a shader uses them.
     const auto ai_texture_types = {
             aiTextureType_DIFFUSE,
-            aiTextureType_SPECULAR,
-            aiTextureType_NORMALS,
-            aiTextureType_HEIGHT,
             aiTextureType_BASE_COLOR,
-            aiTextureType_METALNESS,
+            aiTextureType_NORMALS,
     };
 
     for (const auto ai_texture_type: ai_texture_types) {

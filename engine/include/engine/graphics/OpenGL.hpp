@@ -5,6 +5,7 @@
 
 #pragma once
 #include <filesystem>
+#include <engine/resources/Image.hpp>
 #include <engine/resources/Shader.hpp>
 
 namespace engine::resources {
@@ -68,15 +69,15 @@ public:
     static int32_t shader_type_to_opengl_type(resources::ShaderType type);
 
     /**
-    * @brief Loads the texture from `path` into the OpenGL context.
-    *
-    * @param path path to a texture file.
-    * @param flip_uvs flip_uvs on load.
-    * @returns OpenGL id of a texture object.
+    * @brief Creates an empty texture object. Its contents are set later with @ref OpenGL::upload_texture.
+    * @returns OpenGL id of the texture object.
     */
-    static uint32_t generate_texture(const std::filesystem::path &path, bool flip_uvs);
+    static uint32_t create_texture();
 
-    static uint32_t generate_texture_from_memory(const uint8_t *data, int32_t length, bool flip_uvs);
+    /**
+    * @brief Uploads `image` into the texture `texture_id`, generates mipmaps, and sets repeat wrapping with trilinear filtering.
+    */
+    static void upload_texture(uint32_t texture_id, const resources::Image &image);
 
     /**
     * @brief Get texture format for a `number_of_channels`.
@@ -110,7 +111,7 @@ public:
     * @brief Loads the skybox textures from the `path`.
     * Make sure that images are named: front.jpg, back.jpg, up.jpg, down.jpg, left.jpg, down.jpg.
     * They can be of the other extension as well, but the function will assign each texture to the appropriate
-    * side of the cubemap based on the texture file name.
+    * side of the cubemap based on the texture file name. The six faces are decoded in parallel.
     * @param path directory in which cubemap textures are located.
     * @param flip_uvs wheater to flip_uvs on texture loading.
     * @returns OpenGL id to the cubemap texture

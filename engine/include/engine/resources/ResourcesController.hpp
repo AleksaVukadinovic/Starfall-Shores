@@ -10,6 +10,8 @@
 #include <engine/resources/Texture.hpp>
 #include <engine/resources/Shader.hpp>
 #include <engine/resources/Skybox.hpp>
+#include <engine/resources/TextureLoader.hpp>
+#include <optional>
 #include <unordered_map>
 
 namespace engine::resources {
@@ -49,7 +51,7 @@ public:
     /**
     * @brief Retrieves the @ref Skybox with a given name. You are not supposed to call `delete` on this pointer.
     *
-    * Other params, except name, are optional. If not provided, the function will search for a skybox
+    * Skyboxes are loaded on first use. Other params, except name, are optional. If not provided, the function will search for a skybox
     * in the: "resources/skyboxes".
     * Images for the sides of the skybox cube should be named: left.jpg, right.jpg, top.jpg, bottom.jpg, front.jpg, back.jpg (any supported image extension).
     * @param name of the skybox directory that contains 6 images for each side of the cube.
@@ -93,9 +95,11 @@ private:
     void load_textures();
 
     /**
-    * @brief Loads all the skyboxes from the "resources/skyboxes" directory. Called during @ref ResourcesController::initialize.
+    * @brief Creates the texture object and loads its image with `decode`: batched with the other textures while
+    * @ref ResourcesController::initialize is running, immediately otherwise.
     */
-    void load_skyboxes();
+    Texture *create_texture(const std::string &name, const std::filesystem::path &path, const std::string &texture_name,
+                            TextureType texture_type, TextureLoader::Decoder decode, std::uintmax_t decode_cost);
 
     /**
     * @brief Loads and compile all the shaders from the "resources/shaders" directory. Called during @ref ResourcesController::initialize.
@@ -118,6 +122,10 @@ private:
     * @brief A hashmap of all the loaded @ref Shader.
     */
     std::unordered_map<std::string, std::unique_ptr<Shader> > m_shaders;
+    /**
+    * @brief Decodes textures in parallel; only exists while @ref ResourcesController::initialize runs.
+    */
+    std::optional<TextureLoader> m_texture_loader;
 
     const std::filesystem::path m_models_path = "resources/models";
     const std::filesystem::path m_textures_path = "resources/textures";

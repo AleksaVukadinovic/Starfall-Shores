@@ -81,7 +81,9 @@ Everything is a **`Controller` singleton** that hooks into these phases: `initia
 `ResourcesController` loads everything at init, relative to the CWD:
 - **Shaders:** every `*.glsl` in `resources/shaders/`. The name is the file stem. A single file holds several stages separated by `//#shader vertex`, `//#shader fragment`, and optionally `//#shader geometry`. Linking is checked.
 - **Models:** only the ones listed in `config.json` → `resources.models.<name>.path` (relative to `resources/models/`), with optional `"flip_uvs": true`. They're loaded through Assimp; embedded (glb) textures are supported. `Model::bounds()` is the local AABB. Assimp node transforms are *not* applied to meshes.
-- **Skyboxes:** every subfolder of `resources/skyboxes/` (right/left/top/bottom/front/back images). **Textures:** `resources/textures/`.
+- **Skyboxes:** subfolders of `resources/skyboxes/` (right/left/top/bottom/front/back images), loaded **on first use** (`skybox(name)`), with the 6 faces decoded in parallel. `MainController` preloads the active day and night skyboxes. **Textures:** `resources/textures/`.
+- **Texture loading:** during `ResourcesController::initialize`, `texture()`/`texture_from_memory()` only create the GL texture object and queue the decode. `TextureLoader::load_all()` then decodes on all cores (largest files first) and uploads on the main thread. Outside initialize, loads are synchronous. Decoding goes through `resources::load_image*` (stb_image v2.29, thread-safe per-thread flip). stb is always compiled with `-O2`, even in Debug.
+- Only `DIFFUSE`, `BASE_COLOR` and `NORMALS` material textures are loaded (see `process_materials`), because shaders sample nothing else. Add types there when a shader needs them (e.g. PBR).
 - **Sounds:** loaded by `SoundController` (miniaudio), e.g. `sound("ocean_wind.wav")`.
 
 To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to `app/config.json`, then add it to the `SCENE` table in `MainController.cpp`.

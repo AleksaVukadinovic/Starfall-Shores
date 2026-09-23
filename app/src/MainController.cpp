@@ -38,6 +38,9 @@ namespace app {
         m_camera->rotate_camera(0, 0);
         apply_day_night_lighting();
         create_scene();
+        // Skyboxes load on first use; load the two shown by default now, so switching to night doesn't stall a frame.
+        m_resources->skybox(m_active_daytime_skybox);
+        m_resources->skybox(m_active_nighttime_skybox);
         m_renderer->set_depth_scene([this] { render_depth_scene(); });
         m_background_sound = get<engine::sound::SoundController>()->sound("ocean_wind.wav");
     }

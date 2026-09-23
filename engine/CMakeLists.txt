@@ -26,6 +26,8 @@ add_subdirectory(libs/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(libs/glad EXCLUDE_FROM_ALL)
 add_subdirectory(libs/json EXCLUDE_FROM_ALL)
 add_subdirectory(libs/stb EXCLUDE_FROM_ALL)
+# Image decoding dominates startup time, so it's always optimized, even in Debug builds.
+target_compile_options(stb PRIVATE -O2)
 add_subdirectory(libs/imgui EXCLUDE_FROM_ALL)
 add_subdirectory(libs/glm EXCLUDE_FROM_ALL)
 add_subdirectory(libs/miniaudio EXCLUDE_FROM_ALL)

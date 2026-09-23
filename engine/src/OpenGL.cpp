@@ -1,7 +1,9 @@
 #include <glad/glad.h>
 #include <filesystem>
 #include <array>
-#include <stb_image.h>
+#include <future>
+#include <utility>
+#include <vector>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/resources/Shader.hpp>
 #include <engine/resources/ShaderCompiler.hpp>
@@ -18,59 +20,25 @@ int32_t OpenGL::shader_type_to_opengl_type(const resources::ShaderType type) {
     }
 }
 
-uint32_t OpenGL::generate_texture(const std::filesystem::path &path, const bool flip_uvs) {
+uint32_t OpenGL::create_texture() {
     uint32_t texture_id = 0;
     CHECKED_GL_CALL(glGenTextures, 1, &texture_id);
-
-    int32_t width, height, nr_components;
-    stbi_set_flip_vertically_on_load(flip_uvs);
-    uint8_t *data = stbi_load(path.c_str(), &width, &height, &nr_components, 0);
-    defer {
-        stbi_image_free(data);
-    };
-    if (data) {
-        const int32_t format = texture_format(nr_components);
-
-        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
-        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        CHECKED_GL_CALL(glGenerateMipmap, GL_TEXTURE_2D);
-
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    } else {
-        throw util::EngineError(util::EngineError::Type::AssetLoadingError,
-                                std::format("Failed to load texture {}", path.string()));
-    }
     return texture_id;
 }
 
-uint32_t OpenGL::generate_texture_from_memory(const uint8_t *data, const int32_t length, const bool flip_uvs) {
-    uint32_t texture_id = 0;
-    CHECKED_GL_CALL(glGenTextures, 1, &texture_id);
+void OpenGL::upload_texture(const uint32_t texture_id, const resources::Image &image) {
+    const int32_t format = texture_format(image.channels);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
+    // Rows of 1 and 3 channel images aren't necessarily 4-byte aligned.
+    CHECKED_GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, 1);
+    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, format, image.width, image.height, 0, format, GL_UNSIGNED_BYTE, image.pixels.get());
+    CHECKED_GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, 4);
+    CHECKED_GL_CALL(glGenerateMipmap, GL_TEXTURE_2D);
 
-    int32_t width, height, nr_components;
-    stbi_set_flip_vertically_on_load(flip_uvs);
-    uint8_t *pixels = stbi_load_from_memory(data, length, &width, &height, &nr_components, 0);
-    defer {
-        stbi_image_free(pixels);
-    };
-    if (pixels) {
-        const int32_t format = texture_format(nr_components);
-
-        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
-        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, pixels);
-        CHECKED_GL_CALL(glGenerateMipmap, GL_TEXTURE_2D);
-
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    } else {
-        throw util::EngineError(util::EngineError::Type::AssetLoadingError, "Failed to load embedded texture from memory");
-    }
-    return texture_id;
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 int32_t OpenGL::texture_format(int32_t number_of_channels) {
@@ -159,26 +127,24 @@ uint32_t OpenGL::load_skybox_textures(const std::filesystem::path &path, const b
     RG_GUARANTEE(std::filesystem::is_directory(path),
                  "Directory '{}' doesn't exist. Please specify path to be a directory to where the cubemap textures are located. The cubemap textures should be named: right, left, top, bottom, front, back; by their respective faces in the cubemap.",
                  path.string());
+    std::vector<std::pair<std::filesystem::path, std::future<resources::Image>>> faces;
+    for (const auto &file: std::filesystem::directory_iterator(path)) {
+        faces.emplace_back(file.path(), std::async(std::launch::async, [file_path = file.path(), flip_uvs] {
+            return resources::load_image(file_path, flip_uvs);
+        }));
+    }
+
     uint32_t texture_id;
     CHECKED_GL_CALL(glGenTextures, 1, &texture_id);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_CUBE_MAP, texture_id);
-
-    int width, height, nr_channels;
-    for (const auto &file: std::filesystem::directory_iterator(path)) {
-        stbi_set_flip_vertically_on_load(flip_uvs);
-        unsigned char *data = stbi_load(absolute(file).c_str(), &width, &height, &nr_channels, 0);
-        defer {
-            stbi_image_free(data);
-        };
-        if (data) {
-            const uint32_t i = face_index(file.path().stem().c_str());
-            int32_t format = texture_format(nr_channels);
-            CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        } else {
-            throw util::EngineError(util::EngineError::Type::AssetLoadingError,
-                                    std::format("Failed to load skybox texture {}", path.string()));
-        }
+    CHECKED_GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, 1);
+    for (auto &[face_path, decoding]: faces) {
+        const resources::Image face = decoding.get();
+        const uint32_t i = face_index(face_path.stem().c_str());
+        const int32_t format = texture_format(face.channels);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, face.width, face.height, 0, format, GL_UNSIGNED_BYTE, face.pixels.get());
     }
+    CHECKED_GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, 4);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
