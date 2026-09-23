@@ -7,6 +7,7 @@
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/RainController.hpp>
 #include <engine/graphics/Renderer.hpp>
+#include <engine/graphics/WaterController.hpp>
 #include <engine/platform/TimeController.hpp>
 
 namespace app {
@@ -43,6 +44,7 @@ namespace app {
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;
         RainController *m_rain = nullptr;
+        engine::graphics::WaterController *m_water = nullptr;
         MainController *m_main_controller = nullptr;
         engine::platform::TimeController *m_time = nullptr;
         engine::graphics::Renderer *m_renderer = nullptr;

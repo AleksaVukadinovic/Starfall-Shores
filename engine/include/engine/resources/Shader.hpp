@@ -7,6 +7,7 @@
 
 #include <engine/util/Utils.hpp>
 #include <string>
+#include <span>
 #include <string_view>
 #include <unordered_map>
 #include <glm/glm.hpp>
@@ -89,6 +90,13 @@ public:
     * @param value The value to set.
     */
     void set_vec4(std::string_view name, const glm::vec4 &value) const;
+
+    /**
+    * @brief Sets a vec4 array uniform, starting at its first element.
+    * @param name The name of the array uniform, without an index.
+    * @param values The values to set.
+    */
+    void set_vec4_array(std::string_view name, std::span<const glm::vec4> values) const;
 
     /**
     * @brief Sets a 2x2 matrix uniform value.

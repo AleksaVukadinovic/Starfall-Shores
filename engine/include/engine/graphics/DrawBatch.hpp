@@ -24,7 +24,6 @@ namespace engine::graphics {
 enum class Effect {
     None,
     Wind,
-    Water,
     Fire
 };
 

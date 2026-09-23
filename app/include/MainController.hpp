@@ -7,6 +7,7 @@
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
+#include <engine/graphics/WaterController.hpp>
 #include <engine/util/Transform.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -50,7 +51,7 @@ namespace app {
             "terrain", "campfire", "log_seat", "viking_tent", "stylized_tent",
             "yellow_tree", "green_tree", "beech_tree", "pine_tree", "oak_tree", "old_tree",
             "bush1", "bush2", "laurel_bush", "white_flowers", "red_flowers",
-            "path", "shrooms", "grave", "fire", "water", "grass", "lighthouse", "crow", "seagull"
+            "path", "shrooms", "grave", "fire", "grass", "lighthouse", "crow", "seagull"
         };
 
         /**
@@ -93,6 +94,7 @@ namespace app {
         engine::graphics::Renderer *m_renderer              = nullptr;
         engine::platform::TimeController *m_time = nullptr;
         FogController *m_fog                                = nullptr;
+        engine::graphics::WaterController *m_water          = nullptr;
         engine::graphics::Camera *m_camera                  = nullptr;
         engine::resources::Sound *m_background_sound               = nullptr;
         const engine::resources::Shader *m_placement_shader = nullptr;

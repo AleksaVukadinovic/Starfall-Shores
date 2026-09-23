@@ -29,10 +29,6 @@ struct WindParams {
     float intensity    = 0.8f;
 };
 
-struct WaterParams {
-    glm::vec3 color = glm::vec3(0.0f, 0.4f, 0.6f);
-};
-
 struct FireParams {
     glm::vec3 fire_color        = glm::vec3(1.0f, 0.6f, 0.2f);
     glm::vec3 glow_color        = glm::vec3(1.0f, 0.3f, 0.0f);
@@ -67,7 +63,6 @@ public:
     }
 
     WindParams wind;
-    WaterParams water;
     FireParams fire;
 
     /**

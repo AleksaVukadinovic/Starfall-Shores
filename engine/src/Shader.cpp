@@ -48,6 +48,10 @@ void Shader::set_vec4(const std::string_view name, const glm::vec4 &value) const
     CHECKED_GL_CALL(glUniform4fv, uniform_location(name), 1, &value[0]);
 }
 
+void Shader::set_vec4_array(const std::string_view name, const std::span<const glm::vec4> values) const {
+    CHECKED_GL_CALL(glUniform4fv, uniform_location(name), static_cast<int>(values.size()), &values[0][0]);
+}
+
 void Shader::set_mat2(const std::string_view name, const glm::mat2 &mat) const {
     CHECKED_GL_CALL(glUniformMatrix2fv, uniform_location(name), 1, GL_FALSE, &mat[0][0]);
 }

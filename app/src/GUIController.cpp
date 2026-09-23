@@ -76,6 +76,7 @@ void GUIController::initialize() {
     m_fog = get<FogController>();
     m_greyscale = get<GreyscaleController>();
     m_rain = get<RainController>();
+    m_water = get<engine::graphics::WaterController>();
     m_main_controller = get<MainController>();
     m_fps_camera = get<engine::graphics::FPSCameraController>();
     m_shadow = get<engine::graphics::ShadowController>();
@@ -360,6 +361,19 @@ void GUIController::draw_environment_settings() const {
         ImGui::SliderFloat("Rain Opacity",   &m_rain->opacity, 0.0f, 1.0f);
     }
     ImGui::TextDisabled("Wetness: %.0f%%", m_rain->wetness() * 100.0f);
+
+    ImGui::Dummy({0, 8});
+    section_header("Water");
+    ImGui::SliderFloat("Water Level",    &m_water->level, 0.0f, 15.0f);
+    ImGui::SliderFloat("Wave Height",    &m_water->wave_height, 0.0f, 2.0f);
+    ImGui::SliderFloat("Wavelength",     &m_water->wavelength, 2.0f, 60.0f);
+    ImGui::SliderFloat("Choppiness",     &m_water->choppiness, 0.0f, 1.0f);
+    ImGui::SliderFloat("Wave Direction", &m_water->wind_direction, 0.0f, 360.0f, "%.0f deg");
+    ImGui::SliderFloat("Wave Speed",     &m_water->wave_speed, 0.0f, 3.0f);
+    ImGui::SliderFloat("Foam",           &m_water->foam, 0.0f, 1.0f);
+    ImGui::SliderFloat("Opacity",        &m_water->opacity, 0.0f, 1.0f);
+    ImGui::ColorEdit3("Deep Color",      &m_water->deep_color.x);
+    ImGui::ColorEdit3("Shallow Color",   &m_water->shallow_color.x);
 
     ImGui::Dummy({0, 8});
     section_header("Wind");

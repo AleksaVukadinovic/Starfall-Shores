@@ -10,6 +10,7 @@
 #include <engine/graphics/RainController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
+#include <engine/graphics/WaterController.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
@@ -26,6 +27,7 @@ namespace app {
         const auto lighting_controller = register_controller<engine::graphics::LightingController>();
         const auto renderer = register_controller<engine::graphics::Renderer>();
         const auto time_controller = register_controller<engine::platform::TimeController>();
+        const auto water_controller = register_controller<engine::graphics::WaterController>();
         main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         fps_camera->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         shadow_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
@@ -34,8 +36,9 @@ namespace app {
         post_processing_controller->after(renderer);
         fog_controller->after(post_processing_controller);
         greyscale_controller->after(post_processing_controller);
-        // Rain is transparent: it's drawn after the whole scene, including the skybox, and before the GUI.
-        rain_controller->after(main_controller);
+        // Water and rain are transparent: they're drawn after the whole scene, including the skybox, and before the GUI.
+        water_controller->after(main_controller);
+        rain_controller->after(water_controller);
         main_controller->after(post_processing_controller);
         gui_controller->after(rain_controller);
         time_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());

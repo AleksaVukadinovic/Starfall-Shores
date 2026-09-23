@@ -24,30 +24,32 @@ vec2 rippleHash(vec2 cell)
     return fract(sin(vec2(dot(cell, vec2(127.1, 311.7)), dot(cell, vec2(269.5, 183.3)))) * 43758.5453);
 }
 
-// Horizontal slope of expanding rings where rain drops hit a water surface at worldXZ.
-// Drops land at random spots and times in a grid of cells; each ring grows and fades out.
-vec2 rainRipples(vec2 worldXZ)
+// Rain drops hitting a water surface at worldXZ: xy is the horizontal slope of the expanding rings, z is the brightness
+// of the small splash where a drop just landed. Drops land at random spots and times in a grid of cells rather than
+// being traced one by one; as many land as it's raining.
+vec3 rainImpacts(vec2 worldXZ)
 {
     const float CELL_SIZE = 0.6;
     const float RING_SPEED = 0.8;
     const float MAX_RADIUS = 0.5;
     vec2 p = worldXZ / CELL_SIZE;
     vec2 cell = floor(p);
-    vec2 slope = vec2(0.0);
+    vec3 impacts = vec3(0.0);
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             vec2 neighbour = cell + vec2(x, y);
             vec2 random = rippleHash(neighbour);
-            float age = fract(time * RING_SPEED + random.x);
-            // Only as many drops land as it's raining.
-            if (rippleHash(neighbour + floor(time * RING_SPEED + random.x)).y > rainIntensity)
+            float cycle = time * RING_SPEED + random.x;
+            if (rippleHash(neighbour + floor(cycle)).y > rainIntensity)
                 continue;
+            float age = fract(cycle);
             vec2 toCenter = p - (neighbour + random);
             float dist = length(toCenter);
             float ring = dist - age * MAX_RADIUS / CELL_SIZE;
             float wave = sin(ring * 40.0) * smoothstep(0.15, 0.0, abs(ring)) * (1.0 - age);
-            slope += toCenter / max(dist, 0.001) * wave;
+            impacts.xy += toCenter / max(dist, 0.001) * wave;
+            impacts.z += smoothstep(0.06, 0.0, dist) * smoothstep(0.12, 0.0, age);
         }
     }
-    return slope * rainIntensity;
+    return impacts * vec3(rainIntensity, rainIntensity, 1.0);
 }

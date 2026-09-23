@@ -9,8 +9,10 @@ Key goals included writing everything from scratch, gaining deeper insight into 
 - **Scene:** an island camp with tents, a campfire, a lighthouse, forests, flowers, grass, and water
 - **Day/night cycle:** driven by an in-game clock, with smooth exposure and fog transitions and a campfire light at night
 - **Cascaded shadow maps:** four cascades follow the camera, with soft filtered edges, and are re-rendered only when they go stale
-- **HDR rendering with bloom:** mip-chain downsample/upsample bloom, exposure tone mapping, and greyscale, underwater, and rain screen effects
-- **Effects:** wind-animated vegetation, animated water, a procedural fire shader, and fog
+- **HDR rendering with bloom:** mip-chain downsample/upsample bloom, exposure tone mapping, and greyscale and underwater screen effects
+- **Endless ocean:** a camera-following Gerstner wave surface with sky reflections, sun glints, and foam, configurable in the settings
+- **Rain:** 3D rain streaks with wet surfaces and raindrop ripples on the water
+- **Effects:** wind-animated vegetation, a procedural fire shader, and fog
 - **Performance:** frustum culling, instanced rendering with persistent GPU buffers, and one per-frame uniform buffer shared by all shaders
 - **Built-in GPU/CPU profiler:** open **Settings → Debug** in the pause menu to see per-pass timings, draw calls, and culling statistics
 - **In-app editor:** ImGui settings (graphics, environment, sound, time) and a model placement tool
@@ -190,10 +192,11 @@ You only need to include `<engine/core/Engine.hpp>` in your part of the project 
 │   ├── LightingController.hpp
 │   ├── OpenGL.hpp
 │   ├── PostProcessingController.hpp  # HDR, bloom, screen effects
-│   ├── RainController.hpp
+│   ├── RainController.hpp      # 3D rain and wetness
 │   ├── Renderer.hpp            # culling, batching, shadow passes
 │   ├── ShaderInterface.hpp     # C++ side of the shader uniform layout
-│   └── ShadowController.hpp    # cascaded shadow maps
+│   ├── ShadowController.hpp    # cascaded shadow maps
+│   └── WaterController.hpp     # Gerstner wave ocean
 ├── platform
 │   ├── Input.hpp
 │   ├── PlatformController.hpp

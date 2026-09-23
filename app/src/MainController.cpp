@@ -26,6 +26,7 @@ namespace app {
         m_graphics = get<engine::graphics::GraphicsController>();
         m_bloom = get<engine::graphics::PostProcessingController>();
         m_fog               = get<FogController>();
+        m_water             = get<engine::graphics::WaterController>();
         m_shadow            = get<engine::graphics::ShadowController>();
         m_lighting          = get<engine::graphics::LightingController>();
         m_renderer          = get<engine::graphics::Renderer>();
@@ -53,7 +54,6 @@ namespace app {
 
     using engine::util::model_matrix;
 
-    static constexpr std::array<TransformData, 1> WATER = {{{{0, 0, 7}, {-90, 0, 0}, {30, 30, 1}}}};
     static constexpr std::array<TransformData, 2> TERRAIN = {{
         {{0, 0, 0}, {0, 0, 0}, {1, 1, 1}},
         {{-8.15f, 2.3f, -89.5f}, {0, 0, 0}, {0.72f, 0.72f, 0.72f}},
@@ -133,7 +133,6 @@ namespace app {
      * @brief Everything the scene draws, in drawing order. Resolved into @ref SceneObject instances once, in @ref MainController::create_scene.
      */
     static constexpr std::array SCENE = {
-        SceneObjectDescription{.model = "water", .shader = "water_shader", .transforms = WATER, .method = DrawMethod::Blended, .effect = Effect::Water},
         SceneObjectDescription{.model = "terrain", .shader = "basic", .transforms = TERRAIN, .casts_shadow = true},
         SceneObjectDescription{.model = "viking_tent", .shader = "basic", .transforms = VIKING_TENT, .casts_shadow = true},
         SceneObjectDescription{.model = "stylized_tent", .shader = "basic", .transforms = STYLIZED_TENT, .casts_shadow = true},
@@ -189,10 +188,11 @@ namespace app {
         const auto shader = m_resources->shader("skybox");
         const engine::resources::Skybox *skybox_cube = m_resources->skybox(m_is_day ? m_active_daytime_skybox : m_active_nighttime_skybox);
         m_graphics->draw_skybox(shader, skybox_cube);
+        m_water->reflected_skybox = skybox_cube;
     }
 
     void MainController::update() {
-        m_bloom->underwater = m_camera->Position.y < 7.0f;
+        m_bloom->underwater = m_camera->Position.y < m_water->level;
         update_day_night_transition();
         update_toggles();
         update_sound();
@@ -266,7 +266,6 @@ namespace app {
         color     = m_is_day ? LIGHT_COLOR_DAY : LIGHT_COLOR_NIGHT;
         shininess = m_is_day ? SHININESS_DAY : SHININESS_NIGHT;
         m_shadow->light_position = position;
-        m_renderer->water.color = m_is_day ? glm::vec3(0.0f, 0.4f, 0.6f) : glm::vec3(0.0f, 0.0f, 0.08f);
 
         m_lighting->clear_point_lights();
         if (!m_is_day) {

@@ -142,9 +142,6 @@ void Renderer::apply_effect(const resources::Shader *shader, const Effect effect
             shader->set_bool("windEnabled", wind.enabled);
             shader->set_float("windIntensity", wind.intensity);
             break;
-        case Effect::Water:
-            shader->set_vec3("waterColor", water.color);
-            break;
         case Effect::Fire:
             shader->set_float("flameTime", static_cast<float>(platform::PlatformController::get_time() - fire.start_time));
             shader->set_vec3("fireColor", fire.fire_color);
