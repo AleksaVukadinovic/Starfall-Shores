@@ -6,6 +6,7 @@
 #include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/Renderer.hpp>
+#include <engine/graphics/Scene.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/graphics/WaterController.hpp>
 #include <engine/util/Transform.hpp>
@@ -29,15 +30,6 @@ namespace app {
         float scale;
     };
 
-    /**
-     * @brief A model drawn by the scene: its placements, how to draw them, and whether they cast shadows.
-     */
-    struct SceneObject {
-        const engine::graphics::DrawBatch *batch = nullptr;
-        const engine::resources::Shader *shader  = nullptr;
-        engine::graphics::Effect effect          = engine::graphics::Effect::None;
-        bool casts_shadow                        = false;
-    };
 
     class MainController final : public engine::core::Controller {
     public:
@@ -99,8 +91,12 @@ namespace app {
         engine::resources::Sound *m_background_sound               = nullptr;
         const engine::resources::Shader *m_placement_shader = nullptr;
 
-        std::vector<SceneObject> m_scene_objects;
-        SceneObject m_fire;
+        engine::graphics::Scene m_scene;
+        static constexpr std::string_view SCENE_PATH = "resources/scene.json";
+        /**
+         * @brief Scene entities in this group (like the campfire flames) are only shown at night.
+         */
+        static constexpr std::string_view NIGHT_GROUP = "night";
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;

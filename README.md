@@ -15,6 +15,7 @@ Key goals included writing everything from scratch, gaining deeper insight into 
 - **Effects:** wind-animated vegetation, a procedural fire shader, and fog
 - **Performance:** frustum culling, instanced rendering with persistent GPU buffers, and one per-frame uniform buffer shared by all shaders
 - **Built-in GPU/CPU profiler:** open **Settings → Debug** in the pause menu to see per-pass timings, draw calls, and culling statistics
+- **Scene file:** every model placement lives in one JSON file, `app/resources/scene.json`
 - **In-app editor:** ImGui settings (graphics, environment, sound, time) and a model placement tool
 - **3D models:** loaded with Assimp (glTF, GLB, OBJ, ...)
 - **Sound:** played through miniaudio

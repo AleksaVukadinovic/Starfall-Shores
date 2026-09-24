@@ -1,0 +1,473 @@
+{
+  "entities": [
+    {
+      "model": "terrain",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [0, 0, 0]},
+        {"position": [-8.15, 2.3, -89.5], "scale": 0.72}
+      ]
+    },
+    {
+      "model": "viking_tent",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [19.823, 17, -7.683], "rotation": [0, -20, 0], "scale": 0.037}
+      ]
+    },
+    {
+      "model": "stylized_tent",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [26.004, 20, 20.317], "rotation": [0, -128, 0], "scale": 0.06}
+      ]
+    },
+    {
+      "model": "grave",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [72.168, 12, -25.957], "rotation": [-90, 0, -48], "scale": 1.35}
+      ]
+    },
+    {
+      "model": "campfire",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [12, 17.3, 6]}
+      ]
+    },
+    {
+      "model": "lighthouse",
+      "shader": "basic",
+      "transforms": [
+        {"position": [-102, 15, -107], "scale": 5}
+      ]
+    },
+    {
+      "model": "log_seat",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [5.797, 17.5, -2.528], "rotation": [0, 42, 0], "scale": 0.04},
+        {"position": [10.697, 17.5, 14.919], "rotation": [0, 155, 0], "scale": 0.04},
+        {"position": [25.431, 17.5, 5.5], "rotation": [0, -100, 0], "scale": 0.04}
+      ]
+    },
+    {
+      "model": "bush1",
+      "shader": "basic",
+      "method": "blended",
+      "transforms": [
+        {"position": [-19, 16, 3], "rotation": [-90, 0, 0], "scale": 5},
+        {"position": [15, 16, -25], "rotation": [-90, 0, 0], "scale": 5},
+        {"position": [52, 17, 19], "rotation": [-90, 0, 0], "scale": 5},
+        {"position": [31, 17, 32], "rotation": [-90, 0, 0], "scale": 5},
+        {"position": [12, 17, 24], "rotation": [-90, 0, 0], "scale": 5}
+      ]
+    },
+    {
+      "model": "bush2",
+      "shader": "basic",
+      "method": "blended",
+      "transforms": [
+        {"position": [4, 20, -13], "scale": 0.3},
+        {"position": [32, 20, 4], "scale": 0.3},
+        {"position": [30, 20, 12], "scale": 0.3}
+      ]
+    },
+    {
+      "model": "laurel_bush",
+      "shader": "basic",
+      "method": "blended",
+      "transforms": [
+        {"position": [-25, 16, 0], "scale": 0.68},
+        {"position": [-25, 16, 12], "scale": 0.68},
+        {"position": [-20, 16, 23], "scale": 0.68},
+        {"position": [-5, 16, 23], "scale": 0.68},
+        {"position": [6, 17, 20], "scale": 0.68},
+        {"position": [33, 17, -6], "scale": 0.68}
+      ]
+    },
+    {
+      "model": "yellow_tree",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [49, 17, 9], "scale": 0.04},
+        {"position": [0, 17, -22], "scale": 0.04},
+        {"position": [-25, 15, 5], "scale": 0.04},
+        {"position": [4, 17, 25], "scale": 0.04},
+        {"position": [39, 17, -5], "scale": 0.06},
+        {"position": [45, 17, 12], "scale": 0.06},
+        {"position": [37, 17, 32], "scale": 0.06},
+        {"position": [11, 17, 32], "scale": 0.06},
+        {"position": [-69, 16, 19], "scale": 0.06},
+        {"position": [-59, 20, 26], "scale": 0.06},
+        {"position": [-65, 20, 34], "scale": 0.06},
+        {"position": [-76, 20, 31], "scale": 0.06},
+        {"position": [-86, 20, 26], "scale": 0.06},
+        {"position": [-86, 20, 13], "scale": 0.06},
+        {"position": [-77, 20, 6], "scale": 0.06},
+        {"position": [60, 13, -20], "scale": 0.05},
+        {"position": [54, 13, -31], "scale": 0.05},
+        {"position": [59, 13, -39], "scale": 0.05},
+        {"position": [36.8, 13.355, 9.45], "scale": 0.06},
+        {"position": [9.45, 16.61, 33.55], "scale": 0.06},
+        {"position": [-56.35, 15.96, 33.55], "scale": 0.06},
+        {"position": [-63.52, 15.96, 46.6], "scale": 0.06}
+      ]
+    },
+    {
+      "model": "green_tree",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [-10, 17, -1], "rotation": [-90, 0, 0], "scale": 0.22},
+        {"position": [-2, 16, -6], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [45, 16, -1], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [-1, 16, 39], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [8, 17, -11], "rotation": [-90, 0, 0], "scale": 0.22},
+        {"position": [33, 17, -10], "rotation": [-90, 0, 0], "scale": 0.22},
+        {"position": [17, 17, 24], "rotation": [-90, 0, 0], "scale": 0.22},
+        {"position": [39, 17, 24], "rotation": [-90, 0, 0], "scale": 0.22},
+        {"position": [-59, 20, 16], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [-74, 20, 24], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [-68, 20, 41], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [-67, 20, 9], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [-87, 20, 19], "rotation": [-90, 0, 0], "scale": 0.29},
+        {"position": [45, 12, -39], "rotation": [-90, 0, 0], "scale": 0.24},
+        {"position": [65, 12, -10], "rotation": [-90, 0, 0], "scale": 0.24},
+        {"position": [40.7, 16, 20], "rotation": [-90, 0, 0], "scale": 0.3}
+      ]
+    },
+    {
+      "model": "beech_tree",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [-6, 14, -15], "scale": 0.1},
+        {"position": [-19, 14, -8], "scale": 0.1},
+        {"position": [21, 14, 38], "scale": 0.1},
+        {"position": [-6.84, 16.612, -20.521], "scale": 0.093},
+        {"position": [4.235, 16.612, 27.036], "scale": 0.093}
+      ]
+    },
+    {
+      "model": "pine_tree",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [32, 17, 0], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [36, 17, -22], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [12, 17, -20], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [49, 17, 9], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [23, 17, 30], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-5, 17, 26], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-11, 17, -1], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-26, 13, 0], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-12, 17, -10], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [26, 17, -29], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-11, 17, -10], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-11, 17, 30], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [3, 17, -28], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-63, 20, 10], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-63, 20, 5], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-72, 20, 4], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-72, 20, 13], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-78, 20, 11], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-78, 20, 21], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-77, 20, 24], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-82, 20, 31], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-69, 20, 30], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-72, 20, 37], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [55, 12, -12], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [53, 12, -19], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [36, 12, -38], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-75.896, 19.87, -2.28], "rotation": [-90, 0, 0], "scale": 11},
+        {"position": [-11.075, 14.984, -67.101], "rotation": [-90, 0, 0], "scale": 9.2},
+        {"position": [-7.166, 14.984, -65.798], "rotation": [-90, 0, 0], "scale": 7.8},
+        {"position": [-7.166, 14.984, -61.889], "rotation": [-90, 0, 0], "scale": 7.3},
+        {"position": [-3.257, 13.681, -78.827], "rotation": [-90, 0, 0], "scale": 9.7},
+        {"position": [1.954, 13.681, -84.039], "rotation": [-90, 0, 0], "scale": 8.4},
+        {"position": [-1.954, 13.681, -82.736], "rotation": [-90, 0, 0], "scale": 7.6},
+        {"position": [-20.195, 13.681, -82.736], "rotation": [-90, 0, 0], "scale": 9.1},
+        {"position": [-14.984, 13.681, -89.251], "rotation": [-90, 0, 0], "scale": 8.8},
+        {"position": [-17.59, 13.681, -94.463], "rotation": [-90, 0, 0], "scale": 7.4},
+        {"position": [-17.59, 13.681, -90.554], "rotation": [-90, 0, 0], "scale": 9.5},
+        {"position": [-20.195, 13.681, -90.554], "rotation": [-90, 0, 0], "scale": 8.1},
+        {"position": [-16.287, 13.681, -100.977], "rotation": [-90, 0, 0], "scale": 7.9},
+        {"position": [-12.378, 13.681, -100.977], "rotation": [-90, 0, 0], "scale": 9.3},
+        {"position": [-9.772, 13.681, -97.068], "rotation": [-90, 0, 0], "scale": 8.6},
+        {"position": [-13.681, 13.681, -97.068], "rotation": [-90, 0, 0], "scale": 7.2},
+        {"position": [-5.863, 13.681, -103.583], "rotation": [-90, 0, 0], "scale": 9.8},
+        {"position": [1.954, 13.681, -104.886], "rotation": [-90, 0, 0], "scale": 8.3},
+        {"position": [14.984, 13.681, -93.16], "rotation": [-90, 0, 0], "scale": 7.5},
+        {"position": [14.984, 13.681, -80.13], "rotation": [-90, 0, 0], "scale": 9.4},
+        {"position": [12.378, 13.681, -89.251], "rotation": [-90, 0, 0], "scale": 8.7},
+        {"position": [12.378, 13.681, -85.342], "rotation": [-90, 0, 0], "scale": 7.1},
+        {"position": [7.166, 13.681, -85.342], "rotation": [-90, 0, 0], "scale": 9.6},
+        {"position": [7.166, 13.681, -89.251], "rotation": [-90, 0, 0], "scale": 8.2},
+        {"position": [4.56, 13.681, -82.736], "rotation": [-90, 0, 0], "scale": 7.7},
+        {"position": [5.863, 13.681, -60.586], "rotation": [-90, 0, 0], "scale": 9},
+        {"position": [5.863, 13.681, -65.798], "rotation": [-90, 0, 0], "scale": 8.5},
+        {"position": [13.681, 13.681, -65.798], "rotation": [-90, 0, 0], "scale": 7.3},
+        {"position": [18.893, 13.681, -65.798], "rotation": [-90, 0, 0], "scale": 9.9},
+        {"position": [22.801, 13.681, -65.798], "rotation": [-90, 0, 0], "scale": 8},
+        {"position": [22.801, 13.681, -69.707], "rotation": [-90, 0, 0], "scale": 7.6},
+        {"position": [17.59, 13.681, -73.616], "rotation": [-90, 0, 0], "scale": 9.2},
+        {"position": [17.59, 13.681, -68.404], "rotation": [-90, 0, 0], "scale": 8.4},
+        {"position": [5.863, 13.681, -68.404], "rotation": [-90, 0, 0], "scale": 7.8},
+        {"position": [5.863, 13.681, -74.919], "rotation": [-90, 0, 0], "scale": 9.5},
+        {"position": [5.863, 13.681, -78.827], "rotation": [-90, 0, 0], "scale": 8.1},
+        {"position": [0.651, 13.681, -78.827], "rotation": [-90, 0, 0], "scale": 7.4},
+        {"position": [12.378, 13.681, -73.616], "rotation": [-90, 0, 0], "scale": 9.7},
+        {"position": [20.195, 13.681, -76.221], "rotation": [-90, 0, 0], "scale": 8.6},
+        {"position": [16.287, 13.681, -76.221], "rotation": [-90, 0, 0], "scale": 7.2},
+        {"position": [11.075, 13.681, -77.524], "rotation": [-90, 0, 0], "scale": 9.3},
+        {"position": [21.498, 13.681, -82.736], "rotation": [-90, 0, 0], "scale": 8.8},
+        {"position": [16.287, 13.681, -85.342], "rotation": [-90, 0, 0], "scale": 7.5},
+        {"position": [24.104, 13.681, -85.342], "rotation": [-90, 0, 0], "scale": 9.1},
+        {"position": [24.104, 13.681, -91.857], "rotation": [-90, 0, 0], "scale": 8.3},
+        {"position": [-17.59, 14.984, -67.101], "rotation": [-90, 0, 0], "scale": 9.3},
+        {"position": [-16.287, 14.984, -71.01], "rotation": [-90, 0, 0], "scale": 8.7},
+        {"position": [-21.5, 14.984, -69.707], "rotation": [-90, 0, 0], "scale": 9.5},
+        {"position": [21.498, 14.984, -98.371], "rotation": [-90, 0, 0], "scale": 7.8}
+      ]
+    },
+    {
+      "model": "oak_tree",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [-17, 17, 28], "rotation": [90, 0, 0], "scale": 0.21}
+      ]
+    },
+    {
+      "model": "old_tree",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [62.817, 43.347, -39], "rotation": [0, 0, 3], "scale": 0.04},
+        {"position": [-92.834, 44.474, 6.641], "rotation": [24.039, 0, 0], "scale": 0.032}
+      ]
+    },
+    {
+      "model": "white_flowers",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "effect": "wind",
+      "transforms": [
+        {"position": [-3, 17.2, -21], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-7, 17.2, -17], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-14, 17.2, -11], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-22, 17.2, -4], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-27, 15, 5], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-15, 17.2, 28], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-1, 17.2, 34], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [9, 17.2, 36], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [18, 17.2, 36], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [28, 17.2, 36], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [38, 17.2, 29], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [51, 17.2, 9], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [5, 17.2, -16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-62, 20, 7], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-66, 20, 7], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-70, 20, 7], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-74, 20, 7], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-77, 20, 9], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-82, 20, 13], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-83, 20, 18], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-79, 20, 27], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-74, 20, 27], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-67, 20, 14], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-73, 20, 16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-73, 20, 19], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-69, 20, 23], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-65, 20, 28], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-59, 20, 29], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-66, 20, 36], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-72, 20, 33], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-76, 20, 33], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-72, 20, 40], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [37, 17, 5], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [37, 17, 13], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [35, 17, 16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [-7, 17, 30], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [59, 12.2, -14], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [63, 12.2, -16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [63, 12.2, -21], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [57, 12.2, -21], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [55, 12.2, -21], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [53, 12.2, -25], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [53, 12.2, -30], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [61, 12.2, -30], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [61, 12.2, -35], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [55, 12.2, -35], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [50, 12.2, -35], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [45, 12.2, -35], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, -16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, -12], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, -8], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, -4], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, 0], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, 4], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, 8], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, 12], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, 16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [40, 17.4, 20], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, -16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, -12], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, -8], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, -4], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, 0], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, 4], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, 8], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, 12], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, 16], "rotation": [90, 0, 0], "scale": 0.12},
+        {"position": [44, 17.4, 20], "rotation": [90, 0, 0], "scale": 0.12}
+      ]
+    },
+    {
+      "model": "red_flowers",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "effect": "wind",
+      "transforms": [
+        {"position": [-10, 17, 0], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-4, 17, -9], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-4, 17, -19], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-12, 17, -13], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-15, 17, -6], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-17, 17, -3], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [34, 17, -2], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [43, 17, -2], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [43, 17, -10], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [31, 17, -10], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [31, 17, -15], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [49, 17, 3], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [50, 17, 14], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [43, 17, 26], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [26, 17, 29], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [17, 17, 29], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [17, 17, 40], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [10, 17, 37], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [4, 17, 38], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [4, 17, 23], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [7, 17, 23], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-65, 20, 18], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-57, 20, 11], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-69, 20, 3], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-74, 20, 11], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-83, 20, 15], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-80, 20, 26], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-70, 20, 34], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-65, 20, 38], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-62, 20, 31], "rotation": [-90, 0, 0], "scale": 0.04},
+        {"position": [-54, 20, 26], "rotation": [-90, 0, 0], "scale": 0.04}
+      ]
+    },
+    {
+      "model": "path",
+      "shader": "flower_shader",
+      "method": "instanced",
+      "transforms": [
+        {"position": [-21.447, 16.527, 17.886], "rotation": [90, 10, 15], "scale": 0.19},
+        {"position": [-15.244, 17.269, 15.506], "rotation": [90, -1, 15], "scale": 0.19},
+        {"position": [-10.161, 17.5, 12.807], "rotation": [90, 0, 15], "scale": 0.19},
+        {"position": [-4.072, 17.5, 11.332], "rotation": [90, 0, 15], "scale": 0.19},
+        {"position": [-3.275, 17.615, 6.054], "rotation": [88.534, -2.932, -85.016], "scale": 0.19},
+        {"position": [-5.95, 17.579, -0.719], "rotation": [88.534, -2.932, -85.016], "scale": 0.19},
+        {"position": [-8.557, 17.568, -6.35], "rotation": [88.534, -2.932, -73.29], "scale": 0.19},
+        {"position": [-9.26, 17.433, -13.04], "rotation": [88.534, -2.932, -63.909], "scale": 0.19},
+        {"position": [-7.6, 17.826, -19.845], "rotation": [88.534, -2.932, -22.866], "scale": 0.19},
+        {"position": [-2.804, 15.013, -61.622], "rotation": [88.534, 0.586, -70.945], "scale": 0.19},
+        {"position": [-4.636, 14.824, -68.246], "rotation": [88.534, 0.586, -74.463], "scale": 0.19},
+        {"position": [-8.469, 14.984, -76.222], "rotation": [90, 0, 90], "scale": 0.19},
+        {"position": [-15.662, 14.984, -77.39], "rotation": [90, 0, 45], "scale": 0.19},
+        {"position": [-22.992, 14.984, -77.337], "rotation": [90, 0, 35], "scale": 0.19},
+        {"position": [-9.374, 14.984, -83.13], "rotation": [90, 0, 140], "scale": 0.19},
+        {"position": [-6.127, 14.984, -87.484], "rotation": [90, 0, 150], "scale": 0.19},
+        {"position": [-2.532, 14.984, -92.671], "rotation": [90, 0, 160], "scale": 0.19},
+        {"position": [3.257, 14.984, -95.765], "rotation": [90, 0, 180], "scale": 0.19},
+        {"position": [8.469, 14.984, -98.371], "rotation": [90, 0, 180], "scale": 0.19}
+      ]
+    },
+    {
+      "model": "shrooms",
+      "shader": "basic",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [6, 17, 0], "rotation": [-90, 0, 0], "scale": 0.19},
+        {"position": [3, 17, -8], "rotation": [-90, 0, 0], "scale": 0.19},
+        {"position": [12, 17, -19], "rotation": [-90, 0, 0], "scale": 0.19},
+        {"position": [30, 17, -1], "rotation": [-90, 0, 0], "scale": 0.19},
+        {"position": [30, 17, 10], "rotation": [-90, 0, 0], "scale": 0.19}
+      ]
+    },
+    {
+      "model": "grass",
+      "shader": "grass_shader",
+      "method": "instanced",
+      "effect": "wind",
+      "casts_shadow": true,
+      "transforms": [
+        {"position": [-12.378, 20.195, 3.257], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-20.195, 16.59, -71.01], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-13.681, 16.59, -71.01], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-11.075, 16.59, -63.192], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [5.863, 16.59, -63.192], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [3.257, 16.59, -63.192], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [3.257, 16.59, -68.404], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [3.257, 16.59, -74.919], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-0.651, 16.59, -74.919], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-3.257, 16.59, -80.13], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [3.257, 16.59, -86.645], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [9.772, 16.59, -90.554], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [9.772, 16.59, -86.645], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [16.287, 16.59, -67.101], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [11.075, 16.59, -72.313], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [11.075, 16.59, -78.827], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [21.498, 16.59, -71.01], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [21.498, 16.59, -78.827], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [20.195, 16.59, -87.948], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [26.71, 16.59, -87.948], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [26.71, 16.59, -82.736], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [26.71, 16.59, -77.524], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [20.195, 16.59, -99.674], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-3.257, 16.59, -99.674], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-3.257, 16.59, -104.886], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [3.257, 16.59, -104.886], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-11.075, 16.59, -93.16], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-20.195, 16.287, -90.554], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-9.772, 18, 7.166], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-21.498, 18.893, 9.772], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-17.59, 16.287, -84.039], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-17.59, 16.287, -95.765], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [-11.075, 16.287, -100.977], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [12.378, 16.287, -93.16], "rotation": [180, 0, 0], "scale": 20},
+        {"position": [22.801, 16.287, -93.16], "rotation": [180, 0, 0], "scale": 20}
+      ]
+    },
+    {
+      "model": "fire",
+      "shader": "fire_shader",
+      "method": "blended",
+      "effect": "fire",
+      "group": "night",
+      "transforms": [
+        {"position": [12, 20.5, 6.5], "scale": 3.1}
+      ]
+    }
+  ]
+}

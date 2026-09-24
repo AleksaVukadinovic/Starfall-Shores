@@ -37,7 +37,7 @@ public:
     /**
      * @brief Height of the calm water surface.
      */
-    float level = 7.0f;
+    float level = 9.2f;
     /**
      * @brief Amplitude of the largest wave, in world units.
      */

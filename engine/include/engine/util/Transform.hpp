@@ -26,9 +26,10 @@ struct TransformData {
 /**
  * @brief Creates a model matrix from per-axis Euler rotations (degrees), translation, and scale.
  *
- * Applies rotations in X → Y → Z order, then translation, then scale.
+ * The model is scaled, then rotated around Z, Y, and X (in that order), then moved to `translation`,
+ * so `translation` is the position of the model origin in the world.
  *
- * @param translation Position offset.
+ * @param translation Position of the model origin.
  * @param rotation_degrees Euler angles in degrees (x, y, z).
  * @param scale Scale factor per axis.
  * @returns The composed model matrix.
@@ -40,7 +41,7 @@ glm::mat4 model_matrix(const glm::vec3 &translation,
 /**
  * @brief Creates a model matrix from a single-axis rotation (degrees), translation, and uniform scale.
  *
- * @param translation Position offset.
+ * @param translation Position of the model origin.
  * @param uniform_scale Uniform scale factor applied to all axes.
  * @param rotation_axis The axis to rotate around.
  * @param rotation_angle_degrees Rotation angle in degrees.
@@ -54,7 +55,7 @@ glm::mat4 model_matrix(const glm::vec3 &translation,
 /**
  * @brief Creates a model matrix from a single-axis rotation (degrees), translation, and non-uniform scale.
  *
- * @param translation Position offset.
+ * @param translation Position of the model origin.
  * @param scale Scale factor per axis.
  * @param rotation_axis The axis to rotate around.
  * @param rotation_angle_degrees Rotation angle in degrees.
@@ -68,7 +69,7 @@ glm::mat4 model_matrix(const glm::vec3 &translation,
 /**
  * @brief Creates a translation-only model matrix.
  *
- * @param translation Position offset.
+ * @param translation Position of the model origin.
  * @returns The composed model matrix.
  */
 glm::mat4 model_matrix(const glm::vec3 &translation);

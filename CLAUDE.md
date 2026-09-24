@@ -62,7 +62,7 @@ Everything is a **`Controller` singleton** that hooks into these phases: `initia
 - Resolve `Model*`/`Shader*` once at init. Never look them up by string per frame.
 - `Effect::{None, Wind, Water, Fire}` sets only that effect's per-draw uniforms (`Renderer::wind/water/fire`). The bounds of animated effects are padded for culling.
 - `LightingController` is pure data: `light` plus at most `MAX_POINT_LIGHTS` point lights. `FogController` is data too.
-- `util::model_matrix(...)` overloads are in `engine/util/Transform.hpp`. Note that `model_matrix(t, r, s)` computes **R*T*S** (rotation is applied before translation); scene coordinates are authored against that.
+- `util::model_matrix(...)` overloads are in `engine/util/Transform.hpp`. `model_matrix(t, r, s)` computes the standard **T·Rx·Ry·Rz·S**, so `t` is the world position of the model origin.
 - `util::AABB` and `util::Frustum` are in `engine/util/Geometry.hpp`.
 
 ### Shader conventions (`engine/graphics/ShaderInterface.hpp` <-> `resources/shaders/include/frame.glsl`)
@@ -86,7 +86,7 @@ Everything is a **`Controller` singleton** that hooks into these phases: `initia
 - Only `DIFFUSE`, `BASE_COLOR` and `NORMALS` material textures are loaded (see `process_materials`), because shaders sample nothing else. Add types there when a shader needs them (e.g. PBR).
 - **Sounds:** loaded by `SoundController` (miniaudio), e.g. `sound("ocean_wind.wav")`.
 
-To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to `app/config.json`, then add it to the `SCENE` table in `MainController.cpp`.
+To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to `app/config.json`, then add an entity for it to `app/resources/scene.json`.
 
 ### Other engine controllers
 - `PlatformController`: GLFW window, input (`key(KEY_X).state() == Key::State::JustPressed`, `is_down()`), `dt()`, `get_time()`.
@@ -106,13 +106,16 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 ## App (`app/`)
 - `MyApp.cpp` registers the app controllers and the optional engine controllers and sets their order.
 - `MainController`:
-  - The scene is the `static constexpr SCENE` table in `MainController.cpp`. Each entry has a model, a shader, transforms, a `DrawMethod`, an `Effect`, and `casts_shadow`. `create_scene()` turns it into `DrawBatch`es once. `draw()` draws them in table order, and `render_depth_scene()` draws the shadow casters from the same table. The fire is separate because it's only drawn at night.
+  - The scene is loaded from **`app/resources/scene.json`**, the single source of truth for placements, by `engine::graphics::Scene::load` (format documented in `engine/graphics/Scene.hpp`). Each entity has a `model`, a `shader`, and `transforms` (`position`, optional `rotation` in degrees, optional `scale` as a number or `[x, y, z]`). Optional fields are `method` (`default`/`blended`/`instanced`), `effect` (`none`/`wind`/`fire`), `casts_shadow`, and `group`.
+  - `draw()` calls `m_scene.draw()` in file order. The depth callback calls `m_scene.draw_shadow_casters()` (only during the day).
+  - Entities in the `"night"` group (the campfire flames) are shown only at night, via `set_group_visible`.
+  - Load errors name the file and entity index.
   - Handles the day/night transition: it's triggered by the clock or the `N` key, and interpolates exposure and fog over `DAY_CHANGE_DELAY` = 5s. It swaps the lighting preset, and adds the campfire point light and fire effect at night.
   - Handles hotkeys: `F` fog, `V` wind, `R` rain, `M` sound.
   - Turns on the underwater tint when camera y < 7.
   - Implements the test-model placement tool. The preview is drawn only while the Debug tab is open (`model_placement_active`). Placed models are logged as `TransformData` literals on exit so they can be pasted into coordinate files.
 - `GUIController`: ImGui menu opened with `ESC`. Has a main page and Settings with Graphics/Environment/Sound/Time/Debug tabs, plus resolution/fullscreen and quit.
-- Static placements are in `app/include/coordinates/*.include`: comma-separated `{{t},{r},{s}}` literals `#include`d into `constexpr std::array<TransformData, N>` in `MainController.cpp`. **Update `N` when you add or remove entries.**
+- The placement tool logs placed models on exit as scene-file transforms, ready to paste into `scene.json`.
 - Shadow casting only happens during the day (`render_depth_scene` returns early at night).
 
 ## Gotchas

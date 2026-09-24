@@ -1,4 +1,3 @@
-#include <Constants.hpp>
 #include <GUIController.hpp>
 #include <MainController.hpp>
 #include <engine/core/Controller.hpp>
@@ -17,7 +16,6 @@
 
 namespace app {
     using vec3 = glm::vec3;
-    using engine::util::TransformData;
 
     void MainController::initialize() {
         engine::graphics::OpenGL::enable_depth_testing();
@@ -54,133 +52,15 @@ namespace app {
 
     using engine::util::model_matrix;
 
-    static constexpr std::array<TransformData, 2> TERRAIN = {{
-        {{0, 0, 0}, {0, 0, 0}, {1, 1, 1}},
-        {{-8.15f, 2.3f, -89.5f}, {0, 0, 0}, {0.72f, 0.72f, 0.72f}},
-    }};
-    static constexpr std::array<TransformData, 1> VIKING_TENT = {{{{16, 17, -14}, {0, -20, 0}, {0.037f, 0.037f, 0.037f}}}};
-    static constexpr std::array<TransformData, 1> STYLIZED_TENT = {{{{0, 20, -33}, {0, -128, 0}, {0.06f, 0.06f, 0.06f}}}};
-    static constexpr std::array<TransformData, 1> GRAVE = {{{{29, 71, 12}, {-90, 0, -48}, {1.35f, 1.35f, 1.35f}}}};
-    static constexpr std::array<TransformData, 1> CAMPFIRE = {{{{12.0f, 17.3f, 6.0f}}}};
-    static constexpr std::array<TransformData, 1> LIGHTHOUSE = {{{{-102.0f, 15.0f, -107.0f}, {0, 0, 0}, {5, 5, 5}}}};
-    static constexpr std::array<TransformData, 1> FIRE = {{{{12, 20.5f, 6.5f}, {0, 0, 0}, {3.1f, 3.1f, 3.1f}}}};
-
-    static constexpr std::array<TransformData, 3> LOGS = {{
-        #include <coordinates/logs.include>
-    }};
-
-    static constexpr std::array<TransformData, 5> SHROOM_POSITIONS = {{
-        #include <coordinates/shrooms.include>
-    }};
-
-    constexpr std::array<TransformData, 68> white_translations = {{
-        #include <coordinates/white_flowers.include>
-    }};
-    constexpr std::array<TransformData, 31> red_translations = {{
-        #include <coordinates/red_flowers.include>
-    }};
-
-    constexpr std::array<TransformData, 35> grass_positions = {{
-        #include <coordinates/grass.include>
-    }};
-
-    constexpr std::array<TransformData, 22> yellow_trees = {{
-        #include <coordinates/yellow_trees.include>
-    }};
-    constexpr std::array<TransformData, 16> green_trees = {{
-        #include <coordinates/green_trees.include>
-    }};
-    constexpr std::array<TransformData, 5> tall_trees = {{
-        #include <coordinates/tall_trees.include>
-    }};
-    constexpr std::array<TransformData, 75> pine_trees = {{
-        #include <coordinates/pine_trees.include>
-    }};
-    constexpr std::array<TransformData, 1> oak_trees = {{
-        #include <coordinates/oak_trees.include>
-    }};
-    constexpr std::array<TransformData, 2> old_trees = {{
-        #include <coordinates/old_trees.include>
-    }};
-
-    constexpr std::array<TransformData, 5> bush1_positions = {{
-        #include <coordinates/bush1.include>
-    }};
-    constexpr std::array<TransformData, 3> bush2_positions = {{
-        #include <coordinates/bush2.include>
-    }};
-    constexpr std::array<TransformData, 6> laurel_positions = {{
-        #include <coordinates/laurel_bushes.include>
-    }};
-
-    constexpr std::array<TransformData, 19> path_segments = {{
-        #include <coordinates/path_segments.include>
-    }};
-
-    using engine::graphics::DrawMethod;
-    using engine::graphics::Effect;
-
-    struct SceneObjectDescription {
-        std::string_view model;
-        std::string_view shader;
-        std::span<const TransformData> transforms;
-        DrawMethod method = DrawMethod::Default;
-        Effect effect     = Effect::None;
-        bool casts_shadow = false;
-    };
-
-    /**
-     * @brief Everything the scene draws, in drawing order. Resolved into @ref SceneObject instances once, in @ref MainController::create_scene.
-     */
-    static constexpr std::array SCENE = {
-        SceneObjectDescription{.model = "terrain", .shader = "basic", .transforms = TERRAIN, .casts_shadow = true},
-        SceneObjectDescription{.model = "viking_tent", .shader = "basic", .transforms = VIKING_TENT, .casts_shadow = true},
-        SceneObjectDescription{.model = "stylized_tent", .shader = "basic", .transforms = STYLIZED_TENT, .casts_shadow = true},
-        SceneObjectDescription{.model = "grave", .shader = "basic", .transforms = GRAVE, .casts_shadow = true},
-        SceneObjectDescription{.model = "campfire", .shader = "basic", .transforms = CAMPFIRE, .casts_shadow = true},
-        SceneObjectDescription{.model = "lighthouse", .shader = "basic", .transforms = LIGHTHOUSE},
-        SceneObjectDescription{.model = "log_seat", .shader = "basic", .transforms = LOGS, .casts_shadow = true},
-        SceneObjectDescription{.model = "bush1", .shader = "basic", .transforms = bush1_positions, .method = DrawMethod::Blended},
-        SceneObjectDescription{.model = "bush2", .shader = "basic", .transforms = bush2_positions, .method = DrawMethod::Blended},
-        SceneObjectDescription{.model = "laurel_bush", .shader = "basic", .transforms = laurel_positions, .method = DrawMethod::Blended},
-        SceneObjectDescription{.model = "yellow_tree", .shader = "flower_shader", .transforms = yellow_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
-        SceneObjectDescription{.model = "green_tree", .shader = "flower_shader", .transforms = green_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
-        SceneObjectDescription{.model = "beech_tree", .shader = "flower_shader", .transforms = tall_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
-        SceneObjectDescription{.model = "pine_tree", .shader = "flower_shader", .transforms = pine_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
-        SceneObjectDescription{.model = "oak_tree", .shader = "flower_shader", .transforms = oak_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
-        SceneObjectDescription{.model = "old_tree", .shader = "flower_shader", .transforms = old_trees, .method = DrawMethod::Instanced, .casts_shadow = true},
-        SceneObjectDescription{.model = "white_flowers", .shader = "flower_shader", .transforms = white_translations, .method = DrawMethod::Instanced, .effect = Effect::Wind},
-        SceneObjectDescription{.model = "red_flowers", .shader = "flower_shader", .transforms = red_translations, .method = DrawMethod::Instanced, .effect = Effect::Wind},
-        SceneObjectDescription{.model = "path", .shader = "flower_shader", .transforms = path_segments, .method = DrawMethod::Instanced},
-        SceneObjectDescription{.model = "shrooms", .shader = "basic", .transforms = SHROOM_POSITIONS, .casts_shadow = true},
-        SceneObjectDescription{.model = "grass", .shader = "grass_shader", .transforms = grass_positions, .method = DrawMethod::Instanced, .effect = Effect::Wind, .casts_shadow = true},
-    };
-
     void MainController::create_scene() {
-        auto create_object = [this](const SceneObjectDescription &description) {
-            const auto *model = m_resources->model(std::string(description.model));
-            return SceneObject{
-                .batch        = m_renderer->create_batch(model, description.transforms, description.method),
-                .shader       = m_resources->shader(std::string(description.shader)),
-                .effect       = description.effect,
-                .casts_shadow = description.casts_shadow,
-            };
-        };
-        m_scene_objects.reserve(SCENE.size());
-        for (const auto &description: SCENE) {
-            m_scene_objects.push_back(create_object(description));
-        }
-        m_fire = create_object({.model = "fire", .shader = "fire_shader", .transforms = FIRE, .method = DrawMethod::Blended, .effect = Effect::Fire});
+        m_scene = engine::graphics::Scene::load(SCENE_PATH);
+        m_scene.set_group_visible(NIGHT_GROUP, !m_is_day);
         m_placement_shader = m_resources->shader("basic");
     }
 
     void MainController::draw() {
-        for (const auto &object: m_scene_objects) {
-            m_renderer->draw(object.batch, object.shader, object.effect);
-        }
+        m_scene.draw(*m_renderer);
         draw_placed_models();
-        if (!m_is_day)
-            m_renderer->draw(m_fire.batch, m_fire.shader, m_fire.effect);
         draw_skybox();
     }
 
@@ -216,6 +96,7 @@ namespace app {
                 m_is_day = !m_is_day;
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 m_fog->set_day(m_is_day);
+                m_scene.set_group_visible(NIGHT_GROUP, !m_is_day);
                 m_day_change_requested = false;
                 apply_day_night_lighting();
                 if (!m_is_day)
@@ -300,12 +181,13 @@ namespace app {
     }
 
     void MainController::terminate() {
+        // Placed models are logged as scene file transforms, ready to paste into the entity of their model.
         for (const auto &[model_name, model, translation, rotation, scale] : placed_models) {
-            spdlog::info(std::format("\n// {}\n{{{{{:.3g}f, {:.3g}f, {:.3g}f}}, {{{:.3g}f, {:.3g}f, {:.3g}f}}, {{{:.3g}f, {:.3g}f, {:.3g}f}}}}",
+            spdlog::info(std::format("{}: {{\"position\": [{:.3g}, {:.3g}, {:.3g}], \"rotation\": [{:.3g}, {:.3g}, {:.3g}], \"scale\": {:.3g}}}",
                 model_name,
                 translation.x, translation.y, translation.z,
                 rotation.x, rotation.y, rotation.z,
-                scale, scale, scale));
+                scale));
         }
     }
 
@@ -318,10 +200,7 @@ namespace app {
     }
 
     void MainController::render_depth_scene() const {
-        if (!m_is_day) return;
-        for (const auto &object: m_scene_objects) {
-            if (object.casts_shadow)
-                m_renderer->draw_depth(object.batch);
-        }
+        if (m_is_day)
+            m_scene.draw_shadow_casters(*m_renderer);
     }
 }
