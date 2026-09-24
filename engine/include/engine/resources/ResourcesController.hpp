@@ -33,6 +33,13 @@ public:
     Model *model(const std::string &name);
 
     /**
+    * @brief Reads the triangles of a model for collision queries: three consecutive corners per triangle, in model space,
+    * exactly as the model is rendered. The geometry is read from the model file on every call and isn't kept in memory.
+    * @param name of the model in the configuration file.
+    */
+    std::vector<glm::vec3> collision_triangles(const std::string &name) const;
+
+    /**
     * @brief Retrieves the @ref Texture with a given name. You are not supposed to call `delete` on this pointer.
     *
     * Other params, except name, are optional. If not provided, the function will search for a texture
@@ -105,6 +112,8 @@ private:
     * @brief Loads and compile all the shaders from the "resources/shaders" directory. Called during @ref ResourcesController::initialize.
     */
     void load_shaders();
+
+    [[nodiscard]] std::filesystem::path model_path(const std::string &name) const;
 
     /**
     * @brief A hashmap of all the loaded @ref Model.

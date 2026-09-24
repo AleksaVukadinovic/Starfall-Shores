@@ -1,6 +1,7 @@
 #pragma once
 #include <engine/platform/TimeController.hpp>
 #include <array>
+#include <optional>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/LightingController.hpp>
@@ -72,6 +73,11 @@ namespace app {
 
         void render_depth_scene() const;
 
+        /**
+         * @brief Ground the camera can walk on in walk mode: the scene colliders, except where they're deep underwater.
+         */
+        [[nodiscard]] std::optional<float> walkable_ground(glm::vec2 xz) const;
+
         void update() override;
         void terminate() override;
         void update_sound() const;
@@ -97,6 +103,7 @@ namespace app {
          * @brief Scene entities in this group (like the campfire flames) are only shown at night.
          */
         static constexpr std::string_view NIGHT_GROUP = "night";
+        static constexpr float MAX_WADING_DEPTH = 1.0f;
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;

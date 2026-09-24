@@ -68,6 +68,7 @@ Scene Scene::load(const std::filesystem::path &path) {
     const auto resources = core::Controller::get<resources::ResourcesController>();
     const auto renderer  = core::Controller::get<Renderer>();
     Scene scene;
+    std::vector<glm::vec3> ground_triangles;
     const json &entities = document.value("entities", json::array());
     for (std::size_t index = 0; index < entities.size(); ++index) {
         const json &entity = entities[index];
@@ -89,9 +90,18 @@ Scene Scene::load(const std::filesystem::path &path) {
                 transforms.push_back(read_transform(transform));
             }
             const auto model_name = entity.at("model").get<std::string>();
+            const DrawBatch *batch = renderer->create_batch(resources->model(model_name), transforms, *method);
+            if (entity.value("collider", false)) {
+                const auto model_triangles = resources->collision_triangles(model_name);
+                for (const glm::mat4 &transform: batch->transforms()) {
+                    for (const glm::vec3 &corner: model_triangles) {
+                        ground_triangles.emplace_back(transform * glm::vec4(corner, 1.0f));
+                    }
+                }
+            }
             scene.m_entities.push_back({
                     .model_name = model_name,
-                    .batch = renderer->create_batch(resources->model(model_name), transforms, *method),
+                    .batch = batch,
                     .shader = resources->shader(entity.at("shader").get<std::string>()),
                     .effect = *effect,
                     .casts_shadow = entity.value("casts_shadow", false),
@@ -103,6 +113,7 @@ Scene Scene::load(const std::filesystem::path &path) {
             throw invalid(error.what());
         }
     }
+    scene.m_ground = physics::HeightField(ground_triangles, GROUND_CELL_SIZE);
     return scene;
 }
 

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <engine/graphics/DrawBatch.hpp>
+#include <engine/physics/HeightField.hpp>
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -48,6 +49,7 @@ struct SceneEntity {
  *       "method": "instanced",          // optional: "default" (default), "blended" or "instanced"
  *       "effect": "wind",               // optional: "none" (default), "wind" or "fire"
  *       "casts_shadow": true,           // optional, default false
+ *       "collider": true,               // optional, default false: the entity is ground you can walk on, see Scene::ground
  *       "group": "night",               // optional, see Scene::set_group_visible
  *       "transforms": [
  *         // position in the world; optional rotation in degrees around x, y, z; optional scale, uniform or per axis
@@ -78,8 +80,21 @@ public:
 
     void set_group_visible(std::string_view group, bool visible);
 
+    /**
+     * @brief The walkable ground formed by all the collider entities.
+     */
+    [[nodiscard]] const physics::HeightField &ground() const {
+        return m_ground;
+    }
+
 private:
+    /**
+     * @brief Spacing of the ground height samples, in world units.
+     */
+    static constexpr float GROUND_CELL_SIZE = 0.5f;
+
     std::vector<SceneEntity> m_entities;
+    physics::HeightField m_ground;
 };
 
 }

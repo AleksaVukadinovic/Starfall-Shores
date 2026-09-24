@@ -7,6 +7,9 @@
 
 #include <engine/core/Controller.hpp>
 #include <engine/platform/Input.hpp>
+#include <functional>
+#include <glm/glm.hpp>
+#include <optional>
 
 namespace engine::graphics {
 class Camera;
@@ -17,6 +20,10 @@ class Camera;
  *
  * Handles WASD/arrow-key movement, mouse look, vertical movement (Space/C),
  * sprint (Left Shift), and cursor toggle (P).
+ *
+ * In walk mode the camera walks on the ground given by @ref FPSCameraController::ground_height instead of flying:
+ * it keeps @ref FPSCameraController::eye_height above the ground, falls with gravity, jumps with Space,
+ * can't climb slopes steeper than @ref FPSCameraController::max_slope, and can't leave the walkable ground.
  *
  * Register it in your App::app_setup to enable:
  * @code
@@ -52,10 +59,38 @@ public:
 
     float keyboard_rotate_speed = 10.0f;
 
+    bool walk_mode   = false;
+    float eye_height = 1.7f;
+    float walk_speed = 4.0f;
+    float run_speed  = 9.0f;
+    float jump_speed = 5.5f;
+    float gravity    = 20.0f;
+    /**
+     * @brief Steepest slope that can be walked up, as height gained per unit of distance (1 is 45 degrees).
+     */
+    float max_slope  = 1.0f;
+
+    /**
+     * @brief Height of the walkable ground at a point on the XZ plane, or nothing where the walker can't go.
+     * Walk mode has no effect until this is set.
+     */
+    std::function<std::optional<float>(glm::vec2)> ground_height;
+
 private:
+    /**
+     * @brief How far below the feet the ground may drop while walking and still be followed, instead of falling.
+     */
+    static constexpr float GROUND_SNAP_DISTANCE = 0.3f;
+
     void initialize() override;
     void update() override;
 
+    void fly(float dt) const;
+    void walk(float dt);
+    [[nodiscard]] glm::vec3 walk_direction() const;
+
     Camera *m_camera = nullptr;
+    float m_vertical_speed = 0.0f;
+    bool m_on_ground = false;
 };
 }

@@ -1,6 +1,7 @@
 #include <GUIController.hpp>
 #include <MainController.hpp>
 #include <engine/core/Controller.hpp>
+#include <engine/graphics/FPSCameraController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/LightingController.hpp>
@@ -41,6 +42,7 @@ namespace app {
         m_resources->skybox(m_active_daytime_skybox);
         m_resources->skybox(m_active_nighttime_skybox);
         m_renderer->set_depth_scene([this] { render_depth_scene(); });
+        get<engine::graphics::FPSCameraController>()->ground_height = [this](const glm::vec2 xz) { return walkable_ground(xz); };
         m_background_sound = get<engine::sound::SoundController>()->sound("ocean_wind.wav");
     }
 
@@ -197,6 +199,15 @@ namespace app {
         } else {
             m_active_nighttime_skybox = new_skybox;
         }
+    }
+
+    std::optional<float> MainController::walkable_ground(const glm::vec2 xz) const {
+        const auto ground = m_scene.ground().height_at(xz);
+        // Shallow water can be waded through, deep water can't.
+        if (!ground || *ground < m_water->level - MAX_WADING_DEPTH) {
+            return std::nullopt;
+        }
+        return ground;
     }
 
     void MainController::render_depth_scene() const {

@@ -324,6 +324,14 @@ void GUIController::draw_graphics_settings() {
 
     ImGui::Dummy({0, 8});
     section_header("Camera");
+    ImGui::Checkbox("Walk Mode", &m_fps_camera->walk_mode);
+    if (m_fps_camera->walk_mode) {
+        ImGui::SliderFloat("Eye Height", &m_fps_camera->eye_height, 0.5f, 3.0f, "%.2f m");
+        ImGui::SliderFloat("Walk Speed", &m_fps_camera->walk_speed, 1.0f, 10.0f, "%.1f m/s");
+        ImGui::SliderFloat("Run Speed", &m_fps_camera->run_speed, 2.0f, 20.0f, "%.1f m/s");
+        ImGui::SliderFloat("Jump Speed", &m_fps_camera->jump_speed, 0.0f, 15.0f, "%.1f m/s");
+        ImGui::TextDisabled("Space jumps, Shift runs.");
+    }
     float fov = m_graphics->perspective_params().FOV;
     if (ImGui::SliderFloat("Field of View", &fov, 0.1f, 2.0f))
         m_graphics->perspective_params().FOV = fov;

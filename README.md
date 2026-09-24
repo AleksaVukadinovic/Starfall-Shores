@@ -16,6 +16,7 @@ Key goals included writing everything from scratch, gaining deeper insight into 
 - **Performance:** frustum culling, instanced rendering with persistent GPU buffers, and one per-frame uniform buffer shared by all shaders
 - **Built-in GPU/CPU profiler:** open **Settings → Debug** in the pause menu to see per-pass timings, draw calls, and culling statistics
 - **Scene file:** every model placement lives in one JSON file, `app/resources/scene.json`
+- **Walk mode:** walk on the terrain with gravity and jumping (Settings → Graphics → Camera)
 - **In-app editor:** ImGui settings (graphics, environment, sound, time) and a model placement tool
 - **3D models:** loaded with Assimp (glTF, GLB, OBJ, ...)
 - **Sound:** played through miniaudio
@@ -62,8 +63,8 @@ cd app && ./APP
 | Key | Action |
 |---|---|
 | `W` `A` `S` `D` / arrow keys | Move |
-| `Space` / `C` | Move up / down |
-| `Shift` | Sprint |
+| `Space` / `C` | Move up / down (in walk mode, `Space` jumps) |
+| `Shift` | Sprint (in walk mode: run) |
 | `Q` / `E` | Rotate |
 | Mouse | Look around |
 | `Esc` | Pause menu and settings |
@@ -181,6 +182,8 @@ You only need to include `<engine/core/Engine.hpp>` in your part of the project 
 │   ├── App.hpp                 # main loop
 │   ├── Controller.hpp          # controller base class and registration
 │   └── Engine.hpp              # includes everything
+├── physics
+│   └── HeightField.hpp         # ground height queries for walk mode
 ├── graphics
 │   ├── Camera.hpp
 │   ├── DrawBatch.hpp           # prepared static placements of a model

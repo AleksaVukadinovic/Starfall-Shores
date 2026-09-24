@@ -91,6 +91,9 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 ### Other engine controllers
 - `PlatformController`: GLFW window, input (`key(KEY_X).state() == Key::State::JustPressed`, `is_down()`), `dt()`, `get_time()`.
 - `FPSCameraController`: WASD/arrows to move, Space/C for up/down, Shift to sprint, Q/E to rotate, P to toggle the cursor.
+  - **Walk mode** (`walk_mode`, toggled in Settings → Graphics → Camera): the camera walks on the ground from the injected `ground_height(xz)` function. It moves horizontally along the flattened view direction, has gravity and jumps (Space), keeps `eye_height`, follows the ground downhill, and blocks slopes steeper than `max_slope` and moves off the walkable ground.
+  - `MainController::walkable_ground` supplies `ground_height`: the scene ground, except where it's more than `MAX_WADING_DEPTH` below the water level.
+- `physics::HeightField` (`engine/physics`): world-space triangles rasterized into a 0.5 m grid of ground heights (highest surface wins, NaN = no ground; gaps up to `MAX_GAP` = 1 m, like the spaces between bridge planks, are filled by interpolation), queried with bilinear interpolation in O(1). `Scene` builds one from the entities marked `"collider": true` (the terrain), via `ResourcesController::collision_triangles`, which re-reads positions only from the model file and keeps nothing in memory. Only terrain collides; props like tents and trees don't.
 - `TimeController`: in-game clock. Starts at 12:00, `tickrate` is 0.2 in-game hours per real second, night is 23:00–07:00.
 - `FogController`, `GreyscaleController`: parameter holders, read by the shaders and post-processing. Like `RainController`, they're declared in the global namespace, not in `engine::`.
 - `WaterController` (`engine::graphics`): the ocean.
@@ -106,7 +109,7 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 ## App (`app/`)
 - `MyApp.cpp` registers the app controllers and the optional engine controllers and sets their order.
 - `MainController`:
-  - The scene is loaded from **`app/resources/scene.json`**, the single source of truth for placements, by `engine::graphics::Scene::load` (format documented in `engine/graphics/Scene.hpp`). Each entity has a `model`, a `shader`, and `transforms` (`position`, optional `rotation` in degrees, optional `scale` as a number or `[x, y, z]`). Optional fields are `method` (`default`/`blended`/`instanced`), `effect` (`none`/`wind`/`fire`), `casts_shadow`, and `group`.
+  - The scene is loaded from **`app/resources/scene.json`**, the single source of truth for placements, by `engine::graphics::Scene::load` (format documented in `engine/graphics/Scene.hpp`). Each entity has a `model`, a `shader`, and `transforms` (`position`, optional `rotation` in degrees, optional `scale` as a number or `[x, y, z]`). Optional fields are `method` (`default`/`blended`/`instanced`), `effect` (`none`/`wind`/`fire`), `casts_shadow`, `collider` (walkable ground), and `group`.
   - `draw()` calls `m_scene.draw()` in file order. The depth callback calls `m_scene.draw_shadow_casters()` (only during the day).
   - Entities in the `"night"` group (the campfire flames) are shown only at night, via `set_group_visible`.
   - Load errors name the file and entity index.

@@ -106,15 +106,55 @@ private:
     ResourcesController *m_resources_controller;
 };
 
+std::filesystem::path ResourcesController::model_path(const std::string &name) const {
+    const auto &config = util::Configuration::config();
+    if (!config["resources"]["models"].contains(name)) {
+        throw util::EngineError(util::EngineError::Type::ConfigurationError, std::format(
+        "No model ({}) specify in config.json. Please add the model to the config.json.", name));
+    }
+    return m_models_path / std::filesystem::path(config["resources"]["models"][name]["path"].get<std::string>());
+}
+
+namespace {
+void append_node_triangles(const aiScene *scene, const aiNode *node, std::vector<glm::vec3> &triangles) {
+    // Same traversal as AssimpSceneProcessor::process_node, so the triangles match the rendered meshes.
+    for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
+        const aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        for (uint32_t f = 0; f < mesh->mNumFaces; ++f) {
+            const aiFace &face = mesh->mFaces[f];
+            if (face.mNumIndices != 3) {
+                continue; // points and lines
+            }
+            for (uint32_t corner = 0; corner < 3; ++corner) {
+                const aiVector3D &position = mesh->mVertices[face.mIndices[corner]];
+                triangles.emplace_back(position.x, position.y, position.z);
+            }
+        }
+    }
+    for (uint32_t i = 0; i < node->mNumChildren; ++i) {
+        append_node_triangles(scene, node->mChildren[i], triangles);
+    }
+}
+}
+
+std::vector<glm::vec3> ResourcesController::collision_triangles(const std::string &name) const {
+    const std::filesystem::path path = model_path(name);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate);
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        throw util::EngineError(util::EngineError::Type::AssetLoadingError,
+                                std::format("Assimp error while reading collision geometry of model {} from {}.", name, path.string()));
+    }
+    std::vector<glm::vec3> triangles;
+    append_node_triangles(scene, scene->mRootNode, triangles);
+    return triangles;
+}
+
 Model *ResourcesController::model(const std::string &name) {
     auto &result = m_models[name];
     if (!result) {
         auto &config = util::Configuration::config();
-        if (!config["resources"]["models"].contains(name)) {
-            throw util::EngineError(util::EngineError::Type::ConfigurationError, std::format(
-            "No model ({}) specify in config.json. Please add the model to the config.json.", name));
-        }
-        const std::filesystem::path model_path = m_models_path / std::filesystem::path(config["resources"]["models"][name]["path"].get<std::string>());
+        const std::filesystem::path model_path = this->model_path(name);
         Assimp::Importer importer;
         int flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
         if (config["resources"]["models"][name].value<bool>("flip_uvs", false)) {
