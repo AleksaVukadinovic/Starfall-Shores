@@ -16,14 +16,20 @@ float wavePhase(vec4 wave, vec2 xz)
     return wave.z * dot(wave.xy, xz) - sqrt(GRAVITY * wave.z) * waveSpeed * time;
 }
 
-// Displacement of the calm surface point at xz.
-vec3 waveDisplacement(vec2 xz)
+// A wave needs this many vertices per wavelength to be displaced without visibly changing shape as the grid slides.
+const float MIN_VERTICES_PER_WAVE = 4.0;
+
+// Displacement of the calm surface point at xz, for a grid with `vertexSpacing` between vertices. Waves too short for
+// the grid are left out of the geometry; they still shape the surface through the per-pixel normals (waveNormal).
+vec3 waveDisplacement(vec2 xz, float vertexSpacing)
 {
     vec3 displacement = vec3(0.0);
     for (int i = 0; i < WAVE_COUNT; ++i) {
+        float verticesPerWave = 6.2831853 / (waves[i].z * vertexSpacing);
+        float amplitude = waves[i].w * smoothstep(MIN_VERTICES_PER_WAVE, 2.0 * MIN_VERTICES_PER_WAVE, verticesPerWave);
         float phase = wavePhase(waves[i], xz);
-        displacement.xz += choppiness * waves[i].w * waves[i].xy * cos(phase);
-        displacement.y += waves[i].w * sin(phase);
+        displacement.xz += choppiness * amplitude * waves[i].xy * cos(phase);
+        displacement.y += amplitude * sin(phase);
     }
     return displacement;
 }

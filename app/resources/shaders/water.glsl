@@ -1,6 +1,7 @@
 //#shader vertex
 #version 330 core
-layout (location = 0) in vec2 aGridPos;
+// xy: position relative to the camera, z: distance to the neighbouring grid vertices.
+layout (location = 0) in vec3 aGridVertex;
 
 #include "frame.glsl"
 #include "waves.glsl"
@@ -15,8 +16,8 @@ uniform float totalAmplitude;
 
 void main()
 {
-    vec2 xz = gridOrigin + aGridPos;
-    vec3 displacement = waveDisplacement(xz);
+    vec2 xz = gridOrigin + aGridVertex.xy;
+    vec3 displacement = waveDisplacement(xz, aGridVertex.z);
     FragPos = vec3(xz.x, waterLevel, xz.y) + displacement;
     WaveCoords = xz;
     CrestHeight = displacement.y / max(totalAmplitude, 0.0001);

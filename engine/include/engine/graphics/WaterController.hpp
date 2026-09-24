@@ -20,8 +20,9 @@ namespace engine::graphics {
  * @class WaterController
  * @brief Draws the ocean: a grid that follows the camera, displaced by a sum of Gerstner waves.
  *
- * The grid is dense near the camera and coarser towards the horizon, and it moves with the camera in steps of its
- * finest cell size, so it looks endless. Waves are evaluated from world positions, so they don't move with the grid.
+ * The grid is dense near the camera and coarser towards the horizon, and it moves smoothly with the camera, so it looks
+ * endless. Waves are evaluated at world positions, so they don't move with the grid, and each vertex is only displaced
+ * by the waves that are long enough for the local grid spacing, so the surface doesn't pop as the vertices slide.
  * The surface reflects `reflected_skybox`, shows sun glints and foam on wave crests, and gets rain ripples while it rains.
  *
  * Water is transparent: draw it after the opaque scene and the skybox.
@@ -94,7 +95,6 @@ private:
 
     void create_grid();
     [[nodiscard]] Waves waves() const;
-    [[nodiscard]] static float grid_cell_size();
 
     const resources::Shader *m_shader = nullptr;
     uint32_t m_vao         = 0;

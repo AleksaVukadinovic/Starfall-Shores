@@ -32,22 +32,25 @@ void WaterController::terminate() {
     CHECKED_GL_CALL(glDeleteBuffers, 1, &m_ebo);
 }
 
-float WaterController::grid_cell_size() {
-    return GRID_EXTENT * GRID_LINEAR_SHARE * 2.0f / static_cast<float>(GRID_RESOLUTION);
-}
-
 void WaterController::create_grid() {
     // Grid lines are spaced by a blend of a linear and a cubic curve: fine around the camera, coarse at the horizon.
+    constexpr float step = 2.0f / static_cast<float>(GRID_RESOLUTION);
     auto grid_line = [](const uint32_t index) {
-        const float u = static_cast<float>(index) / static_cast<float>(GRID_RESOLUTION) * 2.0f - 1.0f;
+        const float u = static_cast<float>(index) * step - 1.0f;
         return GRID_EXTENT * (GRID_LINEAR_SHARE * u + (1.0f - GRID_LINEAR_SHARE) * u * u * u);
     };
+    // Distance to the neighbouring grid line: the derivative of grid_line, times the step between indices.
+    auto grid_spacing = [](const uint32_t index) {
+        const float u = static_cast<float>(index) * step - 1.0f;
+        return GRID_EXTENT * (GRID_LINEAR_SHARE + 3.0f * (1.0f - GRID_LINEAR_SHARE) * u * u) * step;
+    };
     constexpr uint32_t side = GRID_RESOLUTION + 1;
-    std::vector<glm::vec2> vertices;
+    // Per vertex: position relative to the camera, and the local grid spacing, which tells the shader which waves it can represent.
+    std::vector<glm::vec3> vertices;
     vertices.reserve(side * side);
     for (uint32_t z = 0; z < side; ++z) {
         for (uint32_t x = 0; x < side; ++x) {
-            vertices.emplace_back(grid_line(x), grid_line(z));
+            vertices.emplace_back(grid_line(x), grid_line(z), std::max(grid_spacing(x), grid_spacing(z)));
         }
     }
     std::vector<uint32_t> indices;
@@ -65,11 +68,11 @@ void WaterController::create_grid() {
     CHECKED_GL_CALL(glGenBuffers, 1, &m_ebo);
     CHECKED_GL_CALL(glBindVertexArray, m_vao);
     CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_vbo);
-    CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, static_cast<int64_t>(vertices.size() * sizeof(glm::vec2)), vertices.data(), GL_STATIC_DRAW);
+    CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, static_cast<int64_t>(vertices.size() * sizeof(glm::vec3)), vertices.data(), GL_STATIC_DRAW);
     CHECKED_GL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, m_ebo);
     CHECKED_GL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER, static_cast<int64_t>(indices.size() * sizeof(uint32_t)), indices.data(), GL_STATIC_DRAW);
     CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
-    CHECKED_GL_CALL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, static_cast<int32_t>(sizeof(glm::vec2)), nullptr);
+    CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, static_cast<int32_t>(sizeof(glm::vec3)), nullptr);
     CHECKED_GL_CALL(glBindVertexArray, 0);
 }
 
@@ -88,10 +91,9 @@ void WaterController::draw() {
     const auto graphics = get<GraphicsController>();
     graphics->profiler().begin_section("Water");
 
-    // Move the grid in whole cells, so the vertices near the camera always sample the waves at the same places.
+    // The grid moves smoothly with the camera. Waves are evaluated at world positions and the shader only displaces the
+    // grid by waves it samples densely enough, so the sliding vertices don't make the surface pop.
     const glm::vec3 &camera = graphics->camera()->Position;
-    const float cell        = grid_cell_size();
-    const glm::vec2 origin  = glm::floor(glm::vec2(camera.x, camera.z) / cell) * cell;
 
     const Waves wave_data = waves();
     float total_amplitude = 0.0f, total_slope = 0.0f;
@@ -104,7 +106,7 @@ void WaterController::draw() {
     const float wind_angle     = glm::radians(wind_direction);
 
     m_shader->use();
-    m_shader->set_vec2("gridOrigin", origin);
+    m_shader->set_vec2("gridOrigin", glm::vec2(camera.x, camera.z));
     m_shader->set_float("waterLevel", level);
     m_shader->set_vec4_array("waves", wave_data);
     m_shader->set_float("choppiness", std::min(choppiness, max_choppiness));
