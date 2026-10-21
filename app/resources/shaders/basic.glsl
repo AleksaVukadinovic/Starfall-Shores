@@ -38,6 +38,7 @@ layout (location = 1) out vec4 BrightColor;
 
 #include "frame.glsl"
 #include "shadows.glsl"
+#include "underwater.glsl"
 #include "fog.glsl"
 #include "weather.glsl"
 
@@ -79,7 +80,7 @@ void main()
     vec3 ambient = lightAmbient * albedo * lightColor;
 
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = lightDiffuse * diff * albedo * lightColor;
+    vec3 diffuse = lightDiffuse * diff * albedo * lightColor * underwaterSunlight(FragPos);
 
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);

@@ -38,4 +38,10 @@ layout (std140) uniform FrameUniforms {
     float rainIntensity;
 
     PointLight pointLights[MAX_POINT_LIGHTS];
+
+    vec3 underwaterColor;
+    float waterLevel;
+    vec3 underwaterAbsorption;
+    bool cameraUnderwater;
+    float causticsStrength;
 };

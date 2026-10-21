@@ -21,6 +21,7 @@ static constexpr std::array<float, WaterController::WAVE_COUNT> WAVE_DIRECTION_O
 
 void WaterController::initialize() {
     m_shader = get<resources::ResourcesController>()->shader("water");
+    m_seabed_shader = get<resources::ResourcesController>()->shader("seabed");
     m_shader->use();
     m_shader->set_int("environmentMap", ENVIRONMENT_TEXTURE_UNIT);
     create_grid();
@@ -76,6 +77,25 @@ void WaterController::create_grid() {
     CHECKED_GL_CALL(glBindVertexArray, 0);
 }
 
+bool WaterController::camera_underwater() const {
+    return get<GraphicsController>()->camera()->Position.y < level;
+}
+
+glm::vec3 WaterController::underwater_absorption() const {
+    // Absorption per unit for a visibility of REFERENCE_VISIBILITY: red fades within a few units, blue lasts the longest.
+    static constexpr glm::vec3 REFERENCE_ABSORPTION = glm::vec3(0.25f, 0.07f, 0.045f);
+    static constexpr float REFERENCE_VISIBILITY     = 20.0f;
+    return REFERENCE_ABSORPTION * REFERENCE_VISIBILITY / std::max(underwater_visibility, 1.0f);
+}
+
+void WaterController::draw_seabed(const glm::vec2 &grid_origin) const {
+    m_seabed_shader->use();
+    m_seabed_shader->set_vec2("gridOrigin", grid_origin);
+    m_seabed_shader->set_float("floorHeight", SEA_FLOOR_HEIGHT);
+    CHECKED_GL_CALL(glBindVertexArray, m_vao);
+    CHECKED_GL_CALL(glDrawElements, GL_TRIANGLES, static_cast<int32_t>(m_index_count), GL_UNSIGNED_INT, nullptr);
+}
+
 WaterController::Waves WaterController::waves() const {
     Waves result;
     for (std::size_t i = 0; i < WAVE_COUNT; ++i) {
@@ -94,6 +114,9 @@ void WaterController::draw() {
     // The grid moves smoothly with the camera. Waves are evaluated at world positions and the shader only displaces the
     // grid by waves it samples densely enough, so the sliding vertices don't make the surface pop.
     const glm::vec3 &camera = graphics->camera()->Position;
+    const glm::vec2 grid_origin(camera.x, camera.z);
+    // The sea floor is opaque, so it's drawn before the transparent water surface above it.
+    draw_seabed(grid_origin);
 
     const Waves wave_data = waves();
     float total_amplitude = 0.0f, total_slope = 0.0f;
@@ -106,8 +129,7 @@ void WaterController::draw() {
     const float wind_angle     = glm::radians(wind_direction);
 
     m_shader->use();
-    m_shader->set_vec2("gridOrigin", glm::vec2(camera.x, camera.z));
-    m_shader->set_float("waterLevel", level);
+    m_shader->set_vec2("gridOrigin", grid_origin);
     m_shader->set_vec4_array("waves", wave_data);
     m_shader->set_float("choppiness", std::min(choppiness, max_choppiness));
     m_shader->set_float("waveSpeed", wave_speed);

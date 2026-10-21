@@ -67,7 +67,7 @@ Everything is a **`Controller` singleton** that hooks into these phases: `initia
 
 ### Shader conventions (`engine/graphics/ShaderInterface.hpp` <-> `resources/shaders/include/frame.glsl`)
 - Scene shaders do `#include "frame.glsl"` to get the std140 `FrameUniforms` block: `projection`, `view`, `viewPos`, `time`, `light*`, `pointLights[]`, `fog*`, cascade data. **Keep the C++ struct and the GLSL block in sync**; `static_assert`s check the C++ offsets.
-- `#include "shadows.glsl"` gives `calculateShadow(fragPos, normal)` (cascaded, hardware PCF, normal offset). `#include "fog.glsl"` gives `applyFog(color, fragPos)`.
+- `#include "shadows.glsl"` gives `calculateShadow(fragPos, normal)` (cascaded, hardware PCF, normal offset). `#include "fog.glsl"` gives `applyFog(color, fragPos)` and `fogVisibility(fragPos)`; additive effects multiply by the visibility instead of mixing in fog colour.
 - Includes resolve from `resources/shaders/include/` and are applied per stage, each file at most once. Only `*.glsl` files directly in `resources/shaders/` are loaded as shaders.
 - Texture units are fixed: diffuse 0, specular 1, normal 2, height 3, and `shadowMap` 7 (a `sampler2DArrayShadow`). Samplers and the uniform-block binding are assigned once at link time (`Shader::apply_conventions`).
 - `Shader` caches all uniform locations at link time. The setters take `std::string_view` and never call `glGetUniformLocation`. **`set_*` affects the currently bound program**, so call `use()` first.
@@ -92,7 +92,7 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 - `PlatformController`: GLFW window, input (`key(KEY_X).state() == Key::State::JustPressed`, `is_down()`), `dt()`, `get_time()`.
 - `FPSCameraController`: WASD/arrows to move, Space/C for up/down, Shift to sprint, Q/E to rotate, P to toggle the cursor.
   - **Walk mode** (`walk_mode`, toggled in Settings → Graphics → Camera): the camera walks on the ground from the injected `ground_height(xz)` function. It moves horizontally along the flattened view direction, has gravity and jumps (Space), keeps `eye_height`, follows the ground downhill, and blocks slopes steeper than `max_slope` and moves off the walkable ground.
-  - `MainController::walkable_ground` supplies `ground_height`: the scene ground, except where it's more than `MAX_WADING_DEPTH` below the water level.
+  - **Swimming**: in water deeper than `wading_depth`, walk mode swims. There's no gravity; you move along the full view direction, Space rises and C sinks, you float with your head out at `water_level`, and you can't sink into the ground. `MainController::solid_ground` (the terrain, or the sea floor where higher) supplies `ground_height` for walking, swimming and the fish.
 - `physics::HeightField` (`engine/physics`): world-space triangles rasterized into a 0.5 m grid of ground heights (highest surface wins, NaN = no ground; gaps up to `MAX_GAP` = 1 m, like the spaces between bridge planks, are filled by interpolation), queried with bilinear interpolation in O(1). `Scene` builds one from the entities marked `"collider": true` (the terrain), via `ResourcesController::collision_triangles`, which re-reads positions only from the model file and keeps nothing in memory. Only terrain collides; props like tents and trees don't.
 - `TimeController`: in-game clock. Starts at 12:00, `tickrate` is 0.2 in-game hours per real second, night is 23:00–07:00.
 - `FogController`, `GreyscaleController`: parameter holders, read by the shaders and post-processing. Like `RainController`, they're declared in the global namespace, not in `engine::`.
@@ -100,6 +100,24 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
   - It's a generated 257² grid (fine near the camera, cubic spacing out to 400 units) that follows the camera smoothly and is displaced by 6 Gerstner waves; each vertex stores its grid spacing and only takes waves with ≥ 4–8 vertices per wavelength, so sliding vertices never pop, while shorter waves live only in the per-pixel normals (`include/waves.glsl`), derived from the settings (`level`, `wave_height`, `wavelength`, `choppiness`, `wind_direction`, `wave_speed`). Choppiness is clamped so crests never fold over.
   - `water.glsl` computes per-pixel wave normals (small waves fade with distance), detail ripples, rain impacts, a Fresnel reflection of `reflected_skybox` (set by `MainController::draw_skybox`, bound to texture unit 4), sun and point-light glints (these feed the bloom), crest foam, shadows, and fog.
   - It's drawn after `MainController` and before `RainController`, blended, and it writes depth. `level` also drives the underwater tint.
+- **Underwater** (state in `WaterController`, applied everywhere through `FrameUniforms`: `waterLevel`, `cameraUnderwater`, `underwaterColor`, `underwaterAbsorption`, `causticsStrength`):
+  - `fog.glsl`: while the camera is underwater, `applyFog`/`fogVisibility` switch to per-channel absorption (red fades first) towards `underwaterScatter()`. The old flat post-process tint is gone. The skybox shows only the scattered water colour underwater.
+  - `underwater.glsl`: `underwaterSunlight(fragPos)` dims sunlight with depth and adds animated caustics (edges of an animated Voronoi pattern, sampled where the sun ray entered the water). It's used by basic/flower/grass, the seabed, and sea life.
+  - Sea floor: `WaterController` draws the same camera-following grid as an opaque procedural sand floor (`seabed.glsl`) at `SEA_FLOOR_HEIGHT` = -4, before the water surface.
+  - Surface from below (`water.glsl` `surfaceFromBelow`): refraction into air gives Snell's window (the sky in a bright circle); total internal reflection mirrors the dark water elsewhere.
+  - Light shafts: `PostProcessingController::light_shafts` (set by `MainController` while underwater) runs `light_shafts.glsl`. It ray-marches the view ray up to the scene depth (the HDR depth buffer is now a texture), through slow, large caustic sheets extruded along the sun, and draws through a colour-only composite FBO.
+  - Particles in the `"underwater"` group (plankton, bubbles) show only while submerged. All audio goes through a master group and a low-pass filter (`SoundController::set_muffling`), faded in and out by `MainController::update_underwater`.
+  - Kelp: an instanced scene entity (`kelp.glsl`, swaying with height), 351 strands in patches around the islands at the sea floor height.
+  - Fish: `FlockController` (`engine::graphics`) runs Reynolds boids per flock (separation, alignment, cohesion, stay in the box, keep above `ground_height`). It draws each flock with `Renderer::draw_instances`, which uses dynamic per-model instance buffers and doesn't cull, so `gl_InstanceID` stays stable. `fish.glsl` applies `bodyTransform` (rotation, centering and scale from `model_rotation` and `length`) and a head-to-tail swim wave, then the heading. Flocks are defined in `scene.json` → `"flocks"`.
+  - `kelp.glb`/`fish.glb` are placeholders generated by `tools/make_sea_life_models.py`. To use a downloaded fish, add it to `config.json` and set the flock's `"model"`, plus `model_rotation` if it doesn't face +Z.
+  - Lit sea life shares `include/sea_life.glsl` (two-sided, translucent, underwater sunlight, fog).
+- `ParticleController` (`engine::graphics`): stateless GPU particles.
+  - Each `ParticleEmitter` is one instanced draw of camera-facing quads. `particles.glsl` derives every particle's life cycle, spawn point (re-randomized each cycle), velocity, turbulence, size and colour from `gl_InstanceID` plus time. There's no simulation, no buffers and no CPU cost, but also no collisions.
+  - Emitters come from the `"particles"` array in `scene.json`; field names match `ParticleEmitter`.
+  - Emitters follow scene groups through `Scene::set_group_visible`, and fade in and out over `fade_seconds`. The `"night"` group is embers, smoke and fireflies; `"day"` is pollen.
+  - `follow_camera` wraps the volume around the camera.
+  - Additive emitters write their over-white light into the bloom attachment. Alpha (smoke) emitters are unsorted and dim the bloom behind them.
+  - Drawn after Water and before Rain; it has its own "Particles" profiler section.
 - `RainController`: real 3D rain.
   - Up to 40k camera-facing streaks, generated in `rain.glsl` from `gl_InstanceID` plus time (no vertex data, empty VAO). They're world-stable and wrap around a 40×24×40 box around the camera.
   - It's drawn in its own `draw()` after `MainController` (after the skybox) and before the GUI. Drops are depth-tested, don't write depth, and don't write to the bloom attachment (`glColorMaski`). They have their own "Rain" profiler section.
@@ -109,11 +127,11 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 ## App (`app/`)
 - `MyApp.cpp` registers the app controllers and the optional engine controllers and sets their order.
 - `MainController`:
-  - The scene is loaded from **`app/resources/scene.json`**, the single source of truth for placements, by `engine::graphics::Scene::load` (format documented in `engine/graphics/Scene.hpp`). Each entity has a `model`, a `shader`, and `transforms` (`position`, optional `rotation` in degrees, optional `scale` as a number or `[x, y, z]`). Optional fields are `method` (`default`/`blended`/`instanced`), `effect` (`none`/`wind`/`fire`), `casts_shadow`, `collider` (walkable ground), and `group`.
+  - The scene is loaded from **`app/resources/scene.json`**, the single source of truth for placements, by `engine::graphics::Scene::load` (format documented in `engine/graphics/Scene.hpp`). Each entity has a `model`, a `shader`, and `transforms` (`position`, optional `rotation` in degrees, optional `scale` as a number or `[x, y, z]`). Optional fields are `method` (`default`/`blended`/`instanced`), `effect` (`none`/`wind`/`fire`), `casts_shadow`, `collider` (walkable ground), and `group`. The file also has a `"particles"` array of emitters and a `"flocks"` array of fish schools.
   - `draw()` calls `m_scene.draw()` in file order. The depth callback calls `m_scene.draw_shadow_casters()` (only during the day).
-  - Entities in the `"night"` group (the campfire flames) are shown only at night, via `set_group_visible`.
+  - Entities and emitters in the `"night"` group (the campfire flames, embers, smoke, fireflies) are shown only at night, and those in `"day"` (pollen) only by day, via `set_group_visible`.
   - Load errors name the file and entity index.
-  - Handles the day/night transition: it's triggered by the clock or the `N` key, and interpolates exposure and fog over `DAY_CHANGE_DELAY` = 5s. It swaps the lighting preset, and adds the campfire point light and fire effect at night.
+  - Handles the day/night transition. The clock (`TimeController::is_night`) is the single source of truth: a transition starts whenever the visuals disagree with it, and `N` just jumps the clock to nightfall (23:00) or daybreak (07:00), which also works while time is paused. It interpolates exposure and fog over `DAY_CHANGE_DELAY` = 5s. It swaps the lighting preset, and adds the campfire point light and fire effect at night.
   - Handles hotkeys: `F` fog, `V` wind, `R` rain, `M` sound.
   - Turns on the underwater tint when camera y < 7.
   - Implements the test-model placement tool. The preview is drawn only while the Debug tab is open (`model_placement_active`). Placed models are logged as `TransformData` literals on exit so they can be pasted into coordinate files.
@@ -123,9 +141,10 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
 
 ## Gotchas
 - `app/CMakeLists.txt` and `engine/CMakeLists.txt` use `file(GLOB ...)`. Re-run CMake after adding source files.
+- `ResourcesController::terminate` skips empty map entries: a resource that failed to load (e.g. a shader compile error) leaves one behind.
 - `imgui.ini` files are runtime-generated (`app/imgui.ini` is tracked and gets modified whenever the app runs).
 - `build/`, `build-*/`, `cmake-build-*/`, and `venv/` are local build artifacts and are gitignored. They contain machine-specific paths (e.g. GLFW's generated `cmake_uninstall.cmake`); never commit them.
 - **Measure performance in Release** (`-DCMAKE_BUILD_TYPE=Release`). In Debug, `CHECKED_GL_CALL` calls `glGetError` after every call, but the frame is GPU-bound so Debug is usually close.
 - `engine/CMakeLists.txt` forces `SPDLOG_USE_STD_FORMAT=ON`, because spdlog's bundled fmt doesn't compile with recent Clang. Log preformatted `std::format` strings (`spdlog::info(std::format(...))`), not fmt-style arguments.
-- `check.py`: namespace-scope constants must be `static constexpr` to be allowed UPPER_CASE names. It crashes on `.DS_Store` files in `app/include`.
+- `check.py`: namespace-scope constants must be `static constexpr` to be allowed UPPER_CASE names. It misreads out-of-class nested struct definitions (`struct A::B {`) as unnamed; use a namespace-scope type instead. It crashes on `.DS_Store` files in `app/include`.
 - macOS caps OpenGL at 4.1: no compute shaders, SSBOs, `glDrawElementsInstancedBaseInstance` or `layout(binding=)`.

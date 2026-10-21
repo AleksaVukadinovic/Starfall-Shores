@@ -11,7 +11,6 @@ out vec2 WaveCoords;
 out float CrestHeight;
 
 uniform vec2 gridOrigin;
-uniform float waterLevel;
 uniform float totalAmplitude;
 
 void main()
@@ -40,7 +39,6 @@ in vec2 WaveCoords;
 in float CrestHeight;
 
 uniform samplerCube environmentMap;
-uniform float waterLevel;
 uniform vec2 windDirection;
 uniform vec3 deepColor;
 uniform vec3 shallowColor;
@@ -63,6 +61,19 @@ vec2 detailSlope(vec2 xz, float viewDistance)
     return slope * (1.0 - smoothstep(5.0, 40.0, viewDistance));
 }
 
+// The surface seen from underwater (normal facing down, towards the camera). Light leaving the water bends away from the
+// normal, so the whole sky is squeezed into a bright circle above the viewer (Snell's window); outside it, the surface
+// reflects everything back (total internal reflection), mirroring the dark water below.
+vec3 surfaceFromBelow(vec3 normal, vec3 viewDir)
+{
+    const float WATER_TO_AIR = 1.33;
+    vec3 intoAir = refract(-viewDir, normal, WATER_TO_AIR);
+    if (dot(intoAir, intoAir) < 0.0001)
+        return underwaterScatter() * 0.6;
+    float fresnel = 0.02 + 0.98 * pow(1.0 - max(dot(normal, viewDir), 0.0), 5.0);
+    return mix(texture(environmentMap, intoAir).rgb * 1.2, underwaterScatter(), fresnel);
+}
+
 void main()
 {
     float viewDistance = distance(viewPos, FragPos);
@@ -76,6 +87,11 @@ void main()
         normal = -normal;
 
     vec3 viewDir = normalize(viewPos - FragPos);
+    if (viewPos.y < waterLevel) {
+        FragColor = vec4(applyFog(surfaceFromBelow(normal, viewDir), FragPos), 1.0);
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+        return;
+    }
     vec3 lightDir = normalize(lightPosition - FragPos);
     float shadow = calculateShadow(FragPos, normal);
     vec3 sunLight = lightDiffuse * lightColor * (1.0 - shadow);

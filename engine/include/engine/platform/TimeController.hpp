@@ -25,6 +25,11 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; }
 
     void set_running(const bool running) { m_running = running; }
+
+    /**
+     * @brief Jumps the clock to `hours`, wrapped into [0, 24).
+     */
+    void set_hours(float hours);
     void set_tickrate(const float tickrate) { m_tickrate = tickrate; }
     [[nodiscard]] float tickrate() const { return m_tickrate; }
 

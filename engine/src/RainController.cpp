@@ -5,16 +5,7 @@
 #include <engine/graphics/Renderer.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/ResourcesController.hpp>
-#include <algorithm>
-
-namespace {
-/**
- * @brief Moves `value` towards `target` by at most `max_step`.
- */
-float approach(const float value, const float target, const float max_step) {
-    return value < target ? std::min(value + max_step, target) : std::max(value - max_step, target);
-}
-}
+#include <engine/util/Utils.hpp>
 
 void RainController::initialize() {
     m_shader = get<engine::resources::ResourcesController>()->shader("rain");
@@ -29,9 +20,9 @@ void RainController::terminate() {
 void RainController::update() {
     const float dt     = get<engine::platform::PlatformController>()->dt();
     const float target = rain_enabled ? rain_intensity : 0.0f;
-    m_intensity        = approach(m_intensity, target, dt / FADE_SECONDS);
+    m_intensity        = engine::util::approach(m_intensity, target, dt / FADE_SECONDS);
     const float wetting_seconds = m_intensity > m_wetness ? WETTING_SECONDS : DRYING_SECONDS;
-    m_wetness          = approach(m_wetness, m_intensity, dt / wetting_seconds);
+    m_wetness          = engine::util::approach(m_wetness, m_intensity, dt / wetting_seconds);
 }
 
 glm::vec3 RainController::fall_velocity() const {

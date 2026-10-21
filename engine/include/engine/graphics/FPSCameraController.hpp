@@ -9,6 +9,7 @@
 #include <engine/platform/Input.hpp>
 #include <functional>
 #include <glm/glm.hpp>
+#include <limits>
 #include <optional>
 
 namespace engine::graphics {
@@ -23,7 +24,9 @@ class Camera;
  *
  * In walk mode the camera walks on the ground given by @ref FPSCameraController::ground_height instead of flying:
  * it keeps @ref FPSCameraController::eye_height above the ground, falls with gravity, jumps with Space,
- * can't climb slopes steeper than @ref FPSCameraController::max_slope, and can't leave the walkable ground.
+ * can't climb slopes steeper than @ref FPSCameraController::max_slope, and can't leave the ground.
+ * In water deeper than @ref FPSCameraController::wading_depth it swims instead: no gravity, moving along the view
+ * direction (Space rises, C sinks), floating with its head out at the surface and never sinking into the ground.
  *
  * Register it in your App::app_setup to enable:
  * @code
@@ -71,6 +74,16 @@ public:
     float max_slope  = 1.0f;
 
     /**
+     * @brief Height of the water surface; leave it at -infinity for a world without water.
+     */
+    float water_level  = -std::numeric_limits<float>::infinity();
+    /**
+     * @brief Water at most this deep can be walked through; deeper water is swum in.
+     */
+    float wading_depth = 1.0f;
+    float swim_speed   = 3.0f;
+
+    /**
      * @brief Height of the walkable ground at a point on the XZ plane, or nothing where the walker can't go.
      * Walk mode has no effect until this is set.
      */
@@ -81,12 +94,19 @@ private:
      * @brief How far below the feet the ground may drop while walking and still be followed, instead of falling.
      */
     static constexpr float GROUND_SNAP_DISTANCE = 0.3f;
+    /**
+     * @brief How far the eyes stay above the water surface while floating, and above the ground while swimming.
+     */
+    static constexpr float SURFACE_EYE_HEIGHT    = 0.25f;
+    static constexpr float SWIM_GROUND_CLEARANCE = 0.6f;
+    static constexpr float SWIM_SPRINT_FACTOR    = 1.8f;
 
     void initialize() override;
     void update() override;
 
     void fly(float dt) const;
     void walk(float dt);
+    void swim(float dt);
     [[nodiscard]] glm::vec3 walk_direction() const;
 
     Camera *m_camera = nullptr;

@@ -79,6 +79,19 @@ struct FrameUniforms {
     float rain_intensity{};
 
     PointLightUniforms point_lights[MAX_POINT_LIGHTS]{};
+
+    /**
+     * @brief Color of the light scattered by the water, which everything fades to underwater.
+     */
+    glm::vec3 underwater_color{};
+    float water_level{};
+    /**
+     * @brief How much of each color channel the water absorbs per world unit; red goes first.
+     */
+    glm::vec3 underwater_absorption{};
+    int32_t camera_underwater{};
+    float caustics_strength{};
+    float padding[3]{};
 };
 
 static_assert(sizeof(PointLightUniforms) == 48);
@@ -87,5 +100,8 @@ static_assert(offsetof(FrameUniforms, view_position) == 400);
 static_assert(offsetof(FrameUniforms, fog_start) == 512);
 static_assert(offsetof(FrameUniforms, rain_intensity) == 524);
 static_assert(offsetof(FrameUniforms, point_lights) == 528);
+static_assert(offsetof(FrameUniforms, underwater_color) == 720);
+static_assert(offsetof(FrameUniforms, caustics_strength) == 752);
+static_assert(sizeof(FrameUniforms) == 768);
 
 } // namespace engine::graphics

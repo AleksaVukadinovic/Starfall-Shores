@@ -74,9 +74,14 @@ namespace app {
         void render_depth_scene() const;
 
         /**
-         * @brief Ground the camera can walk on in walk mode: the scene colliders, except where they're deep underwater.
+         * @brief Height of the solid ground: the scene colliders (the terrain), or the sea floor where it's higher.
          */
-        [[nodiscard]] std::optional<float> walkable_ground(glm::vec2 xz) const;
+        [[nodiscard]] std::optional<float> solid_ground(glm::vec2 xz) const;
+
+        /**
+         * @brief Switches the underwater-only effects (particles, light shafts, muffled sound) as the camera dives or surfaces.
+         */
+        void update_underwater();
 
         void update() override;
         void terminate() override;
@@ -100,10 +105,18 @@ namespace app {
         engine::graphics::Scene m_scene;
         static constexpr std::string_view SCENE_PATH = "resources/scene.json";
         /**
-         * @brief Scene entities in this group (like the campfire flames) are only shown at night.
+         * @brief Scene entities and particles in these groups are only shown at night (like the campfire flames)
+         * or during the day (like pollen).
          */
         static constexpr std::string_view NIGHT_GROUP = "night";
-        static constexpr float MAX_WADING_DEPTH = 1.0f;
+        static constexpr std::string_view DAY_GROUP = "day";
+        /**
+         * @brief Scene particles in this group (plankton, bubbles) are only shown while the camera is underwater.
+         */
+        static constexpr std::string_view UNDERWATER_GROUP = "underwater";
+        static constexpr float MUFFLING_FADE_SECONDS = 0.3f;
+        bool m_was_underwater = false;
+        float m_muffling = 0.0f;
 
         bool m_is_day                            = true;
         bool m_day_change_requested              = false;

@@ -96,6 +96,14 @@
       },
       "seagull": {
         "path": "seagull/seagull.glb"
+      },
+      "kelp": {
+        "path": "kelp/kelp.glb",
+        "flip_uvs": true
+      },
+      "fish": {
+        "path": "fish/fish.glb",
+        "flip_uvs": true
       }
     }
   },

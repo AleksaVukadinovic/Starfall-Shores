@@ -11,7 +11,7 @@ class Shader;
 namespace engine::graphics {
     /**
      * @class PostProcessingController
-     * @brief Renders the scene into an HDR framebuffer, then applies bloom, tone mapping, greyscale and the underwater tint.
+     * @brief Renders the scene into an HDR framebuffer, then applies underwater light shafts, bloom, tone mapping and greyscale.
      *
      * Bloom blurs the bright parts of the scene by progressively downsampling them through a chain of
      * half-resolution textures and additively upsampling them back ("dual filtering", as in Call of Duty: Advanced Warfare).
@@ -29,9 +29,10 @@ namespace engine::graphics {
          */
         float bloom_radius        = 0.005f;
 
-        bool underwater              = false;
-        glm::vec3 underwater_color   = glm::vec3(0.0f, 0.3f, 0.5f);
-        float underwater_intensity   = 0.4f;
+        /**
+         * @brief Strength of the sunbeams slanting down through the water. Set it while the camera is underwater, 0 otherwise.
+         */
+        float light_shafts = 0.0f;
 
         [[nodiscard]] std::string_view name() const override {
             return "PostProcessingController";
@@ -54,11 +55,13 @@ namespace engine::graphics {
         void destroy_bloom_mips();
         void render_bloom() const;
         void render_final() const;
+        void render_light_shafts() const;
         void render_quad() const;
 
         unsigned int m_hdr_fbo                  = 0;
         unsigned int m_color_buffers[2]         = {};
-        unsigned int m_rbo_depth                = 0;
+        unsigned int m_depth_texture            = 0;
+        unsigned int m_composite_fbo            = 0;
         unsigned int m_bloom_fbo                = 0;
         std::array<BloomMip, BLOOM_MIP_COUNT> m_bloom_mips{};
         unsigned int m_scr_width                = 0;
@@ -69,5 +72,6 @@ namespace engine::graphics {
         const resources::Shader *m_downsample_shader = nullptr;
         const resources::Shader *m_upsample_shader   = nullptr;
         const resources::Shader *m_final_shader      = nullptr;
+        const resources::Shader *m_light_shaft_shader = nullptr;
     };
 }

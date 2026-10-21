@@ -42,7 +42,10 @@ public:
     Sound &operator=(Sound &&) noexcept;
 
 private:
-    Sound(ma_engine *engine, const std::filesystem::path &path, std::string name);
+    /**
+    * @param group Sound group (a miniaudio ma_sound_group) the sound plays through.
+    */
+    Sound(ma_engine *engine, ma_sound *group, const std::filesystem::path &path, std::string name);
 
     ma_sound *m_sound = nullptr;
     std::filesystem::path m_path;

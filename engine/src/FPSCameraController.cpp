@@ -2,6 +2,7 @@
 #include <engine/graphics/Camera.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/platform/PlatformController.hpp>
+#include <algorithm>
 
 namespace engine::graphics {
 
@@ -85,6 +86,13 @@ void FPSCameraController::walk(const float dt) {
     const auto platform = get<platform::PlatformController>();
     glm::vec3 &position = m_camera->Position;
 
+    // In deep water, swim once down at the surface (after falling or walking in).
+    if (const auto ground = ground_height(glm::vec2(position.x, position.z));
+        ground && *ground < water_level - wading_depth && position.y <= water_level + SURFACE_EYE_HEIGHT) {
+        swim(dt);
+        return;
+    }
+
     // Horizontal movement, unless it leads up a slope that's too steep or off the walkable ground.
     const float speed          = platform->key(key_sprint).is_down() ? run_speed : walk_speed;
     const glm::vec3 direction  = walk_direction();
@@ -123,6 +131,28 @@ void FPSCameraController::walk(const float dt) {
         position.y       = standing_height;
         m_vertical_speed = 0.0f;
     }
+}
+
+void FPSCameraController::swim(const float dt) {
+    const auto platform = get<platform::PlatformController>();
+    glm::vec3 &position = m_camera->Position;
+    auto held = [&](const platform::KeyId key) {
+        return platform->key(key).is_down() ? 1.0f : 0.0f;
+    };
+    // Swimming follows the full view direction, so looking down and swimming forward dives.
+    const glm::vec3 direction = m_camera->Front * (std::max(held(key_forward), held(key_forward_alt)) - std::max(held(key_backward), held(key_backward_alt)))
+                              + m_camera->Right * (std::max(held(key_right), held(key_right_alt)) - std::max(held(key_left), held(key_left_alt)))
+                              + glm::vec3(0.0f, 1.0f, 0.0f) * (held(key_up) - held(key_down));
+    if (glm::length(direction) > 0.0f) {
+        const float speed = swim_speed * (platform->key(key_sprint).is_down() ? SWIM_SPRINT_FACTOR : 1.0f);
+        position += glm::normalize(direction) * speed * dt;
+    }
+    if (const auto ground = ground_height(glm::vec2(position.x, position.z))) {
+        position.y = std::max(position.y, *ground + SWIM_GROUND_CLEARANCE);
+    }
+    position.y       = std::min(position.y, water_level + SURFACE_EYE_HEIGHT);
+    m_vertical_speed = 0.0f;
+    m_on_ground      = false;
 }
 
 }

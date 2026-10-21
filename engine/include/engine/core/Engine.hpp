@@ -21,6 +21,8 @@
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/Renderer.hpp>
+#include <engine/graphics/FlockController.hpp>
+#include <engine/graphics/ParticleController.hpp>
 #include <engine/graphics/Scene.hpp>
 #include <engine/physics/HeightField.hpp>
 #include <engine/graphics/DrawBatch.hpp>

@@ -3,9 +3,11 @@
 #include <MyApp.hpp>
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/FPSCameraController.hpp>
+#include <engine/graphics/FlockController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/LightingController.hpp>
+#include <engine/graphics/ParticleController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
 #include <engine/graphics/Renderer.hpp>
@@ -28,6 +30,8 @@ namespace app {
         const auto renderer = register_controller<engine::graphics::Renderer>();
         const auto time_controller = register_controller<engine::platform::TimeController>();
         const auto water_controller = register_controller<engine::graphics::WaterController>();
+        const auto particle_controller = register_controller<engine::graphics::ParticleController>();
+        const auto flock_controller = register_controller<engine::graphics::FlockController>();
         main_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         fps_camera->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
         shadow_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
@@ -36,9 +40,12 @@ namespace app {
         post_processing_controller->after(renderer);
         fog_controller->after(post_processing_controller);
         greyscale_controller->after(post_processing_controller);
-        // Water and rain are transparent: they're drawn after the whole scene, including the skybox, and before the GUI.
-        water_controller->after(main_controller);
-        rain_controller->after(water_controller);
+        // Water, particles and rain are transparent: they're drawn after the whole scene, including the skybox, and before the GUI.
+        // Fish are opaque: drawn after the scene, before the transparent water.
+        flock_controller->after(main_controller);
+        water_controller->after(flock_controller);
+        particle_controller->after(water_controller);
+        rain_controller->after(particle_controller);
         main_controller->after(post_processing_controller);
         gui_controller->after(rain_controller);
         time_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());

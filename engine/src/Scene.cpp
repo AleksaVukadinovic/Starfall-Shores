@@ -1,3 +1,5 @@
+#include <engine/graphics/FlockController.hpp>
+#include <engine/graphics/ParticleController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/Scene.hpp>
 #include <engine/resources/ResourcesController.hpp>
@@ -27,29 +29,88 @@ std::optional<Effect> parse_effect(const std::string_view name) {
     return std::nullopt;
 }
 
+std::optional<ParticleBlend> parse_particle_blend(const std::string_view name) {
+    if (name == "additive") return ParticleBlend::Additive;
+    if (name == "alpha") return ParticleBlend::Alpha;
+    return std::nullopt;
+}
+
 /**
- * @brief Reads `key` of `object` as a vec3 given as [x, y, z] or as a single number for all three components.
+ * @brief Reads `key` of `object` as a vector given as an array of N numbers, or as a single number for all components.
  */
-glm::vec3 read_vec3(const json &object, const char *key, const glm::vec3 &fallback) {
+template<glm::length_t N>
+glm::vec<N, float> read_vector(const json &object, const char *key, const glm::vec<N, float> &fallback) {
     if (!object.contains(key)) {
         return fallback;
     }
     const json &value = object.at(key);
     if (value.is_number()) {
-        return glm::vec3(value.get<float>());
+        return glm::vec<N, float>(value.get<float>());
     }
-    if (!value.is_array() || value.size() != 3) {
-        throw std::invalid_argument(std::format("\"{}\" must be a number or an array of 3 numbers", key));
+    if (!value.is_array() || value.size() != N) {
+        throw std::invalid_argument(std::format("\"{}\" must be a number or an array of {} numbers", key, N));
     }
-    return {value[0].get<float>(), value[1].get<float>(), value[2].get<float>()};
+    glm::vec<N, float> result;
+    for (glm::length_t i = 0; i < N; ++i) {
+        result[i] = value[i].get<float>();
+    }
+    return result;
 }
 
 util::TransformData read_transform(const json &transform) {
     return {
-            .translation = read_vec3(transform, "position", glm::vec3(0.0f)),
-            .rotation = read_vec3(transform, "rotation", glm::vec3(0.0f)),
-            .scale = read_vec3(transform, "scale", glm::vec3(1.0f)),
+            .translation = read_vector<3>(transform, "position", glm::vec3(0.0f)),
+            .rotation = read_vector<3>(transform, "rotation", glm::vec3(0.0f)),
+            .scale = read_vector<3>(transform, "scale", glm::vec3(1.0f)),
     };
+}
+
+FlockSettings read_flock(const json &object) {
+    FlockSettings flock;
+    flock.name                = object.value("name", flock.name);
+    flock.count               = object.at("count").get<uint32_t>();
+    flock.center              = read_vector<3>(object, "center", flock.center);
+    flock.extent              = read_vector<3>(object, "extent", flock.extent);
+    flock.length              = object.value("length", flock.length);
+    flock.model_rotation      = read_vector<3>(object, "model_rotation", flock.model_rotation);
+    flock.min_speed           = object.value("min_speed", flock.min_speed);
+    flock.max_speed           = object.value("max_speed", flock.max_speed);
+    flock.neighbour_radius    = object.value("neighbour_radius", flock.neighbour_radius);
+    flock.separation_distance = object.value("separation_distance", flock.separation_distance);
+    flock.ground_clearance    = object.value("ground_clearance", flock.ground_clearance);
+    return flock;
+}
+
+ParticleEmitter read_particle_emitter(const json &object) {
+    ParticleEmitter emitter;
+    const auto blend = parse_particle_blend(object.value("blend", "additive"));
+    if (!blend) {
+        throw std::invalid_argument("unknown \"blend\", expected \"additive\" or \"alpha\".");
+    }
+    const glm::vec2 size = read_vector<2>(object, "size", glm::vec2(emitter.size_start, emitter.size_end));
+    emitter.name                 = object.value("name", emitter.name);
+    emitter.group                = object.value("group", emitter.group);
+    emitter.position             = read_vector<3>(object, "position", emitter.position);
+    emitter.extent               = read_vector<3>(object, "extent", emitter.extent);
+    emitter.follow_camera        = object.value("follow_camera", emitter.follow_camera);
+    emitter.count                = object.at("count").get<uint32_t>();
+    emitter.lifetime             = object.value("lifetime", emitter.lifetime);
+    emitter.lifetime_variation   = object.value("lifetime_variation", emitter.lifetime_variation);
+    emitter.velocity             = read_vector<3>(object, "velocity", emitter.velocity);
+    emitter.velocity_variation   = read_vector<3>(object, "velocity_variation", emitter.velocity_variation);
+    emitter.acceleration         = read_vector<3>(object, "acceleration", emitter.acceleration);
+    emitter.turbulence           = object.value("turbulence", emitter.turbulence);
+    emitter.turbulence_frequency = object.value("turbulence_frequency", emitter.turbulence_frequency);
+    emitter.wind_influence       = object.value("wind_influence", emitter.wind_influence);
+    emitter.size_start           = size.x;
+    emitter.size_end             = size.y;
+    emitter.color_start          = read_vector<4>(object, "color_start", emitter.color_start);
+    emitter.color_end            = read_vector<4>(object, "color_end", emitter.color_end);
+    emitter.blend                = *blend;
+    emitter.lit                  = object.value("lit", emitter.lit);
+    emitter.blink_frequency      = object.value("blink_frequency", emitter.blink_frequency);
+    emitter.fade_seconds         = object.value("fade_seconds", emitter.fade_seconds);
+    return emitter;
 }
 }
 
@@ -114,6 +175,29 @@ Scene Scene::load(const std::filesystem::path &path) {
         }
     }
     scene.m_ground = physics::HeightField(ground_triangles, GROUND_CELL_SIZE);
+
+    const json &emitters = document.value("particles", json::array());
+    for (std::size_t index = 0; index < emitters.size(); ++index) {
+        try {
+            core::Controller::get<ParticleController>()->add_emitter(read_particle_emitter(emitters[index]));
+        } catch (const std::exception &error) {
+            throw util::EngineError(util::EngineError::Type::ConfigurationError,
+                                    std::format("Scene file {}, particle emitter {}: {}", path.string(), index, error.what()));
+        }
+    }
+    scene.m_has_particles = !emitters.empty();
+
+    const json &flocks = document.value("flocks", json::array());
+    for (std::size_t index = 0; index < flocks.size(); ++index) {
+        try {
+            const json &flock = flocks[index];
+            core::Controller::get<FlockController>()->add_flock(read_flock(flock), resources->model(flock.at("model").get<std::string>()),
+                                                                resources->shader(flock.at("shader").get<std::string>()));
+        } catch (const std::exception &error) {
+            throw util::EngineError(util::EngineError::Type::ConfigurationError,
+                                    std::format("Scene file {}, flock {}: {}", path.string(), index, error.what()));
+        }
+    }
     return scene;
 }
 
@@ -138,6 +222,9 @@ void Scene::set_group_visible(const std::string_view group, const bool visible) 
         if (entity.group == group) {
             entity.visible = visible;
         }
+    }
+    if (m_has_particles) {
+        core::Controller::get<ParticleController>()->set_group_visible(group, visible);
     }
 }
 

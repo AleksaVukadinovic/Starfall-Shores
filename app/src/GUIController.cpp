@@ -77,6 +77,7 @@ void GUIController::initialize() {
     m_greyscale = get<GreyscaleController>();
     m_rain = get<RainController>();
     m_water = get<engine::graphics::WaterController>();
+    m_particles = get<engine::graphics::ParticleController>();
     m_main_controller = get<MainController>();
     m_fps_camera = get<engine::graphics::FPSCameraController>();
     m_shadow = get<engine::graphics::ShadowController>();
@@ -330,6 +331,7 @@ void GUIController::draw_graphics_settings() {
         ImGui::SliderFloat("Walk Speed", &m_fps_camera->walk_speed, 1.0f, 10.0f, "%.1f m/s");
         ImGui::SliderFloat("Run Speed", &m_fps_camera->run_speed, 2.0f, 20.0f, "%.1f m/s");
         ImGui::SliderFloat("Jump Speed", &m_fps_camera->jump_speed, 0.0f, 15.0f, "%.1f m/s");
+        ImGui::SliderFloat("Swim Speed", &m_fps_camera->swim_speed, 0.5f, 8.0f, "%.1f m/s");
         ImGui::TextDisabled("Space jumps, Shift runs.");
     }
     float fov = m_graphics->perspective_params().FOV;
@@ -359,6 +361,13 @@ void GUIController::draw_environment_settings() const {
     }
 
     ImGui::Dummy({0, 8});
+    section_header("Particles");
+    bool particles = m_particles->is_enabled();
+    if (ImGui::Checkbox("Enable Particles", &particles))
+        m_particles->set_enable(particles);
+    ImGui::TextDisabled("Embers, smoke and fireflies at night; pollen during the day.");
+
+    ImGui::Dummy({0, 8});
     section_header("Rain");
     ImGui::Checkbox("Enable Rain", &m_rain->rain_enabled);
     if (m_rain->rain_enabled) {
@@ -382,6 +391,14 @@ void GUIController::draw_environment_settings() const {
     ImGui::SliderFloat("Opacity",        &m_water->opacity, 0.0f, 1.0f);
     ImGui::ColorEdit3("Deep Color",      &m_water->deep_color.x);
     ImGui::ColorEdit3("Shallow Color",   &m_water->shallow_color.x);
+
+    ImGui::Dummy({0, 8});
+    section_header("Underwater");
+    ImGui::SliderFloat("Visibility",     &m_water->underwater_visibility, 5.0f, 80.0f, "%.0f m");
+    ImGui::ColorEdit3("Water Tint",      &m_water->underwater_color.x);
+    ImGui::SliderFloat("Caustics",       &m_water->caustics, 0.0f, 3.0f);
+    ImGui::SliderFloat("Light Shafts",   &m_water->light_shafts, 0.0f, 3.0f);
+    ImGui::TextDisabled("In walk mode, dive in deep water to swim: look down and move forward, Space rises, C sinks.");
 
     ImGui::Dummy({0, 8});
     section_header("Wind");

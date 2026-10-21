@@ -2,6 +2,7 @@
 #include <MainController.hpp>
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/FPSCameraController.hpp>
+#include <engine/graphics/FlockController.hpp>
 #include <engine/graphics/FogController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/LightingController.hpp>
@@ -14,6 +15,7 @@
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/sound/SoundController.hpp>
 #include <engine/util/Transform.hpp>
+#include <engine/util/Utils.hpp>
 
 namespace app {
     using vec3 = glm::vec3;
@@ -42,7 +44,8 @@ namespace app {
         m_resources->skybox(m_active_daytime_skybox);
         m_resources->skybox(m_active_nighttime_skybox);
         m_renderer->set_depth_scene([this] { render_depth_scene(); });
-        get<engine::graphics::FPSCameraController>()->ground_height = [this](const glm::vec2 xz) { return walkable_ground(xz); };
+        get<engine::graphics::FPSCameraController>()->ground_height = [this](const glm::vec2 xz) { return solid_ground(xz); };
+        get<engine::graphics::FlockController>()->ground_height = [this](const glm::vec2 xz) { return solid_ground(xz); };
         m_background_sound = get<engine::sound::SoundController>()->sound("ocean_wind.wav");
     }
 
@@ -57,6 +60,9 @@ namespace app {
     void MainController::create_scene() {
         m_scene = engine::graphics::Scene::load(SCENE_PATH);
         m_scene.set_group_visible(NIGHT_GROUP, !m_is_day);
+        m_scene.set_group_visible(DAY_GROUP, m_is_day);
+        m_was_underwater = m_water->camera_underwater();
+        m_scene.set_group_visible(UNDERWATER_GROUP, m_was_underwater);
         m_placement_shader = m_resources->shader("basic");
     }
 
@@ -74,7 +80,7 @@ namespace app {
     }
 
     void MainController::update() {
-        m_bloom->underwater = m_camera->Position.y < m_water->level;
+        update_underwater();
         update_day_night_transition();
         update_toggles();
         update_sound();
@@ -83,13 +89,13 @@ namespace app {
     void MainController::update_day_night_transition() {
         using namespace engine::platform;
 
-        if (const auto platform = get<PlatformController>(); platform->key(KEY_N).state() == Key::State::JustPressed ||
-            (m_time->hours() >= 23 && m_is_day && !m_day_change_requested) ||
-            (m_time->hours() >= 7 && !m_is_day && !m_day_change_requested)) {
-            if (!m_day_change_requested) {
-                m_day_change_requested = true;
-                m_day_change_timer = PlatformController::get_time();
-            }
+        // The clock decides whether it's day or night; N jumps the clock to the next nightfall or daybreak.
+        if (get<PlatformController>()->key(KEY_N).state() == Key::State::JustPressed && !m_day_change_requested) {
+            m_time->set_hours(m_is_day ? TimeController::NIGHT_START : TimeController::NIGHT_END);
+        }
+        if (m_is_day == m_time->is_night() && !m_day_change_requested) {
+            m_day_change_requested = true;
+            m_day_change_timer = PlatformController::get_time();
         }
 
         if (m_day_change_requested) {
@@ -99,6 +105,7 @@ namespace app {
                 m_current_exposure = m_is_day ? DAY_EXPOSURE : NIGHT_EXPOSURE;
                 m_fog->set_day(m_is_day);
                 m_scene.set_group_visible(NIGHT_GROUP, !m_is_day);
+                m_scene.set_group_visible(DAY_GROUP, m_is_day);
                 m_day_change_requested = false;
                 apply_day_night_lighting();
                 if (!m_is_day)
@@ -201,13 +208,24 @@ namespace app {
         }
     }
 
-    std::optional<float> MainController::walkable_ground(const glm::vec2 xz) const {
-        const auto ground = m_scene.ground().height_at(xz);
-        // Shallow water can be waded through, deep water can't.
-        if (!ground || *ground < m_water->level - MAX_WADING_DEPTH) {
-            return std::nullopt;
+    std::optional<float> MainController::solid_ground(const glm::vec2 xz) const {
+        const auto terrain = m_scene.ground().height_at(xz);
+        return std::max(terrain.value_or(engine::graphics::WaterController::SEA_FLOOR_HEIGHT), engine::graphics::WaterController::SEA_FLOOR_HEIGHT);
+    }
+
+    void MainController::update_underwater() {
+        const bool underwater = m_water->camera_underwater();
+        if (underwater != m_was_underwater) {
+            m_scene.set_group_visible(UNDERWATER_GROUP, underwater);
+            m_was_underwater = underwater;
         }
-        return ground;
+        m_bloom->light_shafts = underwater ? m_water->light_shafts : 0.0f;
+        get<engine::graphics::FPSCameraController>()->water_level = m_water->level;
+
+        // Sounds fade to muffled when diving under, and back when surfacing.
+        const float dt = get<engine::platform::PlatformController>()->dt();
+        m_muffling = engine::util::approach(m_muffling, underwater ? 1.0f : 0.0f, dt / MUFFLING_FADE_SECONDS);
+        get<engine::sound::SoundController>()->set_muffling(m_muffling);
     }
 
     void MainController::render_depth_scene() const {

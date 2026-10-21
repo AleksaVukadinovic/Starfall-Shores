@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <span>
+#include <unordered_map>
 #include <vector>
 
 class FogController;
@@ -20,6 +21,7 @@ class Shader;
 
 namespace engine::graphics {
 class LightingController;
+class WaterController;
 class ShadowController;
 class GraphicsController;
 class Camera;
@@ -53,7 +55,7 @@ struct RenderStats {
  *
  * Once per frame, before anything is drawn, the renderer:
  * 1. renders the stale shadow cascades by invoking the depth scene callback (see @ref Renderer::set_depth_scene),
- * 2. uploads camera, light, fog, rain and shadow data into the frame uniform block (see @ref FrameUniforms),
+ * 2. uploads camera, light, fog, rain, underwater and shadow data into the frame uniform block (see @ref FrameUniforms),
  *    so draws only set per-object uniforms.
  */
 class Renderer final : public core::Controller {
@@ -80,6 +82,13 @@ public:
      * @brief Draws a single model at a transform that may change every frame, e.g. an object being placed in the editor.
      */
     void draw(const resources::Model *model, const resources::Shader *shader, const glm::mat4 &transform, Effect effect = Effect::None);
+
+    /**
+     * @brief Draws `model` once per transform with instancing, for transforms that change every frame (e.g. a school of fish).
+     * The shader must read the instance matrix from attribute 5. Instances aren't culled, so their order is stable
+     * (shaders can use gl_InstanceID to tell them apart).
+     */
+    void draw_instances(const resources::Model *model, const resources::Shader *shader, std::span<const glm::mat4> transforms);
 
     /**
      * @brief Sets the function that draws the shadow casters with @ref Renderer::draw_depth. It's called once per stale shadow cascade.
@@ -121,12 +130,17 @@ private:
     GraphicsController *m_graphics = nullptr;
     FogController *m_fog = nullptr;
     RainController *m_rain = nullptr;
+    WaterController *m_water = nullptr;
     Camera *m_camera = nullptr;
     resources::Shader *m_depth_shader = nullptr;
     resources::Shader *m_depth_instanced_shader = nullptr;
     std::function<void()> m_depth_scene_callback;
 
     std::vector<std::unique_ptr<DrawBatch>> m_batches;
+    /**
+     * @brief Instance buffers for @ref Renderer::draw_instances, one per model, created on first use.
+     */
+    std::unordered_map<const resources::Model *, std::unique_ptr<resources::InstanceBuffer>> m_dynamic_instances;
     std::vector<glm::mat4> m_visible_transforms;
     util::Frustum m_view_frustum;
     util::Frustum m_shadow_frustum;

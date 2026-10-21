@@ -7,10 +7,12 @@
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShaderInterface.hpp>
 #include <engine/graphics/ShadowController.hpp>
+#include <engine/graphics/WaterController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/Model.hpp>
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/resources/Shader.hpp>
+#include <ranges>
 
 namespace engine::graphics {
 
@@ -20,6 +22,7 @@ void Renderer::initialize() {
     m_graphics = get<GraphicsController>();
     m_fog = get<FogController>();
     m_rain = get<RainController>();
+    m_water = get<WaterController>();
     m_camera = m_graphics->camera();
     const auto resources = get<resources::ResourcesController>();
     m_depth_shader = resources->shader("depth_shader");
@@ -36,6 +39,10 @@ void Renderer::terminate() {
         batch->destroy();
     }
     m_batches.clear();
+    for (const auto &instances: m_dynamic_instances | std::views::values) {
+        instances->destroy();
+    }
+    m_dynamic_instances.clear();
     CHECKED_GL_CALL(glDeleteBuffers, 1, &m_frame_uniform_buffer);
 }
 
@@ -130,6 +137,12 @@ void Renderer::update_frame_uniforms() const {
     uniforms.wetness        = m_rain->wetness();
     uniforms.rain_intensity = m_rain->current_intensity();
 
+    uniforms.water_level           = m_water->level;
+    uniforms.camera_underwater     = m_water->camera_underwater();
+    uniforms.underwater_color      = m_water->underwater_color;
+    uniforms.underwater_absorption = m_water->underwater_absorption();
+    uniforms.caustics_strength     = m_water->caustics;
+
     CHECKED_GL_CALL(glBindBuffer, GL_UNIFORM_BUFFER, m_frame_uniform_buffer);
     CHECKED_GL_CALL(glBufferSubData, GL_UNIFORM_BUFFER, 0, sizeof(FrameUniforms), &uniforms);
 }
@@ -211,6 +224,20 @@ void Renderer::draw(const resources::Model *model, const resources::Shader *shad
     shader->set_mat4("model", transform);
     model->draw(shader);
     ++m_stats.objects_drawn;
+    m_stats.draw_calls += static_cast<uint32_t>(model->meshes().size());
+}
+
+void Renderer::draw_instances(const resources::Model *model, const resources::Shader *shader, const std::span<const glm::mat4> transforms) {
+    if (transforms.empty()) {
+        return;
+    }
+    auto &instances = m_dynamic_instances[model];
+    if (!instances) {
+        instances = std::make_unique<resources::InstanceBuffer>(*model);
+    }
+    instances->upload(transforms);
+    model->draw_instanced(shader, *instances, static_cast<uint32_t>(transforms.size()));
+    m_stats.objects_drawn += static_cast<uint32_t>(transforms.size());
     m_stats.draw_calls += static_cast<uint32_t>(model->meshes().size());
 }
 

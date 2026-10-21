@@ -24,7 +24,8 @@ namespace engine::graphics {
 
         CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_fbo);
         CHECKED_GL_CALL(glGenTextures, 2, m_color_buffers);
-        CHECKED_GL_CALL(glGenRenderbuffers, 1, &m_rbo_depth);
+        CHECKED_GL_CALL(glGenTextures, 1, &m_depth_texture);
+        CHECKED_GL_CALL(glGenFramebuffers, 1, &m_composite_fbo);
         create_hdr_attachments();
 
         CHECKED_GL_CALL(glGenFramebuffers, 1, &m_bloom_fbo);
@@ -49,6 +50,7 @@ namespace engine::graphics {
         m_downsample_shader  = resources->shader("bloom_downsample");
         m_upsample_shader    = resources->shader("bloom_upsample");
         m_final_shader       = resources->shader("bloom_final");
+        m_light_shaft_shader = resources->shader("light_shafts");
         m_final_shader->use();
         m_final_shader->set_int("scene", 0);
         m_final_shader->set_int("bloomBlur", 1);
@@ -62,12 +64,21 @@ namespace engine::graphics {
             set_linear_clamp_filtering();
             CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_color_buffers[i], 0);
         }
-        CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, m_rbo_depth);
-        CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_scr_width, m_scr_height);
-        CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo_depth);
+        // The depth is a texture, so effects can read the scene depth after the scene is drawn.
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_depth_texture);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_scr_width, m_scr_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth_texture, 0);
 
         constexpr unsigned int attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
         CHECKED_GL_CALL(glDrawBuffers, 2, attachments);
+
+        // Renders into the scene color without a depth attachment, so effects can read the scene depth while drawing.
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_composite_fbo);
+        CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_color_buffers[0], 0);
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
     }
 
@@ -164,10 +175,6 @@ namespace engine::graphics {
         m_final_shader->set_bool("greyscaleEnabled", greyscale->greyscale_enabled);
         m_final_shader->set_float("greyscaleStrength", greyscale->greyscale_strength);
 
-        m_final_shader->set_bool("underwaterEnabled", underwater);
-        m_final_shader->set_vec3("underwaterColor", underwater_color);
-        m_final_shader->set_float("underwaterIntensity", underwater_intensity);
-
         render_quad();
     }
 
@@ -179,8 +186,30 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
+    void PostProcessingController::render_light_shafts() const {
+        const auto graphics = get<GraphicsController>();
+        const glm::mat4 view_projection = graphics->projection_matrix() * graphics->camera()->view_matrix();
+
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_composite_fbo);
+        CHECKED_GL_CALL(glViewport, 0, 0, m_scr_width, m_scr_height);
+        m_light_shaft_shader->use();
+        m_light_shaft_shader->set_mat4("inverseViewProjection", glm::inverse(view_projection));
+        m_light_shaft_shader->set_float("strength", light_shafts);
+        CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_depth_texture);
+        CHECKED_GL_CALL(glEnable, GL_BLEND);
+        CHECKED_GL_CALL(glBlendFunc, GL_ONE, GL_ONE);
+        render_quad();
+        CHECKED_GL_CALL(glDisable, GL_BLEND);
+    }
+
     void PostProcessingController::end_draw() {
-        get<GraphicsController>()->profiler().begin_section("Post-processing");
+        auto &profiler = get<GraphicsController>()->profiler();
+        if (light_shafts > 0.0f) {
+            profiler.begin_section("Light shafts");
+            render_light_shafts();
+        }
+        profiler.begin_section("Post-processing");
         if (bloom) {
             render_bloom();
         }
@@ -191,7 +220,8 @@ namespace engine::graphics {
         CHECKED_GL_CALL(glDeleteFramebuffers, 1, &m_hdr_fbo);
         CHECKED_GL_CALL(glDeleteFramebuffers, 1, &m_bloom_fbo);
         CHECKED_GL_CALL(glDeleteTextures, 2, m_color_buffers);
-        CHECKED_GL_CALL(glDeleteRenderbuffers, 1, &m_rbo_depth);
+        CHECKED_GL_CALL(glDeleteTextures, 1, &m_depth_texture);
+        CHECKED_GL_CALL(glDeleteFramebuffers, 1, &m_composite_fbo);
         destroy_bloom_mips();
         CHECKED_GL_CALL(glDeleteVertexArrays, 1, &m_quad_vao);
         CHECKED_GL_CALL(glDeleteBuffers, 1, &m_quad_vbo);

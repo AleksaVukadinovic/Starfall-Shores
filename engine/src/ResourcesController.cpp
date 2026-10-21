@@ -23,18 +23,18 @@ void ResourcesController::initialize() {
 }
 
 void ResourcesController::terminate() {
-    for (const auto &resource: m_models | std::views::values) {
-        resource->destroy();
-    }
-    for (const auto &resource: m_shaders | std::views::values) {
-        resource->destroy();
-    }
-    for (const auto &resource: m_textures | std::views::values) {
-        resource->destroy();
-    }
-    for (const auto &resource: m_sky_boxes | std::views::values) {
-        resource->destroy();
-    }
+    // A resource that failed to load (e.g. a shader with a compile error) leaves an empty entry behind; skip those.
+    auto destroy_all = [](const auto &resources) {
+        for (const auto &resource: resources | std::views::values) {
+            if (resource) {
+                resource->destroy();
+            }
+        }
+    };
+    destroy_all(m_models);
+    destroy_all(m_shaders);
+    destroy_all(m_textures);
+    destroy_all(m_sky_boxes);
 }
 
 void ResourcesController::load_shaders() {

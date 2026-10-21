@@ -56,6 +56,17 @@ struct SceneEntity {
  *         {"position": [32, 17, 0], "rotation": [-90, 0, 0], "scale": 11}
  *       ]
  *     }
+ *   ],
+ *   // Optional particle emitters, drawn by the ParticleController; every field of ParticleEmitter has the same name here
+ *   // (snake_case), "size" is [start, end], colors are [r, g, b, a], and "blend" is "additive" (default) or "alpha".
+ *   "particles": [
+ *     {"name": "embers", "group": "night", "position": [12, 18.6, 6.5], "count": 160, "lifetime": 2.5,
+ *      "velocity": [0, 2.2, 0], "size": [0.05, 0.02], "color_start": [6, 2.4, 0.6, 1], "color_end": [1.5, 0.2, 0.05, 0]}
+ *   ],
+ *   // Optional flocks (e.g. schools of fish), simulated and drawn by the FlockController; every field of FlockSettings has the
+ *   // same name here, plus the "model" and "shader" to draw the members with.
+ *   "flocks": [
+ *     {"name": "reef_fish", "model": "fish", "shader": "fish", "count": 40, "center": [100, 1, 30], "extent": [18, 4, 18], "length": 0.4}
  *   ]
  * }
  * @endcode
@@ -78,6 +89,9 @@ public:
      */
     void draw_shadow_casters(Renderer &renderer) const;
 
+    /**
+     * @brief Shows or hides the entities and particle emitters of `group`.
+     */
     void set_group_visible(std::string_view group, bool visible);
 
     /**
@@ -95,6 +109,7 @@ private:
 
     std::vector<SceneEntity> m_entities;
     physics::HeightField m_ground;
+    bool m_has_particles = false;
 };
 
 }

@@ -6,11 +6,11 @@
 
 namespace engine::resources {
 
-Sound::Sound(ma_engine *engine, const std::filesystem::path &path, std::string name)
+Sound::Sound(ma_engine *engine, ma_sound *group, const std::filesystem::path &path, std::string name)
     : m_sound(new ma_sound)
     , m_path(path)
     , m_name(std::move(name)) {
-    const ma_result result = ma_sound_init_from_file(engine, path.string().c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, m_sound);
+    const ma_result result = ma_sound_init_from_file(engine, path.string().c_str(), MA_SOUND_FLAG_DECODE, group, nullptr, m_sound);
     RG_GUARANTEE(result == MA_SUCCESS, "Failed to load sound: {} (error: {})", path.string(), static_cast<int>(result));
     spdlog::info(std::format("load_sound(name={}, path={})", m_name, m_path.string()));
 }

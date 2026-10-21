@@ -36,6 +36,7 @@ out vec4 FragColor;
 
 #include "frame.glsl"
 #include "shadows.glsl"
+#include "underwater.glsl"
 #include "fog.glsl"
 #include "weather.glsl"
 
@@ -76,7 +77,7 @@ void main()
     vec3 ambient = lightAmbient * modifiedColor;
 
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = lightDiffuse * diff * modifiedColor;
+    vec3 diffuse = lightDiffuse * diff * modifiedColor * underwaterSunlight(FragPos);
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);

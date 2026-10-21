@@ -1,6 +1,7 @@
 #include <engine/platform/TimeController.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/ResourcesController.hpp>
+#include <cmath>
 #include <cstdio>
 
 namespace engine::platform {
@@ -23,6 +24,10 @@ void TimeController::update() {
         m_in_game_hours += HOURS_IN_DAY;
 
     m_was_night = is_night();
+}
+
+void TimeController::set_hours(const float hours) {
+    m_in_game_hours = std::fmod(std::fmod(hours, HOURS_IN_DAY) + HOURS_IN_DAY, HOURS_IN_DAY);
 }
 
 bool TimeController::is_night() const {

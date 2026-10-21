@@ -4,6 +4,7 @@
  */
 
 #pragma once
+#include <algorithm>
 #include <format>
 #include <source_location>
 #include <vector>
@@ -92,6 +93,13 @@ void trace(std::source_location location = std::source_location::current());
 * @returns The content of the file.
 */
 std::string read_text_file(const std::filesystem::path &path);
+
+/**
+ * @brief Moves `value` towards `target` by at most `max_step`, e.g. to fade something in or out over time.
+ */
+inline float approach(const float value, const float target, const float max_step) {
+    return value < target ? std::min(value + max_step, target) : std::max(value - max_step, target);
+}
 
 /**
 * @brief Calls an action once.

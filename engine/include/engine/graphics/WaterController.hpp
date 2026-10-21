@@ -23,7 +23,11 @@ namespace engine::graphics {
  * The grid is dense near the camera and coarser towards the horizon, and it moves smoothly with the camera, so it looks
  * endless. Waves are evaluated at world positions, so they don't move with the grid, and each vertex is only displaced
  * by the waves that are long enough for the local grid spacing, so the surface doesn't pop as the vertices slide.
- * The surface reflects `reflected_skybox`, shows sun glints and foam on wave crests, and gets rain ripples while it rains.
+ * The surface reflects `reflected_skybox`, shows sun glints and foam on wave crests, and gets rain ripples while it rains;
+ * seen from below, it shows the sky through a bright circular window and mirrors the water everywhere else.
+ * Below it, the same grid forms an endless sandy sea floor at @ref WaterController::SEA_FLOOR_HEIGHT.
+ *
+ * The underwater settings (visibility, color, caustics) reach every shader through the frame uniforms.
  *
  * Water is transparent: draw it after the opaque scene and the skybox.
  */
@@ -69,6 +73,35 @@ public:
      */
     const resources::Skybox *reflected_skybox = nullptr;
 
+    /**
+     * @brief How far you can see underwater, in world units; beyond that everything fades into the water color.
+     */
+    float underwater_visibility = 20.0f;
+    /**
+     * @brief Color of the light scattered by the water, which distant things fade to underwater.
+     */
+    glm::vec3 underwater_color = glm::vec3(0.05f, 0.35f, 0.45f);
+    /**
+     * @brief Brightness of the caustics: sunlight focused by the waves into moving patterns on underwater surfaces.
+     */
+    float caustics = 1.0f;
+    /**
+     * @brief Brightness of the sunbeams slanting down through the water, seen while the camera is underwater.
+     */
+    float light_shafts = 1.0f;
+
+    /**
+     * @brief Height of the sandy sea floor. Kelp in the scene file is planted at this height.
+     */
+    static constexpr float SEA_FLOOR_HEIGHT = -4.0f;
+
+    [[nodiscard]] bool camera_underwater() const;
+
+    /**
+     * @returns How much of each color channel the water absorbs per world unit, for the current visibility.
+     */
+    [[nodiscard]] glm::vec3 underwater_absorption() const;
+
 private:
     /**
      * @brief Number of grid cells along each side.
@@ -94,9 +127,11 @@ private:
     void terminate() override;
 
     void create_grid();
+    void draw_seabed(const glm::vec2 &grid_origin) const;
     [[nodiscard]] Waves waves() const;
 
     const resources::Shader *m_shader = nullptr;
+    const resources::Shader *m_seabed_shader = nullptr;
     uint32_t m_vao         = 0;
     uint32_t m_vbo         = 0;
     uint32_t m_ebo         = 0;

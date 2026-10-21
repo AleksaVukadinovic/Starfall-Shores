@@ -19,6 +19,7 @@ void main()
 out vec4 FragColor;
 
 #include "frame.glsl"
+#include "fog.glsl"
 
 in vec3 TexCoords;
 
@@ -26,6 +27,11 @@ uniform samplerCube skybox;
 
 void main()
 {
+    // Underwater, the sky is only visible through the water surface; past the surface everything is murky water.
+    if (cameraUnderwater) {
+        FragColor = vec4(underwaterScatter(), 1.0);
+        return;
+    }
     vec3 color = texture(skybox, TexCoords).rgb;
 
     if (fogEnabled) {

@@ -16,6 +16,8 @@ Key goals included writing everything from scratch, gaining deeper insight into 
 - **Performance:** frustum culling, instanced rendering with persistent GPU buffers, and one per-frame uniform buffer shared by all shaders
 - **Built-in GPU/CPU profiler:** open **Settings → Debug** in the pause menu to see per-pass timings, draw calls, and culling statistics
 - **Scene file:** every model placement lives in one JSON file, `app/resources/scene.json`
+- **Underwater world:** sandy sea floor, kelp forests, schools of fish (boids), caustics, light shafts, water that absorbs red first, Snell's window when looking up, plankton and bubbles, and muffled sound; swim in walk mode
+- **Particles:** GPU particle emitters defined in the scene file: embers and smoke over the campfire, fireflies at night, pollen by day
 - **Walk mode:** walk on the terrain with gravity and jumping (Settings → Graphics → Camera)
 - **In-app editor:** ImGui settings (graphics, environment, sound, time) and a model placement tool
 - **3D models:** loaded with Assimp (glTF, GLB, OBJ, ...)
@@ -188,12 +190,14 @@ You only need to include `<engine/core/Engine.hpp>` in your part of the project 
 │   ├── Camera.hpp
 │   ├── DrawBatch.hpp           # prepared static placements of a model
 │   ├── FPSCameraController.hpp
+│   ├── FlockController.hpp     # schools of fish (boids)
 │   ├── FogController.hpp
 │   ├── GpuProfiler.hpp         # per-section GPU/CPU frame timings
 │   ├── GraphicsController.hpp
 │   ├── GreyscaleController.hpp
 │   ├── LightSource.hpp
 │   ├── LightingController.hpp
+│   ├── ParticleController.hpp  # stateless GPU particle emitters
 │   ├── OpenGL.hpp
 │   ├── PostProcessingController.hpp  # HDR, bloom, screen effects
 │   ├── RainController.hpp      # 3D rain and wetness
