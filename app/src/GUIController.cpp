@@ -76,6 +76,7 @@ void GUIController::initialize() {
     m_fog = get<FogController>();
     m_greyscale = get<GreyscaleController>();
     m_rain = get<RainController>();
+    m_snow = get<SnowController>();
     m_water = get<engine::graphics::WaterController>();
     m_particles = get<engine::graphics::ParticleController>();
     m_main_controller = get<MainController>();
@@ -378,6 +379,17 @@ void GUIController::draw_environment_settings() const {
         ImGui::SliderFloat("Rain Opacity",   &m_rain->opacity, 0.0f, 1.0f);
     }
     ImGui::TextDisabled("Wetness: %.0f%%", m_rain->wetness() * 100.0f);
+
+    ImGui::Dummy({0, 8});
+    section_header("Snow");
+    ImGui::Checkbox("Enable Snow", &m_snow->snow_enabled);
+    if (m_snow->snow_enabled) {
+        ImGui::SliderFloat("Snow Intensity",  &m_snow->snow_intensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Snow Fall Speed", &m_snow->fall_speed, 0.2f, 5.0f);
+        ImGui::SliderFloat("Flake Size",      &m_snow->flake_size, 0.005f, 0.1f, "%.3f");
+        ImGui::SliderFloat("Snow Opacity",    &m_snow->opacity, 0.0f, 1.0f);
+    }
+    ImGui::TextDisabled("Snow cover: %.0f%%", m_snow->cover() * 100.0f);
 
     ImGui::Dummy({0, 8});
     section_header("Water");

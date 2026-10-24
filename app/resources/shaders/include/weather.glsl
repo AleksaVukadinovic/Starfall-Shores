@@ -1,4 +1,6 @@
-// Rain effects on surfaces. Requires frame.glsl.
+// Rain and snow effects on surfaces. Requires frame.glsl.
+
+const vec3 SNOW_COLOR = vec3(0.82, 0.85, 0.9);
 
 // How wet a surface is: surfaces facing up collect the most water, walls some, overhangs none.
 float surfaceWetness(vec3 normal)
@@ -17,6 +19,38 @@ vec3 wetSpecular(vec3 normal, vec3 viewDir, vec3 lightDir, float surfaceWet)
 {
     vec3 halfway = normalize(viewDir + lightDir);
     return lightColor * lightDiffuse * surfaceWet * 0.6 * pow(max(dot(normal, halfway), 0.0), 80.0);
+}
+
+float snowHash(vec2 p)
+{
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float snowNoise(vec2 p)
+{
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(snowHash(i), snowHash(i + vec2(1.0, 0.0)), f.x),
+               mix(snowHash(i + vec2(0.0, 1.0)), snowHash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+
+// How much snow lies on a surface: it settles on surfaces facing up, above the water. It covers in patches that grow as
+// snowCover rises, until the whole surface is white.
+float snowCoverage(vec3 normal, vec3 fragPos)
+{
+    if (snowCover <= 0.0)
+        return 0.0;
+    float facing = smoothstep(0.35, 0.8, normal.y);
+    float aboveWater = smoothstep(waterLevel + 0.1, waterLevel + 0.6, fragPos.y);
+    float patches = snowNoise(fragPos.xz * 0.7) * 0.65 + snowNoise(fragPos.xz * 5.0) * 0.35;
+    return smoothstep(patches, patches + 0.15, snowCover * 1.15) * facing * aboveWater;
+}
+
+// Snow hides the surface under it.
+vec3 snowAlbedo(vec3 albedo, float coverage)
+{
+    return mix(albedo, SNOW_COLOR, coverage);
 }
 
 vec2 rippleHash(vec2 cell)

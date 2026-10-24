@@ -123,6 +123,10 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
   - It's drawn in its own `draw()` after `MainController` (after the skybox) and before the GUI. Drops are depth-tested, don't write depth, and don't write to the bloom attachment (`glColorMaski`). They have their own "Rain" profiler section.
   - Intensity eases in and out over `FADE_SECONDS`. `wetness` follows it (wets in ~15 s, dries in ~45 s).
   - Both values go to all shaders through `FrameUniforms` (`wetness`, `rainIntensity`). `include/weather.glsl` has `surfaceWetness`/`wetAlbedo`/`wetSpecular`, used by the lit shaders, and `rainImpacts` (ripple rings plus splash flashes), used by water. Wind slants the drops.
+- `SnowController`: snowfall, built like the rain.
+  - Up to 30k camera-facing soft discs from `snow.glsl` (`gl_InstanceID` plus time, empty VAO) in a 40×20×40 box around the camera. Each flake has its own speed and flutter, drifts with the wind, and fades out at the water. Distant flakes are kept at least ~1.5 px wide and dimmed instead, so they don't flicker.
+  - Drawn after Rain and before the GUI, depth-tested, no depth write, no bloom. It has its own "Snow" profiler section.
+  - `cover()` builds up while it snows (full in `COVERING_SECONDS` at full intensity, slower when lighter) and melts over `MELTING_SECONDS`. It goes to the shaders as `snowCover`; `weather.glsl` `snowCoverage(normal, fragPos)`/`snowAlbedo` whiten upward-facing surfaces above the water in noise patches that grow with the cover (basic, grass, flower). Snow hides wetness underneath it.
 
 ## App (`app/`)
 - `MyApp.cpp` registers the app controllers and the optional engine controllers and sets their order.
@@ -132,7 +136,7 @@ To add a model: put the assets in `app/resources/models/<dir>/`, add an entry to
   - Entities and emitters in the `"night"` group (the campfire flames, embers, smoke, fireflies) are shown only at night, and those in `"day"` (pollen) only by day, via `set_group_visible`.
   - Load errors name the file and entity index.
   - Handles the day/night transition. The clock (`TimeController::is_night`) is the single source of truth: a transition starts whenever the visuals disagree with it, and `N` just jumps the clock to nightfall (23:00) or daybreak (07:00), which also works while time is paused. It interpolates exposure and fog over `DAY_CHANGE_DELAY` = 5s. It swaps the lighting preset, and adds the campfire point light and fire effect at night.
-  - Handles hotkeys: `F` fog, `V` wind, `R` rain, `M` sound.
+  - Handles hotkeys: `F` fog, `V` wind, `R` rain, `B` snow, `M` sound.
   - Turns on the underwater tint when camera y < 7.
   - Implements the test-model placement tool. The preview is drawn only while the Debug tab is open (`model_placement_active`). Placed models are logged as `TransformData` literals on exit so they can be pasted into coordinate files.
 - `GUIController`: ImGui menu opened with `ESC`. Has a main page and Settings with Graphics/Environment/Sound/Time/Debug tabs, plus resolution/fullscreen and quit.

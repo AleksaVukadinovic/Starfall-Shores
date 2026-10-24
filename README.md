@@ -12,6 +12,7 @@ Key goals included writing everything from scratch, gaining deeper insight into 
 - **HDR rendering with bloom:** mip-chain downsample/upsample bloom, exposure tone mapping, and greyscale and underwater screen effects
 - **Endless ocean:** a camera-following Gerstner wave surface with sky reflections, sun glints, and foam, configurable in the settings
 - **Rain:** 3D rain streaks with wet surfaces and raindrop ripples on the water
+- **Snow:** drifting, fluttering snowflakes and snow that settles on the scene in growing patches, then melts
 - **Effects:** wind-animated vegetation, a procedural fire shader, and fog
 - **Performance:** frustum culling, instanced rendering with persistent GPU buffers, and one per-frame uniform buffer shared by all shaders
 - **Built-in GPU/CPU profiler:** open **Settings → Debug** in the pause menu to see per-pass timings, draw calls, and culling statistics
@@ -73,6 +74,7 @@ cd app && ./APP
 | `N` | Toggle day / night |
 | `F` | Toggle fog |
 | `R` | Toggle rain |
+| `B` | Toggle snow |
 | `V` | Toggle wind |
 | `M` | Toggle sound |
 | `P` | Toggle cursor |

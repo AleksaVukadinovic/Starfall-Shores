@@ -10,6 +10,7 @@
 #include <engine/graphics/ParticleController.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/SnowController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/graphics/WaterController.hpp>
@@ -24,6 +25,7 @@ namespace app {
         const auto fog_controller = register_controller<FogController>();
         const auto greyscale_controller = register_controller<GreyscaleController>();
         const auto rain_controller = register_controller<RainController>();
+        const auto snow_controller = register_controller<SnowController>();
         const auto fps_camera = register_controller<engine::graphics::FPSCameraController>();
         const auto shadow_controller = register_controller<engine::graphics::ShadowController>();
         const auto lighting_controller = register_controller<engine::graphics::LightingController>();
@@ -40,14 +42,15 @@ namespace app {
         post_processing_controller->after(renderer);
         fog_controller->after(post_processing_controller);
         greyscale_controller->after(post_processing_controller);
-        // Water, particles and rain are transparent: they're drawn after the whole scene, including the skybox, and before the GUI.
+        // Water, particles, rain and snow are transparent: they're drawn after the whole scene, including the skybox, and before the GUI.
         // Fish are opaque: drawn after the scene, before the transparent water.
         flock_controller->after(main_controller);
         water_controller->after(flock_controller);
         particle_controller->after(water_controller);
         rain_controller->after(particle_controller);
         main_controller->after(post_processing_controller);
-        gui_controller->after(rain_controller);
+        snow_controller->after(rain_controller);
+        gui_controller->after(snow_controller);
         time_controller->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
     }
 

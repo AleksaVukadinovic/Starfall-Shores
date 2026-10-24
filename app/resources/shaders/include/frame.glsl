@@ -44,4 +44,5 @@ layout (std140) uniform FrameUniforms {
     vec3 underwaterAbsorption;
     bool cameraUnderwater;
     float causticsStrength;
+    float snowCover;
 };

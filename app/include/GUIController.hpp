@@ -6,6 +6,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/GreyscaleController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/SnowController.hpp>
 #include <engine/graphics/ParticleController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/WaterController.hpp>
@@ -45,6 +46,7 @@ namespace app {
         FogController *m_fog = nullptr;
         GreyscaleController *m_greyscale = nullptr;
         RainController *m_rain = nullptr;
+        SnowController *m_snow = nullptr;
         engine::graphics::WaterController *m_water = nullptr;
         engine::graphics::ParticleController *m_particles = nullptr;
         MainController *m_main_controller = nullptr;

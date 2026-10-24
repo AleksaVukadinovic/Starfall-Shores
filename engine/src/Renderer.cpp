@@ -4,6 +4,7 @@
 #include <engine/graphics/LightingController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/SnowController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShaderInterface.hpp>
 #include <engine/graphics/ShadowController.hpp>
@@ -22,6 +23,7 @@ void Renderer::initialize() {
     m_graphics = get<GraphicsController>();
     m_fog = get<FogController>();
     m_rain = get<RainController>();
+    m_snow = get<SnowController>();
     m_water = get<WaterController>();
     m_camera = m_graphics->camera();
     const auto resources = get<resources::ResourcesController>();
@@ -136,6 +138,7 @@ void Renderer::update_frame_uniforms() const {
 
     uniforms.wetness        = m_rain->wetness();
     uniforms.rain_intensity = m_rain->current_intensity();
+    uniforms.snow_cover     = m_snow->cover();
 
     uniforms.water_level           = m_water->level;
     uniforms.camera_underwater     = m_water->camera_underwater();

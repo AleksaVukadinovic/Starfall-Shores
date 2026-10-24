@@ -61,7 +61,8 @@ void main()
     if (texColor.a < 0.1)
         discard;
 
-    vec3 modifiedColor = wetAlbedo(texColor.rgb, surfaceWetness(normalize(Normal)));
+    float snow = snowCoverage(normalize(Normal), FragPos);
+    vec3 modifiedColor = snowAlbedo(wetAlbedo(texColor.rgb, surfaceWetness(normalize(Normal)) * (1.0 - snow)), snow);
 
     vec3 norm;
     if (hasNormalMap) {

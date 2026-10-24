@@ -74,8 +74,9 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 lightDir = normalize(lightPosition - FragPos);
 
-    float surfaceWet = surfaceWetness(normalize(Normal));
-    vec3 albedo = wetAlbedo(texColor.rgb, surfaceWet);
+    float snow = snowCoverage(normalize(Normal), FragPos);
+    float surfaceWet = surfaceWetness(normalize(Normal)) * (1.0 - snow);
+    vec3 albedo = snowAlbedo(wetAlbedo(texColor.rgb, surfaceWet), snow);
 
     vec3 ambient = lightAmbient * albedo * lightColor;
 

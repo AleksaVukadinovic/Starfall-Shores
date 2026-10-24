@@ -9,6 +9,7 @@
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/graphics/PostProcessingController.hpp>
 #include <engine/graphics/RainController.hpp>
+#include <engine/graphics/SnowController.hpp>
 #include <engine/graphics/Renderer.hpp>
 #include <engine/graphics/ShadowController.hpp>
 #include <engine/platform/PlatformController.hpp>
@@ -129,6 +130,8 @@ namespace app {
             m_renderer->wind.enabled = !m_renderer->wind.enabled;
         if (platform->key(KEY_R).state() == Key::State::JustPressed)
             get<RainController>()->rain_enabled = !get<RainController>()->rain_enabled;
+        if (platform->key(KEY_B).state() == Key::State::JustPressed)
+            get<SnowController>()->snow_enabled = !get<SnowController>()->snow_enabled;
         if (platform->key(KEY_M).state() == Key::State::JustPressed)
             m_sound_enabled = !m_sound_enabled;
     }

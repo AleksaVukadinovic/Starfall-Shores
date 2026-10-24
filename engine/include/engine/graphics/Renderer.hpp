@@ -13,6 +13,7 @@
 
 class FogController;
 class RainController;
+class SnowController;
 
 namespace engine::resources {
 class Model;
@@ -130,6 +131,7 @@ private:
     GraphicsController *m_graphics = nullptr;
     FogController *m_fog = nullptr;
     RainController *m_rain = nullptr;
+    SnowController *m_snow = nullptr;
     WaterController *m_water = nullptr;
     Camera *m_camera = nullptr;
     resources::Shader *m_depth_shader = nullptr;

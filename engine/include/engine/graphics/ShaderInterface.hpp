@@ -91,7 +91,11 @@ struct FrameUniforms {
     glm::vec3 underwater_absorption{};
     int32_t camera_underwater{};
     float caustics_strength{};
-    float padding[3]{};
+    /**
+     * @brief How much of the scene is covered in snow, in [0, 1].
+     */
+    float snow_cover{};
+    float padding[2]{};
 };
 
 static_assert(sizeof(PointLightUniforms) == 48);
@@ -102,6 +106,7 @@ static_assert(offsetof(FrameUniforms, rain_intensity) == 524);
 static_assert(offsetof(FrameUniforms, point_lights) == 528);
 static_assert(offsetof(FrameUniforms, underwater_color) == 720);
 static_assert(offsetof(FrameUniforms, caustics_strength) == 752);
+static_assert(offsetof(FrameUniforms, snow_cover) == 756);
 static_assert(sizeof(FrameUniforms) == 768);
 
 } // namespace engine::graphics
